@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lite-Pocket V24：閱讀筆記版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <style>
+        :root { --primary: #2563eb; --bg: #f3f4f6; --card-bg: #ffffff; --text: #1f2937; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 80px 0; -webkit-font-smoothing: antialiased; }
+        
+        /* 導航 */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; background: white; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #e5e7eb; z-index: 100; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; display: flex; align-items: center; gap: 10px;}
+        
+        /* 容量顯示 */
+        .storage-pill { font-size: 0.7rem; background: #eee; padding: 2px 8px; border-radius: 12px; color: #555; display: flex; align-items: center; gap: 5px; }
+        .storage-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; }
+        
+        .nav-menu { display: flex; gap: 5px; background: #f3f4f6; padding: 3px; border-radius: 6px; }
+        .nav-item { cursor: pointer; color: #6b7280; font-size: 0.85rem; padding: 4px 10px; border-radius: 4px; transition: 0.2s; font-weight: 500;}
+        .nav-item.active { background: white; color: var(--primary); shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        /* 新增區 */
+        .add-panel { max-width: 800px; margin: 15px auto; padding: 0 15px; display: flex; gap: 8px; }
+        .input-url { flex: 1; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.2s; }
+        .input-url:focus { border-color: var(--primary); }
+        .btn-add { background: var(--primary); color: white; border: none; padding: 0 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 1rem; }
+        
+        /* 列表 */
+        .grid-container { max-width: 800px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
+        .card { background: white; padding: 16px; border-radius: 12px; border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 8px; transition: transform 0.1s; position: relative;}
+        .card:active { transform: scale(0.99); }
+        
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;}
+        .card-meta { font-size: 0.75rem; color: #9ca3af; display: flex; align-items: center; gap: 6px; }
+        .site-icon { width: 14px; height: 14px; border-radius: 2px; }
+        .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: #111; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* 筆記預覽標籤 */
+        .note-tag { font-size: 0.75rem; color: #b45309; background: #fffbeb; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; border: 1px solid #fcd34d; }
+
+        .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px solid #f3f4f6; }
+        .btn-text { background: none; border: none; font-size: 0.85rem; color: #6b7280; cursor: pointer; padding: 5px 8px; border-radius: 4px; }
+        .btn-text:hover { background: #f3f4f6; color: var(--primary); }
+        .btn-read { color: var(--primary); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+
+        /* 底部工具列 */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 60px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #e5e7eb; z-index: 90; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-btn { background: none; border: none; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; color: #6b7280; gap: 2px; cursor: pointer; width: 60px;}
+        .bottom-btn span { font-size: 1.2rem; }
+        .bottom-btn:hover { color: var(--primary); }
+
+        /* --- 📖 閱讀與筆記室 (Reader Room) --- */
+        .reader-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 2000; display: none; flex-direction: column; }
+        .reader-header { height: 50px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: white; flex-shrink: 0; }
+        .reader-title { font-weight: bold; font-size: 1rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 60%; }
+        
+        /* 雙欄佈局容器 */
+        .reader-container { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; }
+        
+        /* 左側：文章區 */
+        .article-view { flex: 2; padding: 30px; overflow-y: auto; font-size: 18px; line-height: 1.7; color: #374151; max-width: 800px; margin: 0 auto; }
+        .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
+        .article-view h1 { font-size: 1.8rem; line-height: 1.3; color: #111; }
+        .article-view a { color: var(--primary); }
+
+        /* 右側：筆記區 (電腦版) */
+        .notes-view { flex: 1; border-left: 1px solid #e5e7eb; background: #f9fafb; display: flex; flex-direction: column; min-width: 300px; max-width: 400px; }
+        .notes-header { padding: 15px; font-weight: bold; color: #4b5563; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
+        .notes-area { flex: 1; padding: 15px; border: none; resize: none; background: transparent; font-family: inherit; font-size: 1rem; outline: none; line-height: 1.5; color: #1f2937; }
+        
+        /* 討論輸出按鈕區 */
+        .notes-footer { padding: 15px; border-top: 1px solid #e5e7eb; background: white; display: flex; gap: 10px; flex-direction: column; }
+        .btn-copy-discussion { background: #374151; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-copy-discussion:hover { background: #1f2937; }
+
+        /* --- 手機版適配 (RWD) --- */
+        @media (max-width: 768px) {
+            .reader-container { flex-direction: column; }
+            .notes-view { 
+                position: absolute; bottom: 0; left: 0; right: 0; 
+                height: 50vh; border-left: none; border-top: 1px solid #e5e7eb; 
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1); 
+                transform: translateY(100%); transition: transform 0.3s; z-index: 10;
+            }
+            .notes-view.show { transform: translateY(0); }
+            
+            /* 手機版筆記開關按鈕 */
+            .mobile-note-toggle { 
+                position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px; 
+                background: var(--primary); color: white; border-radius: 50%; 
+                display: flex; align-items: center; justify-content: center; 
+                font-size: 1.5rem; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4); z-index: 20; cursor: pointer;
+            }
+            .article-view { padding: 20px; padding-bottom: 80px; }
+        }
+        @media (min-width: 769px) {
+            .mobile-note-toggle { display: none; } /* 電腦版隱藏浮動按鈕 */
+        }
+
+        /* 載入動畫 */
+        .loading-overlay { position: absolute; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 5; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-brand">
+            📚 V24
+            <div class="storage-pill" title="本地儲存空間">
+                <div class="storage-dot" id="storageDot"></div>
+                <span id="storageText">0%</span>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">待讀</div>
+            <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">已讀</div>
+        </div>
+    </nav>
+
+    <div class="add-panel">
+        <input type="text" id="newUrl" class="input-url" placeholder="貼上網址... (或留空寫純筆記)">
+        <button class="btn-add" onclick="addNewItem()">＋</button>
+    </div>
+
+    <div class="grid-container" id="container"></div>
+
+    <div class="bottom-bar">
+        <button class="bottom-btn" onclick="downloadJSON()"><span>📥</span>備份</button>
+        <button class="bottom-btn" onclick="document.getElementById('fileInput').click()"><span>📤</span>讀取</button>
+        <button class="bottom-btn" onclick="clearReadItems()" style="color:#ef4444;"><span>🧹</span>清理</button>
+        <input type="file" id="fileInput" hidden onchange="loadJSON(this)">
+    </div>
+
+    <div class="reader-overlay" id="readerModal">
+        <div class="reader-header">
+            <span style="font-size:1.5rem;cursor:pointer;padding:10px;" onclick="closeReader()">✕</span>
+            <span class="reader-title" id="readerTitle">標題</span>
+            <button class="btn-text" onclick="saveReader()">儲存</button>
+        </div>
+        
+        <div class="reader-container">
+            <div class="article-view" id="articleView"></div>
+            
+            <div class="notes-view" id="notesView">
+                <div class="notes-header">
+                    <span>📝 思考筆記</span>
+                    <span style="font-size:0.8rem;cursor:pointer;color:#ef4444;" onclick="toggleMobileNotes()">收起</span>
+                </div>
+                <textarea class="notes-area" id="notesArea" placeholder="在這裡記下重點，準備稍後討論..."></textarea>
+                <div class="notes-footer">
+                    <button class="btn-copy-discussion" onclick="copyDiscussion()">
+                        <span>📋 複製討論草稿</span>
+                    </button>
+                    <button class="btn-text" style="width:100%;text-align:center;" onclick="shareNative()">📤 分享到 Keep/Line</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-note-toggle" onclick="toggleMobileNotes()">📝</div>
+    </div>
+
+    <script>
+        let items = [];
+        let currentTab = 'inbox';
+        let currentId = null;
+
+        function init() {
+            const saved = localStorage.getItem('lite_pocket_v24_data');
+            if (saved) items = JSON.parse(saved);
+            updateStorage();
+            render();
+        }
+
+        /* --- 💾 空間與清理 --- */
+        function updateStorage() {
+            let total = JSON.stringify(items).length * 2;
+            let mb = (total / 1024 / 1024).toFixed(2);
+            let percent = Math.min((mb / 5) * 100, 100);
+            
+            document.getElementById('storageText').innerText = mb + "MB";
+            const dot = document.getElementById('storageDot');
+            if(percent > 80) dot.style.background = "#ef4444"; // 紅色警戒
+            else if(percent > 50) dot.style.background = "#f59e0b"; // 黃色注意
+            else dot.style.background = "#10b981"; // 綠色安全
+        }
+
+        function clearReadItems() {
+            const archiveCount = items.filter(i => i.status === 'archive').length;
+            if (archiveCount === 0) return alert('已讀區是空的，無需清理。');
+            
+            if(confirm(`確定要刪除 ${archiveCount} 篇「已讀」文章以釋放空間嗎？\n(建議先按備份)`)) {
+                items = items.filter(i => i.status === 'inbox');
+                save(); render();
+                alert('清理完成！');
+            }
+        }
+
+        /* --- 📖 閱讀器邏輯 --- */
+        async function openReader(id) {
+            currentId = id;
+            const item = items.find(i => i.id === id);
+            
+            document.getElementById('readerModal').style.display = 'flex';
+            document.getElementById('readerTitle').innerText = item.title;
+            document.getElementById('notesArea').value = item.notes || '';
+            const view = document.getElementById('articleView');
+            
+            // 手機版重置筆記欄位置
+            document.getElementById('notesView').classList.remove('show');
+
+            if (item.content) {
+                view.innerHTML = item.content;
+            } else {
+                view.innerHTML = '<div class="loading-overlay">正在抓取內容...</div>';
+                await fetchContent(item);
+            }
+        }
+
+        async function fetchContent(item) {
+            const view = document.getElementById('articleView');
+            try {
+                // 如果是純筆記 (domain=note)，直接顯示空
+                if (item.domain === 'note') {
+                    view.innerHTML = '<h2>(純筆記模式)</h2><p>此項目沒有網址，請直接在右側/下方筆記欄撰寫內容。</p>';
+                    return;
+                }
+
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(item.url)}`);
+                const data = await res.json();
+                if (!data.contents) throw new Error();
+
+                const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+                const baseUrl = new URL(item.url);
+                doc.querySelectorAll('img').forEach(img => {
+                    const src = img.getAttribute('src');
+                    if (src && !src.startsWith('http')) img.src = new URL(src, baseUrl).href;
+                });
+
+                const reader = new Readability(doc);
+                const article = reader.parse();
+                
+                if(article) {
+                    const cleanHtml = `<h1>${article.title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;">來源: ${item.domain}</p>` + DOMPurify.sanitize(article.content);
+                    item.content = cleanHtml; // 快取內容
+                    item.title = article.title; // 更新精確標題
+                    save();
+                    view.innerHTML = cleanHtml;
+                }
+            } catch (e) {
+                view.innerHTML = `<div style="text-align:center;margin-top:50px;">
+                    <p>⚠️ 無法自動抓取內容 (可能是網站有防護)</p>
+                    <a href="${item.url}" target="_blank" style="color:#2563eb;text-decoration:underline;">點此開啟原始網頁</a>
+                    <p style="color:#666;font-size:0.9rem;margin-top:20px;">或是您可以從原網頁複製文字，貼到筆記欄。</p>
+                </div>`;
+            }
+        }
+
+        function saveReader() {
+            if (!currentId) return;
+            const item = items.find(i => i.id === currentId);
+            item.notes = document.getElementById('notesArea').value;
+            save();
+            // 如果是自動儲存，可以不彈窗
+            // alert('已儲存'); 
+        }
+
+        function closeReader() {
+            saveReader(); // 關閉前自動存
+            document.getElementById('readerModal').style.display = 'none';
+            render(); // 更新列表顯示的筆記標籤
+        }
+
+        function toggleMobileNotes() {
+            document.getElementById('notesView').classList.toggle('show');
+        }
+
+        /* --- 💬 討論與輸出功能 --- */
+        function copyDiscussion() {
+            const item = items.find(i => i.id === currentId);
+            const notes = document.getElementById('notesArea').value;
+            
+            let text = `【討論】${item.title}\n`;
+            text += `連結：${item.url}\n\n`;
+            text += `📝 重點筆記：\n${notes || '(無筆記)'}\n`;
+            
+            navigator.clipboard.writeText(text).then(() => alert('草稿已複製！\n請直接貼到 Line / Slack / Teams。'));
+        }
+
+        async function shareNative() {
+            saveReader();
+            const item = items.find(i => i.id === currentId);
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: item.title,
+                        text: item.notes,
+                        url: item.url
+                    });
+                } catch(e) {}
+            } else {
+                alert('您的裝置不支援原生分享，請使用「複製草稿」功能。');
+            }
+        }
+
+        /* --- 基礎 CRUD --- */
+        async function addNewItem() {
+            const urlIn = document.getElementById('newUrl');
+            let url = urlIn.value.trim();
+            
+            if (!url) {
+                const t = prompt("筆記標題：", "新想法");
+                if(!t) return;
+                createItem({url:'#', title:t, domain:'note'});
+                return;
+            }
+            if(!url.startsWith('http')) url = 'https://'+url;
+            const domain = new URL(url).hostname.replace('www.','');
+            
+            const newItem = createItem({url:url, title:'載入中...', domain:domain});
+            urlIn.value = '';
+            
+            // 背景抓標題
+            try {
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+                if(data.contents) {
+                    const m = data.contents.match(/<title>(.*?)<\/title>/i);
+                    if(m && m[1]) {
+                        newItem.title = new DOMParser().parseFromString(m[1], 'text/html').body.textContent;
+                        save(); render();
+                    }
+                }
+            } catch(e){}
+        }
+
+        function createItem(data) {
+            const item = {
+                id: Date.now(),
+                url: data.url,
+                title: data.title,
+                domain: data.domain,
+                timestamp: Date.now(),
+                status: 'inbox',
+                content: null,
+                notes: ''
+            };
+            items.unshift(item);
+            save(); render();
+            return item;
+        }
+
+        function render() {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            const filtered = items.filter(i => i.status === currentTab);
+            
+            if(filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center;color:#999;padding:30px;">${currentTab==='inbox'?'太棒了，都讀完了！':'還沒有已讀的文章'}</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const favicon = item.domain==='note' ? '' : `https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`;
+                const imgTag = favicon ? `<img src="${favicon}" class="site-icon" onerror="this.style.display='none'">` : '📝';
+                const noteTag = item.notes ? `<div class="note-tag">筆記</div>` : '';
+                
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                    <div class="card-header" onclick="openReader(${item.id})">
+                        <div>
+                            <div class="card-meta">${imgTag} ${item.domain}</div>
+                            <div class="card-title">${item.title}</div>
+                            ${noteTag}
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀/筆記</button>
+                        <div style="display:flex; gap:10px;">
+                            ${currentTab==='inbox' 
+                                ? `<button class="btn-text" onclick="moveItem(${item.id}, 'archive')">✅ 已讀</button>` 
+                                : `<button class="btn-text" onclick="moveItem(${item.id}, 'inbox')">📥 放回</button>`}
+                            <button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button>
+                        </div>
+                    </div>`;
+                container.appendChild(div);
+            });
+        }
+
+        function save() { localStorage.setItem('lite_pocket_v24_data', JSON.stringify(items)); updateStorage(); }
+        function moveItem(id, s) { const idx=items.findIndex(i=>i.id===id); if(idx>-1){items[idx].status=s; save(); render();} }
+        function deleteItem(id) { if(confirm('刪除?')) { items=items.filter(i=>i.id!==id); save(); render(); } }
+        function switchTab(t) { currentTab=t; document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active')); document.getElementById(`tab-${t}`).classList.add('active'); render(); }
+        
+        function downloadJSON() { const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(items,null,2)],{type:'application/json'})); a.download='pocket_backup.json'; a.click(); }
+        function loadJSON(input) { const f=input.files[0]; if(!f)return; const r=new FileReader(); r.onload=e=>{ items=JSON.parse(e.target.result); save(); render(); alert('OK'); }; r.readAsText(f); }
+
+        init();
+    </script>
+</body>
+</html>
