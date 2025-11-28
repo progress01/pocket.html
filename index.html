@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V35：書籤直通版</title>
+    <title>Lite-Pocket V37：圖片友善版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -18,25 +18,12 @@
         .nav-item { cursor: pointer; color: #64748b; font-size: 0.85rem; padding: 4px 12px; border-radius: 4px; font-weight: 500; transition: 0.2s; }
         .nav-item.active { background: white; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
-        /* 智慧面板 */
-        .add-panel { max-width: 800px; margin: 15px auto; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 10px; }
+        .add-panel { max-width: 800px; margin: 15px auto; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
-        .input-label { font-size: 0.8rem; font-weight: bold; color: #64748b; width: 40px; }
-        .input-field { flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 15px; outline: none; transition: border 0.2s; }
-        .input-field:focus { border-color: var(--primary); background: #f8fafc; }
+        .input-field { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; outline: none; }
+        .btn-paste { background: #334155; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; }
         
-        /* 狀態燈 */
-        .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; margin-left: 5px; transition: 0.3s; }
-        .status-indicator.loading { background: #f59e0b; animation: pulse 1s infinite; }
-        .status-indicator.success { background: #10b981; }
-        .status-indicator.error { background: #ef4444; }
-        @keyframes pulse { 0% {opacity: 0.5;} 50% {opacity: 1;} 100% {opacity: 0.5;} }
-
-        .btn-paste-smart { background: #334155; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 5px; }
-        .btn-confirm:hover { background: #1d4ed8; }
-        .btn-clear { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.2rem; padding: 0 5px; }
-
         .grid-container { max-width: 800px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
         .card { background: white; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px; }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
@@ -49,27 +36,31 @@
         .btn-text { background: none; border: none; font-size: 0.85rem; color: #64748b; cursor: pointer; padding: 5px 8px; border-radius: 4px; display:flex; align-items:center; gap:4px; }
         .btn-text:hover { background: #f8fafc; color: var(--primary); }
         .btn-read { color: var(--primary); font-weight: 600; }
-        .btn-rename { color: #d97706; }
 
-        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 70px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #e5e7eb; z-index: 90; padding-bottom: env(safe-area-inset-bottom); }
-        .bottom-btn { background: none; border: none; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; color: #64748b; gap: 2px; cursor: pointer; width: 80px;}
-        .bottom-btn span { font-size: 1.4rem; margin-bottom: 2px; }
-        .bottom-btn.highlight { color: #2563eb; font-weight: bold; }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 70px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; z-index: 90; padding: 0 30px; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-btn { background: none; border: none; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; color: #64748b; gap: 4px; cursor: pointer; min-width: 60px;}
+        .bottom-btn span { font-size: 1.5rem; }
+        .bottom-btn.import { color: #2563eb; } .bottom-btn.export { color: #059669; } .bottom-btn.clear { color: #ef4444; }
 
-        /* Modal 樣式 */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 2000; display: none; flex-direction: column; }
-        .modal-header { height: 50px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: white; flex-shrink: 0; }
-        .modal-title { font-weight: bold; font-size: 1rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 60%; }
-        .modal-toolbar { display: flex; gap: 10px; padding: 10px 15px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; overflow-x: auto; white-space: nowrap; align-items: center;}
+        .modal-header { height: 55px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: white; flex-shrink: 0; }
+        .modal-title-input { font-weight: bold; font-size: 1.1rem; border: none; outline: none; flex: 1; text-align: center; color:#1f2937; }
+        .btn-close { font-size: 1.5rem; cursor: pointer; padding: 10px; color: #64748b; line-height: 1;}
+        .btn-save { font-weight: bold; color: white; background: var(--primary); padding: 6px 15px; border-radius: 20px; border: none; font-size: 0.9rem; cursor: pointer;}
+
+        .modal-toolbar { display: flex; gap: 8px; padding: 10px 15px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; overflow-x: auto; white-space: nowrap; align-items: center;}
+        .tool-sep { width: 1px; height: 20px; background: #ccc; margin: 0 5px; }
         .editor-btn { background: white; border: 1px solid #cbd5e1; padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: #475569; cursor: pointer; }
         .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; }
         .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } .hl-pink { background: #fbcfe8; }
-        
+
         .reader-content-wrapper { flex: 1; overflow-y: auto; display: flex; flex-direction: column; position: relative; background: #fff; }
         .notes-section { padding: 15px; background: #fffbeb; border-bottom: 1px solid #fcd34d; flex-shrink: 0; }
-        .notes-input { width: 100%; height: 80px; padding: 10px; border: 1px solid #fcd34d; border-radius: 6px; font-size: 16px; font-family: inherit; resize: vertical; outline: none; }
+        .notes-input { width: 100%; height: 80px; padding: 10px; border: 1px solid #fcd34d; border-radius: 6px; font-size: 16px; font-family: inherit; resize: vertical; outline: none; display: block; }
+        
         .article-view { padding: 30px 20px; font-size: 18px; line-height: 1.7; color: #334155; max-width: 800px; margin: 0 auto; width: 100%; box-sizing: border-box; outline: none; }
         .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
+        .article-view h1 { font-size: 1.6rem; line-height: 1.3; color: #0f172a; margin-bottom: 1rem; }
         
         .io-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .io-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
@@ -79,14 +70,12 @@
         .io-btn.primary { background: var(--primary); color: white; }
         .io-btn.cancel { background: #eee; color: #333; }
         .loading-mask { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; font-weight: bold; color: #555; }
-
-        @media (max-width: 600px) { .input-group { flex-direction: column; } }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">📚 V35 <span id="fetchStatus" style="font-size:0.7rem;color:#d97706;display:none;">抓取中...</span></div>
+        <div class="nav-brand">📚 V37 <span id="fetchStatus" style="font-size:0.7rem;color:#d97706;display:none;">抓取中...</span></div>
         <div class="nav-menu">
             <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">待讀</div>
             <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">已讀</div>
@@ -95,49 +84,46 @@
 
     <div class="add-panel">
         <div class="input-row">
-            <button class="btn-paste-smart" onclick="smartPaste()">📋 貼上</button>
-            <div style="flex:1;"></div>
-            <button class="btn-clear" onclick="clearInput()">✕</button>
+            <button class="btn-paste" onclick="smartPaste()">📋 貼上</button>
+            <div style="flex:1"></div>
+            <button class="btn-paste" style="background:none;color:#999;" onclick="clearInput()">✕</button>
         </div>
-        <div class="input-row">
-            <span class="input-label" style="font-size:0.8rem;font-weight:bold;color:#64748b;width:40px;">網址</span>
-            <input type="text" id="newUrl" class="input-field" placeholder="https://..." oninput="checkUrlInput()">
-        </div>
-        <div class="input-row">
-            <span class="input-label" style="font-size:0.8rem;font-weight:bold;color:#64748b;width:40px;">標題</span>
-            <input type="text" id="newTitle" class="input-field" placeholder="等待輸入...">
-            <div id="titleStatus" class="status-indicator" title="狀態"></div>
-        </div>
-        <button class="btn-confirm" onclick="confirmAdd()">＋ 確認加入</button>
+        <input type="text" id="newUrl" class="input-field" placeholder="網址..." oninput="checkUrlInput()">
+        <input type="text" id="newTitle" class="input-field" placeholder="標題 (自動抓取或手動輸入)">
+        <div id="titleStatus" style="height:2px;background:#eee;width:100%;"><div id="titleBar" style="height:100%;width:0%;background:var(--primary);transition:0.3s"></div></div>
+        <button class="btn-confirm" onclick="confirmAdd()">＋ 加入</button>
     </div>
 
     <div class="grid-container" id="container"></div>
 
     <div class="bottom-bar">
-        <button class="bottom-btn highlight" onclick="openExportModal()"><span>📋</span>複製備份</button>
-        <button class="bottom-btn highlight" onclick="openImportModal()"><span>📥</span>貼上還原</button>
-        <button class="bottom-btn" onclick="clearReadItems()" style="color:#ef4444;"><span>🧹</span>清理</button>
+        <button class="bottom-btn import" onclick="openImportModal()"><span>📥</span>貼上還原</button>
+        <button class="bottom-btn clear" onclick="clearReadItems()"><span>🧹</span>清理</button>
+        <button class="bottom-btn export" onclick="openExportModal()"><span>📋</span>複製備份</button>
     </div>
 
     <div class="modal-overlay" id="readerModal">
         <div class="modal-header">
-            <span style="font-size:1.5rem;cursor:pointer;padding:10px;" onclick="closeReader()">✕</span>
-            <span class="modal-title" id="readerTitle">標題</span>
-            <button class="btn-text" onclick="saveReader()" style="font-weight:bold;color:var(--primary);font-size:1rem;">儲存筆記</button>
+            <div class="btn-close" onclick="closeReader()">✕</div>
+            <input type="text" class="modal-title-input" id="readerTitleInput" placeholder="文章標題">
+            <button class="btn-save" onclick="saveReader()">儲存</button>
         </div>
+        
         <div class="modal-toolbar">
-            <span style="font-size:0.8rem;color:#999;">重點:</span>
+            <button class="editor-btn" onclick="pasteToEditor()">📋 貼上</button>
+            <div class="tool-sep"></div>
+            <button class="editor-btn" onclick="magicFormat()" title="AI 分析排版">✨ AI 排版</button>
+            <button class="editor-btn" onclick="cleanKeepImages()" title="只清除格式，保留圖片" style="color:#059669; border-color:#059669;">🖼️ 保留圖片</button>
+            <button class="editor-btn" onclick="clearStyle()" title="變成純文字">📝 純文字</button>
+            <div class="tool-sep"></div>
             <div class="highlighter hl-yellow" onclick="highlight('yellow')"></div>
             <div class="highlighter hl-green" onclick="highlight('#bbf7d0')"></div>
-            <div class="highlighter hl-pink" onclick="highlight('#fbcfe8')"></div>
-            <div class="tool-sep"></div>
             <button class="editor-btn" onclick="captureReader()">📸 截圖</button>
-            <button class="editor-btn magic" onclick="magicFormat()">✨ 排版</button>
-            <button class="editor-btn" onclick="clearStyle()">🧹 清除</button>
         </div>
+
         <div class="reader-content-wrapper" id="readerWrapper">
             <div class="notes-section">
-                <label style="font-weight:bold;color:#92400e;font-size:0.9rem;margin-bottom:5px;display:block;">📝 我的筆記：</label>
+                <label style="font-weight:bold;color:#92400e;font-size:0.9rem;margin-bottom:5px;display:block;">📝 筆記：</label>
                 <textarea id="userNotes" class="notes-input" placeholder="輸入筆記..."></textarea>
             </div>
             <div class="article-view" id="articleView" contenteditable="true" placeholder="文章內容..."></div>
@@ -154,103 +140,87 @@
         let currentId = null;
 
         function init() {
-            const saved = localStorage.getItem('lite_pocket_v35_data');
+            const saved = localStorage.getItem('lite_pocket_v37_data');
             if (saved) items = JSON.parse(saved);
             
             const params = new URLSearchParams(window.location.search);
             const addUrl = params.get('add');
             const addTitle = params.get('title');
-
             if (addUrl) {
                 document.getElementById('newUrl').value = addUrl;
                 if (addTitle) {
-                    // 🟢 書籤傳來了標題，直接填入並亮綠燈
                     document.getElementById('newTitle').value = addTitle;
-                    updateStatus('success');
+                    updateTitleBar('success');
                 } else {
-                    // 只有網址，嘗試偵測
                     detectTitle(addUrl);
                 }
-                // 清除網址參數
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             render();
         }
 
-        // --- 核心流程 ---
+        /* --- 🌟 V37 核心：圖片友善的清洗功能 --- */
+        function cleanKeepImages() {
+            let raw = document.getElementById('articleView').innerHTML;
+            if(!raw || raw.length < 10) return alert('內容太少');
+            
+            // 使用 DOMPurify 清洗，但保留常用標籤和屬性
+            let clean = DOMPurify.sanitize(raw, {
+                // 允許的標籤 (包含圖片 img, 連結 a, 標題 h1-h6, 列表, 表格)
+                ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'],
+                // 允許的屬性 (關鍵是 src, href, alt)
+                ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target'],
+                // 禁止所有 style 屬性 (這樣就能移除背景色、字體大小、固定寬度)
+                FORBID_ATTR: ['style', 'class', 'width', 'height'] 
+            });
+            
+            document.getElementById('articleView').innerHTML = clean;
+            alert('🖼️ 已清除格式 (保留圖片)');
+        }
+
+        // --- 舊的排版工具 ---
+        function magicFormat() {
+            let raw = document.getElementById('articleView').innerHTML;
+            if(!raw || raw.length < 50) return alert('內容太少');
+            try {
+                let doc = new DOMParser().parseFromString(raw, 'text/html');
+                let reader = new Readability(doc);
+                let article = reader.parse();
+                if(article) {
+                    const clean = DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
+                    document.getElementById('articleView').innerHTML = clean;
+                }
+            } catch(e){}
+        }
+        function clearStyle() {
+            // 純文字模式 (圖片會消失)
+            let txt = document.getElementById('articleView').innerText;
+            document.getElementById('articleView').innerHTML = txt.split('\n').filter(t=>t.trim()).map(t=>`<p>${t}</p>`).join('');
+        }
+
+        // --- 其他功能 (保持 V36 不變) ---
         function checkUrlInput() {
             const url = document.getElementById('newUrl').value.trim();
             if (url.startsWith('http')) detectTitle(url);
-            else if (url === '') updateStatus('reset');
+            else updateTitleBar('reset');
         }
-
         async function detectTitle(url) {
             const titleInput = document.getElementById('newTitle');
-            if(titleInput.value.trim() !== '' && titleInput.value !== '偵測中...') return;
-
-            updateStatus('loading');
-            titleInput.value = '偵測中...';
-            titleInput.disabled = true;
-
+            if(titleInput.value.trim() !== '') return;
+            updateTitleBar('loading');
+            titleInput.placeholder = '偵測中...';
             const detected = await fetchTitle(url);
-            
-            titleInput.disabled = false;
-            if (detected) {
-                titleInput.value = detected;
-                updateStatus('success');
-            } else {
-                titleInput.value = '';
-                titleInput.placeholder = '抓取失敗，請手動輸入';
-                updateStatus('error');
-                titleInput.focus();
-            }
+            if (detected) { titleInput.value = detected; updateTitleBar('success'); } 
+            else { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); }
         }
-
-        async function confirmAdd() {
-            const url = document.getElementById('newUrl').value.trim();
-            let title = document.getElementById('newTitle').value.trim();
-            
-            if (!url) { // 筆記
-                if (!title) title = "新筆記";
-                createItem({url:'#', title:title, domain:'note', content:''});
-                clearInput(); return;
-            }
-            if (!title) title = url; // 沒標題用網址
-
-            const domain = new URL(url).hostname.replace('www.','');
-            const newItem = createItem({url:url, title:title, domain:domain, content:null});
-            clearInput();
-
-            // 背景抓取內容
-            const html = await fetchWithFallbacks(url);
-            if (html) {
-                const doc = new DOMParser().parseFromString(html, 'text/html');
-                const reader = new Readability(doc);
-                const article = reader.parse();
-                const idx = items.findIndex(i => i.id === newItem.id);
-                if(idx > -1 && article) {
-                    // 如果標題是亂碼或網址，再次更新為 Readability 的標題
-                    // 但因為這次 V35 我們相信使用者的手動輸入/書籤標題，所以這裡只存內容
-                    items[idx].content = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;">來源: ${domain}</p>` + DOMPurify.sanitize(article.content);
-                    save(); render();
-                }
-            } else {
-                // 抓取失敗，開啟救援
-                const idx = items.findIndex(i => i.id === newItem.id);
-                if(idx > -1) { openReader(newItem.id, true); }
-            }
+        function updateTitleBar(state) {
+            const bar = document.getElementById('titleBar');
+            if(state==='loading') { bar.style.width='50%'; bar.style.background='#f59e0b'; }
+            else if(state==='success') { bar.style.width='100%'; bar.style.background='#10b981'; }
+            else if(state==='error') { bar.style.width='100%'; bar.style.background='#ef4444'; }
+            else { bar.style.width='0%'; }
         }
-
-        // --- 工具 ---
-        function updateStatus(state) {
-            const dot = document.getElementById('titleStatus');
-            dot.className = 'status-indicator';
-            if (state === 'loading') dot.classList.add('loading');
-            if (state === 'success') dot.classList.add('success');
-            if (state === 'error') dot.classList.add('error');
-        }
-        function clearInput() { document.getElementById('newUrl').value = ''; document.getElementById('newTitle').value = ''; updateStatus('reset'); }
-        
+        function clearInput(){ document.getElementById('newUrl').value=''; document.getElementById('newTitle').value=''; updateTitleBar('reset'); }
         async function fetchTitle(url) {
             try {
                 const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
@@ -262,7 +232,29 @@
             } catch (e) {}
             return null;
         }
-
+        async function confirmAdd() {
+            const url = document.getElementById('newUrl').value.trim();
+            let title = document.getElementById('newTitle').value.trim();
+            if(!url) { if(!title) title="新筆記"; createItem({url:'#', title:title, domain:'note', content:''}); clearInput(); return; }
+            if(!title) title = url;
+            const domain = new URL(url).hostname.replace('www.','');
+            const newItem = createItem({url:url, title:title, domain:domain, content:null});
+            clearInput();
+            const html = await fetchWithFallbacks(url);
+            if(html) {
+                let doc = new DOMParser().parseFromString(html, 'text/html');
+                let reader = new Readability(doc);
+                let article = reader.parse();
+                const idx = items.findIndex(i=>i.id===newItem.id);
+                if(idx>-1 && article) {
+                    items[idx].content = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;">來源: ${domain}</p>` + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
+                    save(); render();
+                }
+            } else {
+                const idx = items.findIndex(i=>i.id===newItem.id);
+                if(idx>-1) { openReader(newItem.id, true); }
+            }
+        }
         async function fetchWithFallbacks(url) {
             const encodedUrl = encodeURIComponent(url);
             const proxies = [
@@ -279,38 +271,18 @@
             }
             return null;
         }
-
-        /* --- CRUD & Reader (保留 V33 功能) --- */
-        function createItem(data) { const item={id:Date.now(),url:data.url,title:data.title,domain:data.domain,timestamp:Date.now(),status:'inbox',content:data.content,notes:data.notes||''}; items.unshift(item); save(); render(); return item; }
-        function renameItem(id) { const i=items.find(x=>x.id===id); const t=prompt("改名:",i.title); if(t){i.title=t;save();render();} }
-        function openReader(id, err=false) { currentId=id; const i=items.find(x=>x.id===id); document.getElementById('readerModal').style.display='flex'; document.getElementById('readerTitle').innerText=i.title; document.getElementById('userNotes').value=i.notes||''; const v=document.getElementById('articleView'); 
-            if(i.content) v.innerHTML=i.content; else if(err) v.innerHTML=`<div style="text-align:center;padding:20px;color:#999;">⚠️ 抓取失敗，請手動貼上</div>`; else v.innerHTML='無內容'; }
-        function saveReader(){ if(!currentId)return; const i=items.find(x=>x.id===currentId); i.content=document.getElementById('articleView').innerHTML; i.notes=document.getElementById('userNotes').value; save(); alert('已儲存'); document.getElementById('readerModal').style.display='none'; render(); }
-        function closeReader(){document.getElementById('readerModal').style.display='none';}
+        function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, domain: data.domain, timestamp: Date.now(), status: 'inbox', content: data.content, notes: data.notes || '' }; items.unshift(item); save(); render(); return item; }
+        function renameItem(id) { const item = items.find(i => i.id === id); const newTitle = prompt("修改標題：", item.title); if (newTitle && newTitle.trim() !== "") { item.title = newTitle.trim(); save(); render(); } }
+        function openReader(id, isError=false) { currentId = id; const item = items.find(i => i.id === id); document.getElementById('readerModal').style.display = 'flex'; document.getElementById('readerTitleInput').value = item.title; document.getElementById('userNotes').value = item.notes || ''; const view = document.getElementById('articleView'); if (item.content) { view.innerHTML = item.content; } else if (isError) { view.innerHTML = `<div class="manual-box"><h3>⚠️ 自動抓取失敗</h3><button class="btn-manual" onclick="window.open('${item.url}')">🔗 開啟原網頁</button><p style="font-size:0.9rem;margin-top:10px;color:#666;">請複製全文 -> 回來貼上 -> 按上方「✨ 自動排版」</p></div>`; } else { view.innerHTML = '無內容'; } }
+        function saveReader() { if (!currentId) return; const content = document.getElementById('articleView').innerHTML; const notes = document.getElementById('userNotes').value; const title = document.getElementById('readerTitleInput').value; const idx = items.findIndex(i => i.id === currentId); if(idx > -1) { items[idx].content = content; items[idx].notes = notes; items[idx].title = title; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); } }
+        function closeReader() { document.getElementById('readerModal').style.display = 'none'; }
         function highlight(c){document.execCommand('styleWithCSS',false,true);document.execCommand('hiliteColor',false,c);}
-        function magicFormat(){let r=document.getElementById('articleView').innerHTML; if(!r||r.length<50)return alert('內容太少'); try{let d=new DOMParser().parseFromString(r,'text/html');let a=new Readability(d).parse();if(a)document.getElementById('articleView').innerHTML=DOMPurify.sanitize(a.content);}catch(e){}}
-        function clearStyle(){let t=document.getElementById('articleView').innerText;document.getElementById('articleView').innerHTML=t.split('\n').filter(x=>x.trim()).map(x=>`<p>${x}</p>`).join('');}
-        function captureReader(){
-            const el=document.getElementById('readerWrapper'); const m=document.getElementById('loadingMask'); m.style.display='flex';
-            const ta=document.getElementById('userNotes'); const d=document.createElement('div'); d.style.cssText=getComputedStyle(ta).cssText; d.style.height='auto'; d.style.minHeight='80px'; d.innerText=ta.value; ta.replaceWith(d);
-            html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollHeight:el.scrollHeight,windowHeight:el.scrollHeight}).then(c=>{ d.replaceWith(ta); m.style.display='none'; const l=document.createElement('a'); l.download=`Note_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }).catch(()=>{d.replaceWith(ta);m.style.display='none';alert('失敗');});
-        }
+        function captureReader(){ const el=document.getElementById('readerWrapper'); const m=document.getElementById('loadingMask'); m.style.display='flex'; const ta=document.getElementById('userNotes'); const d=document.createElement('div'); d.style.cssText=getComputedStyle(ta).cssText; d.style.height='auto'; d.style.minHeight='80px'; d.innerText=ta.value; ta.replaceWith(d); html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollHeight:el.scrollHeight,windowHeight:el.scrollHeight}).then(c=>{ d.replaceWith(ta); m.style.display='none'; const l=document.createElement('a'); l.download=`Note_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }).catch(()=>{d.replaceWith(ta);m.style.display='none';alert('失敗');}); }
         async function smartPaste(){try{const t=await navigator.clipboard.readText();if(t){document.getElementById('newUrl').value=t;checkUrlInput();}else alert('剪貼簿空');}catch(e){alert('請手動貼上');}}
         async function pasteToEditor(){try{const t=await navigator.clipboard.readText();document.getElementById('articleView').focus();document.execCommand('insertText',false,t);}catch(e){alert('請手動貼上');}}
-        function clearReadItems(){if(confirm('清除已讀?')){items=items.filter(x=>x.status==='inbox');save();render();}}
-        
-        function render() {
-            const c=document.getElementById('container');c.innerHTML=''; const f=items.filter(x=>x.status===currentTab);
-            if(f.length===0)c.innerHTML='<div style="text-align:center;color:#999;margin-top:30px;">無項目</div>';
-            f.forEach(i=>{
-                const fav=i.domain==='note'?'':`https://www.google.com/s2/favicons?domain=${i.domain}&sz=32`;
-                const nb=i.notes?'card-note-badge':'card-note-badge style="display:none"';
-                const d=document.createElement('div');d.className='card';
-                d.innerHTML=`<div class="card-header" onclick="openReader(${i.id})"><div style="flex:1"><div class="card-meta"><img src="${fav}" class="site-icon" onerror="this.style.display='none'"> ${i.domain}</div><div class="card-title">${i.title}</div><span ${nb}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${i.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${i.id})">📖 閱讀</button>${currentTab==='inbox'?`<button class="btn-text" onclick="moveItem(${i.id},'archive')">✅ 已讀</button>`:`<button class="btn-text" onclick="moveItem(${i.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${i.id})">🗑️</button></div>`;
-                c.appendChild(d);
-            });
-        }
-        function save(){localStorage.setItem('lite_pocket_v35_data',JSON.stringify(items));}
+        function clearReadItems() { if(confirm('清除所有「已讀」？')) { items = items.filter(i=>i.status==='inbox'); save(); render(); } }
+        function render() { const container = document.getElementById('container'); container.innerHTML = ''; const filtered = items.filter(i => i.status === currentTab); if(filtered.length===0) container.innerHTML = '<div style="text-align:center;color:#999;margin-top:30px;">無項目</div>'; filtered.forEach(item => { const favicon = item.domain==='note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"'; const div = document.createElement('div'); div.className = 'card'; div.innerHTML = `<div class="card-header" onclick="openReader(${item.id})"><div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button></div>`; container.appendChild(div); }); }
+        function save(){localStorage.setItem('lite_pocket_v37_data',JSON.stringify(items));}
         function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s;save();render();}}
         function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id);save();render();}}
         function switchTab(t){currentTab=t;document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active');render();}
