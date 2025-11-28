@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V39：穩定修復版</title>
+    <title>Lite-Pocket V39+：匯出增強版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -12,37 +12,29 @@
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 100px 0; height: 100vh; overflow: hidden; }
         
-        /* 導航 */
         .navbar { position: fixed; top: 0; left: 0; right: 0; background: white; height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid #ddd; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
         .nav-menu { display: flex; gap: 5px; background: #f1f5f9; padding: 3px; border-radius: 6px; }
         .nav-item { cursor: pointer; color: #64748b; font-size: 0.85rem; padding: 4px 12px; border-radius: 4px; font-weight: 500; transition: 0.2s; }
         .nav-item.active { background: white; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
-        /* 主畫面捲動區 */
         .main-scroller { height: 100%; overflow-y: auto; padding-bottom: 80px; }
 
-        /* 新增面板 */
         .add-panel { max-width: 900px; margin: 15px auto; padding: 15px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
         .input-field { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; outline: none; }
         .btn-paste { background: #334155; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; }
         
-        /* 標題狀態燈 */
-        .status-indicator { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; margin-left: 5px; transition: 0.3s; }
-        .status-indicator.loading { background: #f59e0b; animation: pulse 1s infinite; }
-        .status-indicator.success { background: #10b981; }
-        .status-indicator.error { background: #ef4444; }
-        @keyframes pulse { 0% {opacity: 0.5;} 50% {opacity: 1;} 100% {opacity: 0.5;} }
-
-        /* 列表 */
         .grid-container { max-width: 900px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
-        .card { background: white; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px; }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+        .card { background: white; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px; cursor: pointer; transition: 0.2s; }
+        /* 選取模式下的卡片樣式 */
+        .card.selecting { border-color: var(--primary); background: #f0f9ff; }
+        
+        .card-header { display: flex; align-items: flex-start; gap: 10px; }
         .card-meta { font-size: 0.75rem; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
         .site-icon { width: 14px; height: 14px; border-radius: 2px; }
-        .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: #0f172a; cursor: pointer; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: #0f172a; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .card-note-badge { font-size: 0.7rem; background: #fffbeb; color: #b45309; padding: 2px 6px; border-radius: 4px; border: 1px solid #fcd34d; display: inline-block; margin-top: 5px;}
         
         .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
@@ -52,11 +44,13 @@
         .btn-rename { color: #d97706; }
 
         /* 底部工具列 */
-        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 70px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; z-index: 90; padding: 0 30px; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 70px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; z-index: 90; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); }
         .bottom-btn { background: none; border: none; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; color: #64748b; gap: 4px; cursor: pointer; min-width: 60px;}
         .bottom-btn span { font-size: 1.5rem; }
-        .bottom-btn.import { color: #2563eb; } .bottom-btn.export { color: #059669; } .bottom-btn.clear { color: #ef4444; }
-
+        /* 功能按鈕顏色 */
+        .bottom-btn.select-mode { color: #8b5cf6; } 
+        .bottom-btn.export-urls { color: #059669; font-weight: bold; }
+        
         /* 閱讀器 Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 2000; display: none; flex-direction: column; }
         .modal-header { height: 55px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: white; flex-shrink: 0; }
@@ -70,32 +64,23 @@
         .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; }
         .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } .hl-pink { background: #fbcfe8; }
 
-        /* 閱讀器佈局 (PC: 左右, Mobile: 上下) */
         .reader-container { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; }
-        
         .article-section { flex: 2; overflow-y: auto; padding: 30px; border-right: 1px solid #e5e7eb; display: flex; justify-content: center; background: #fff;}
         .article-view { font-size: 18px; line-height: 1.7; color: #334155; max-width: 800px; width: 100%; outline: none; }
         .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
         .article-view h1 { font-size: 1.6rem; line-height: 1.3; color: #0f172a; margin-bottom: 1rem; }
-        
         .notes-section { flex: 1; display: flex; flex-direction: column; background: #f9fafb; min-width: 300px; max-width: 450px; }
         .notes-header { padding: 10px 15px; font-weight: bold; color: #b45309; background: #fffbeb; border-bottom: 1px solid #fcd34d; font-size: 0.9rem; }
         .notes-input { flex: 1; width: 100%; padding: 15px; border: none; font-size: 16px; font-family: inherit; resize: none; outline: none; background: #fffbeb; color: #451a03; line-height: 1.6; }
-        
-        /* 分享按鈕區 */
         .notes-footer { padding: 10px 15px; background: #fffbeb; border-top: 1px solid #fcd34d; }
         .btn-share-full { width: 100%; padding: 12px; background: #374151; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; gap: 8px; align-items: center;}
-        .btn-share-full:hover { background: #1f2937; }
-
-        /* 手機適配 */
+        
         @media (max-width: 768px) {
-            .reader-container { flex-direction: column-reverse; } /* 筆記在上，文章在下 */
+            .reader-container { flex-direction: column-reverse; }
             .article-section { border-right: none; padding: 20px; flex: 1; }
-            /* 固定筆記高度 */
             .notes-section { flex: none; height: 180px; min-width: 100%; max-width: 100%; border-bottom: 1px solid #d1d5db; }
         }
 
-        /* Modals & Loading */
         .io-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .io-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; }
         .io-textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace; font-size: 0.8rem; resize: none; }
@@ -109,7 +94,7 @@
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">📚 V39 <span id="fetchStatus" style="font-size:0.7rem;color:#d97706;display:none;">處理中...</span></div>
+        <div class="nav-brand">📚 V39+ <span id="fetchStatus" style="font-size:0.7rem;color:#d97706;display:none;">抓取中...</span></div>
         <div class="nav-menu">
             <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">待讀</div>
             <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">已讀</div>
@@ -132,10 +117,17 @@
         <div class="grid-container" id="container"></div>
     </div>
 
-    <div class="bottom-bar">
-        <button class="bottom-btn import" onclick="openImportModal()"><span>📥</span>貼上還原</button>
-        <button class="bottom-btn clear" onclick="clearReadItems()"><span>🧹</span>清理</button>
-        <button class="bottom-btn export" onclick="openExportModal()"><span>📋</span>複製備份</button>
+    <div class="bottom-bar" id="defaultBottomBar">
+        <button class="bottom-btn select-mode" onclick="toggleSelectMode()"><span>☑️</span>選取</button>
+        <button class="bottom-btn" onclick="openImportModal()"><span>📥</span>還原</button>
+        <button class="bottom-btn" onclick="openExportModal()"><span>📋</span>備份</button>
+        <button class="bottom-btn clear" onclick="clearReadItems()" style="color:#ef4444;"><span>🧹</span>清理</button>
+    </div>
+
+    <div class="bottom-bar" id="selectBottomBar" style="display:none; background:#f0f9ff;">
+        <button class="bottom-btn" onclick="toggleSelectMode()" style="color:#666;"><span>✕</span>取消</button>
+        <div style="font-weight:bold;color:var(--primary);">已選 <span id="selectCount">0</span> 篇</div>
+        <button class="bottom-btn export-urls" onclick="exportSelectedUrls()"><span>🔗</span>匯出網址</button>
     </div>
 
     <div class="modal-overlay" id="readerModal">
@@ -144,7 +136,6 @@
             <input type="text" class="modal-title-input" id="readerTitleInput" placeholder="文章標題">
             <button class="btn-save" onclick="saveReader()">儲存</button>
         </div>
-        
         <div class="modal-toolbar">
             <button class="editor-btn" onclick="pasteToEditor()">📋 <span>貼上</span></button>
             <div class="tool-sep"></div>
@@ -158,20 +149,12 @@
             <div class="tool-sep"></div>
             <button class="editor-btn" onclick="captureReader()">📸 <span>截圖</span></button>
         </div>
-
-        <div class="reader-container" id="readerWrapper">
-            <div class="article-section">
-                <div class="article-view" id="articleView" contenteditable="true" placeholder="文章內容..."></div>
-            </div>
-            
+        <div class="reader-content-wrapper" id="readerWrapper">
+            <div class="article-section"><div class="article-view" id="articleView" contenteditable="true" placeholder="文章內容..."></div></div>
             <div class="notes-section">
                 <div class="notes-header">📝 思考筆記</div>
                 <textarea id="userNotes" class="notes-input" placeholder="在這裡輸入重點..."></textarea>
-                <div class="notes-footer">
-                    <button class="btn-share-full" onclick="shareDraft()">
-                        📤 複製討論草稿
-                    </button>
-                </div>
+                <div class="notes-footer"><button class="btn-share-full" onclick="shareDraft()">📤 複製討論草稿</button></div>
             </div>
         </div>
     </div>
@@ -184,10 +167,18 @@
         let items = [];
         let currentTab = 'inbox';
         let currentId = null;
+        // 🌟 新增選取模式變數
+        let isSelectMode = false;
+        let selectedIds = new Set();
 
         function init() {
-            const saved = localStorage.getItem('lite_pocket_v39_data');
+            const saved = localStorage.getItem('lite_pocket_v39_plus_data'); // 改個名區隔
             if (saved) items = JSON.parse(saved);
+            else {
+                // 嘗試讀取舊版資料
+                const old = localStorage.getItem('lite_pocket_v39_data');
+                if(old) items = JSON.parse(old);
+            }
             
             const params = new URLSearchParams(window.location.search);
             const addUrl = params.get('add');
@@ -205,105 +196,77 @@
             render();
         }
 
-        /* --- V39 功能修復 --- */
-        function highlight(color) {
-            document.execCommand('styleWithCSS', false, true);
-            document.execCommand('hiliteColor', false, color);
-        }
-
-        function shareDraft() {
-            saveReader();
-            const item = items.find(i => i.id === currentId);
-            const notes = document.getElementById('userNotes').value;
+        /* --- 🌟 選取與匯出功能 --- */
+        function toggleSelectMode() {
+            isSelectMode = !isSelectMode;
+            if (!isSelectMode) selectedIds.clear();
             
-            let text = `【${item.title}】\n\n`;
-            if(notes) text += `📝 筆記：\n${notes}\n\n`;
-            text += `🔗 連結：${item.url}`;
-
-            if (navigator.share) {
-                navigator.share({ title: item.title, text: text, url: item.url }).catch(()=>{});
-            } else {
-                navigator.clipboard.writeText(text).then(() => alert('✅ 草稿已複製！\n可貼到 Line 或 Keep。'));
-            }
+            document.getElementById('defaultBottomBar').style.display = isSelectMode ? 'none' : 'flex';
+            document.getElementById('selectBottomBar').style.display = isSelectMode ? 'flex' : 'none';
+            render();
         }
 
-        function cleanKeepImages() {
-            let raw = document.getElementById('articleView').innerHTML;
-            if(!raw || raw.length < 10) return alert('內容太少');
-            let clean = DOMPurify.sanitize(raw, {
-                ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'],
-                ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style'],
-                FORBID_ATTR: ['width','height'] 
+        function toggleCheck(id) {
+            if (selectedIds.has(id)) selectedIds.delete(id);
+            else selectedIds.add(id);
+            document.getElementById('selectCount').innerText = selectedIds.size;
+            render();
+        }
+
+        function exportSelectedUrls() {
+            if (selectedIds.size === 0) return alert('請先勾選文章');
+            
+            const urls = items.filter(i => selectedIds.has(i.id) && i.url.startsWith('http')).map(i => i.url);
+            if (urls.length === 0) return alert('沒有有效的網址');
+
+            const text = urls.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`✅ 已複製 ${urls.length} 個網址！\n\n請貼到記事本存成 "list.txt" 給 Python 用。`);
+                toggleSelectMode(); // 結束選取
             });
-            document.getElementById('articleView').innerHTML = clean;
-            alert('🖼️ 排版完成');
         }
 
-        // --- 其他工具 ---
+        /* --- 原有功能 --- */
+        function highlight(c) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, c); }
+        function shareDraft() { saveReader(); const item = items.find(i => i.id === currentId); const notes = document.getElementById('userNotes').value; let text = `【${item.title}】\n\n`; if(notes) text += `📝 筆記：\n${notes}\n\n`; text += `🔗 連結：${item.url}`; if (navigator.share) { navigator.share({ title: item.title, text: text, url: item.url }).catch(()=>{}); } else { navigator.clipboard.writeText(text).then(() => alert('✅ 草稿已複製！')); } }
+        function cleanKeepImages() { let raw = document.getElementById('articleView').innerHTML; if(!raw || raw.length < 10) return alert('內容太少'); let clean = DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'], ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style'], FORBID_ATTR: ['width','height'] }); document.getElementById('articleView').innerHTML = clean; alert('🖼️ 排版完成'); }
         function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
-        async function detectTitle(url) {
-            const titleInput = document.getElementById('newTitle');
-            if(titleInput.value.trim() !== '') return;
-            updateTitleBar('loading'); titleInput.placeholder = '偵測中...';
-            const detected = await fetchTitle(url);
-            if (detected) { titleInput.value = detected; updateTitleBar('success'); } 
-            else { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); }
-        }
+        async function detectTitle(url) { const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return; updateTitleBar('loading'); titleInput.placeholder = '偵測中...'; const detected = await fetchTitle(url); if (detected) { titleInput.value = detected; updateTitleBar('success'); } else { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); } }
         function updateTitleBar(state) { const bar=document.getElementById('titleBar'); if(state==='loading'){bar.style.width='50%';bar.style.background='#f59e0b';}else if(state==='success'){bar.style.width='100%';bar.style.background='#10b981';}else if(state==='error'){bar.style.width='100%';bar.style.background='#ef4444';}else{bar.style.width='0%';} }
         function clearInput(){ document.getElementById('newUrl').value=''; document.getElementById('newTitle').value=''; updateTitleBar('reset'); }
         async function fetchTitle(url) { try{const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);const d=await res.json();if(d.contents){const m=d.contents.match(/<title>(.*?)<\/title>/i);if(m&&m[1])return new DOMParser().parseFromString(m[1],'text/html').body.textContent;}}catch(e){}return null;}
-        
-        async function confirmAdd() {
-            const url = document.getElementById('newUrl').value.trim();
-            let title = document.getElementById('newTitle').value.trim();
-            if(!url) { if(!title) title="新筆記"; createItem({url:'#', title:title, domain:'note', content:''}); clearInput(); return; }
-            if(!title) title = url;
-            const domain = new URL(url).hostname.replace('www.','');
-            const newItem = createItem({url:url, title:title, domain:domain, content:null});
-            clearInput();
-            const html = await fetchWithFallbacks(url);
-            if(html) {
-                let doc = new DOMParser().parseFromString(html, 'text/html');
-                let reader = new Readability(doc);
-                let article = reader.parse();
-                const idx = items.findIndex(i=>i.id===newItem.id);
-                if(idx>-1 && article) {
-                    items[idx].content = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;">來源: ${domain}</p>` + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
-                    save(); render();
-                }
-            } else {
-                const idx = items.findIndex(i=>i.id===newItem.id);
-                if(idx>-1) { openReader(newItem.id, true); }
-            }
-        }
-        async function fetchWithFallbacks(url) {
-            const encodedUrl = encodeURIComponent(url);
-            const proxies = [{ url: `https://api.allorigins.win/get?url=${encodedUrl}`, type: 'json' }, { url: `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`, type: 'text' }];
-            for (let proxy of proxies) { try { const res = await fetch(proxy.url); if (!res.ok) throw new Error(); let htmlText = proxy.type === 'json' ? (await res.json()).contents : await res.text(); if (htmlText && htmlText.length > 100) return htmlText; } catch (e) {} } return null;
-        }
+        async function confirmAdd() { const url = document.getElementById('newUrl').value.trim(); let title = document.getElementById('newTitle').value.trim(); if(!url) { if(!title) title="新筆記"; createItem({url:'#', title:title, domain:'note', content:''}); clearInput(); return; } if(!title) title = url; const domain = new URL(url).hostname.replace('www.',''); const newItem = createItem({url:url, title:title, domain:domain, content:null}); clearInput(); const html = await fetchWithFallbacks(url); if(html) { let doc = new DOMParser().parseFromString(html, 'text/html'); let reader = new Readability(doc); let article = reader.parse(); const idx = items.findIndex(i=>i.id===newItem.id); if(idx>-1 && article) { items[idx].content = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;">來源: ${domain}</p>` + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']}); save(); render(); } } else { const idx = items.findIndex(i=>i.id===newItem.id); if(idx>-1) { openReader(newItem.id, true); } } }
+        async function fetchWithFallbacks(url) { const encodedUrl = encodeURIComponent(url); const proxies = [{ url: `https://api.allorigins.win/get?url=${encodedUrl}`, type: 'json' }, { url: `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`, type: 'text' }]; for (let proxy of proxies) { try { const res = await fetch(proxy.url); if (!res.ok) throw new Error(); let htmlText = proxy.type === 'json' ? (await res.json()).contents : await res.text(); if (htmlText && htmlText.length > 100) return htmlText; } catch (e) {} } return null; }
         function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, domain: data.domain, timestamp: Date.now(), status: 'inbox', content: data.content, notes: data.notes || '' }; items.unshift(item); save(); render(); return item; }
         function renameItem(id) { const item = items.find(i => i.id === id); const newTitle = prompt("修改標題：", item.title); if (newTitle && newTitle.trim() !== "") { item.title = newTitle.trim(); save(); render(); } }
-        function openReader(id, isError=false) {
-            currentId = id; const item = items.find(i => i.id === id);
-            document.getElementById('readerModal').style.display = 'flex';
-            document.getElementById('readerTitleInput').value = item.title;
-            document.getElementById('userNotes').value = item.notes || '';
-            const view = document.getElementById('articleView');
-            if (item.content) { view.innerHTML = item.content; }
-            else if (isError) { view.innerHTML = `<div style="text-align:center;padding:20px;color:#999;">⚠️ 自動抓取失敗，請手動貼上</div>`; } 
-            else { view.innerHTML = '無內容'; }
-        }
+        function openReader(id, isError=false) { currentId = id; const item = items.find(i => i.id === id); document.getElementById('readerModal').style.display = 'flex'; document.getElementById('readerTitleInput').value = item.title; document.getElementById('userNotes').value = item.notes || ''; const view = document.getElementById('articleView'); if (item.content) { view.innerHTML = item.content; } else if (isError) { view.innerHTML = `<div style="text-align:center;padding:20px;color:#999;">⚠️ 自動抓取失敗，請手動貼上</div>`; } else { view.innerHTML = '無內容'; } }
         function saveReader() { if (!currentId) return; const content = document.getElementById('articleView').innerHTML; const notes = document.getElementById('userNotes').value; const title = document.getElementById('readerTitleInput').value; const idx = items.findIndex(i => i.id === currentId); if(idx > -1) { items[idx].content = content; items[idx].notes = notes; items[idx].title = title; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); } }
         function closeReader() { document.getElementById('readerModal').style.display = 'none'; }
-        
         function clearStyle() { let txt=document.getElementById('articleView').innerText;document.getElementById('articleView').innerHTML=txt.split('\n').filter(t=>t.trim()).map(t=>`<p>${t}</p>`).join(''); }
         function captureReader(){ const el=document.getElementById('readerWrapper'); const m=document.getElementById('loadingMask'); m.style.display='flex'; const ta=document.getElementById('userNotes'); const d=document.createElement('div'); d.style.cssText=getComputedStyle(ta).cssText; d.style.height='auto'; d.style.minHeight='80px'; d.innerText=ta.value; ta.replaceWith(d); html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollHeight:el.scrollHeight,windowHeight:el.scrollHeight}).then(c=>{ d.replaceWith(ta); m.style.display='none'; const l=document.createElement('a'); l.download=`Note_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }).catch(()=>{d.replaceWith(ta);m.style.display='none';alert('失敗');}); }
         async function smartPaste(){try{const t=await navigator.clipboard.readText();if(t){document.getElementById('newUrl').value=t;checkUrlInput();}else alert('剪貼簿空');}catch(e){alert('請手動貼上');}}
         async function pasteToEditor(){try{const t=await navigator.clipboard.readText();document.getElementById('articleView').focus();document.execCommand('insertText',false,t);}catch(e){alert('請手動貼上');}}
-        
         function clearReadItems() { if(confirm('清除所有「已讀」？')) { items = items.filter(i=>i.status==='inbox'); save(); render(); } }
-        function render() { const container = document.getElementById('container'); container.innerHTML = ''; const filtered = items.filter(i => i.status === currentTab); if(filtered.length===0) container.innerHTML = '<div style="text-align:center;color:#999;margin-top:30px;">無項目</div>'; filtered.forEach(item => { const favicon = item.domain==='note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"'; const div = document.createElement('div'); div.className = 'card'; div.innerHTML = `<div class="card-header" onclick="openReader(${item.id})"><div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button></div>`; container.appendChild(div); }); }
-        function save(){localStorage.setItem('lite_pocket_v39_data',JSON.stringify(items));}
+        function render() { 
+            const container = document.getElementById('container'); container.innerHTML = ''; const filtered = items.filter(i => i.status === currentTab); if(filtered.length===0) container.innerHTML = '<div style="text-align:center;color:#999;margin-top:30px;">無項目</div>'; 
+            filtered.forEach(item => { 
+                const favicon = item.domain==='note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"';
+                // 🌟 新增：勾選框邏輯
+                const isChecked = selectedIds.has(item.id) ? 'checked' : '';
+                const checkDisplay = isSelectMode ? 'block' : 'none';
+                const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`;
+                const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card'; // 選取時變色
+
+                const div = document.createElement('div'); div.className = activeCard; 
+                div.innerHTML = `
+                    <div class="card-header" onclick="${clickAction}">
+                        <div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div>
+                        <div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div>
+                    </div>
+                    <div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button></div>`; container.appendChild(div); 
+            }); 
+        }
+        function save(){localStorage.setItem('lite_pocket_v39_plus_data',JSON.stringify(items));}
         function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s;save();render();}}
         function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id);save();render();}}
         function switchTab(t){currentTab=t;document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active');render();}
