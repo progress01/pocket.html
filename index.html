@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V56：全能學習版</title>
+    <title>Lite-Pocket V56：最終確認版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* --- 基礎變數與樣式 --- */
         :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --card-bg: #ffffff;
             --border: #e5e7eb; --meta: #6b7280; --input-bg: #ffffff;
             --tag-bg: #e0f2fe; --tag-text: #0284c7; }
@@ -18,7 +19,7 @@
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 100px 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* --- 導航與列表 --- */
+        /* 導航列 */
         .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; display:flex; align-items:center; gap:10px;}
         .nav-menu { display: flex; gap: 5px; }
@@ -27,6 +28,8 @@
         .theme-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; }
         
         .main-scroller { height: 100%; overflow-y: auto; padding-bottom: 80px; }
+        
+        /* 加入面板 */
         .add-panel { max-width: 900px; margin: 15px auto; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
         .input-field { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; outline: none; background: var(--input-bg); color: var(--text); }
@@ -42,7 +45,7 @@
         .filter-tag { font-size: 0.8rem; padding: 4px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 15px; cursor: pointer; white-space: nowrap; }
         .filter-tag.active { background: var(--primary); color: white; }
 
-        /* 卡片列表 (V49樣式回歸) */
+        /* 卡片列表 */
         .grid-container { max-width: 900px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
         .card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; transition:0.2s; }
         .card.selecting { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
@@ -86,34 +89,33 @@
         .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; flex-shrink:0; }
         .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } 
         
+        /* 閱讀器佈局 */
         .reader-content-wrapper { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; transition: 0.3s; }
         
-        /* 1. 左側目錄 (Deep Mode) */
+        /* 左側目錄 */
         .toc-section { width: 0; opacity: 0; overflow-y: auto; background: var(--bg); border-right: 1px solid var(--border); transition: 0.3s; padding: 0; font-size: 0.85rem; }
         .deep-mode .toc-section { width: 220px; padding: 15px; opacity: 1; }
         .toc-item { padding: 4px 0; color: var(--meta); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .toc-item:hover { color: var(--primary); font-weight: bold; }
         .toc-h1 { margin-left: 0; font-weight: bold; } .toc-h2 { margin-left: 10px; } .toc-h3 { margin-left: 20px; }
 
-        /* 2. 中間文章 */
+        /* 中間文章 */
         .article-section { flex: 2; overflow-y: auto; padding: 30px; border-right: 1px solid var(--border); display: flex; justify-content: center; background: var(--card-bg); transition: 0.3s;}
         .article-view { font-size: 18px; line-height: 1.7; color: var(--text); max-width: 800px; width: 100%; outline: none; }
         .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
         .inline-note-box { display: block; margin: 10px 0; padding: 8px 12px; background: #fff7ed; border-left: 4px solid #f97316; color: #9a3412; font-size: 0.95rem; border-radius: 4px; }
         .inline-note-box::before { content: '📝 筆記：'; font-weight: bold; margin-right: 5px; color: #ea580c; }
         
-        /* 特殊功能樣式 */
         .mask-mode span[style*="background-color"] { color: transparent !important; background-color: #374151 !important; border-radius: 3px; cursor: help; transition: 0.2s; }
         .mask-mode span[style*="background-color"]:hover { color: inherit !important; background-color: #f3f4f6 !important; }
         .chunk-sep { color: #ef4444; font-weight: bold; margin: 0 2px; font-size: 1.1em; user-select: none; }
         .shadowing-mode .article-view { cursor: pointer; } .shadowing-mode .article-view p:hover { background: rgba(37,99,235,0.05); }
 
-        /* 3. 右側筆記區 */
+        /* 右側筆記區 */
         .notes-section { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 320px; max-width: 450px; transition: 0.3s; }
         .notes-header { padding: 10px 15px; font-weight: bold; color: #b45309; background: #fffbeb; border-bottom: 1px solid #fcd34d; font-size: 0.9rem; display:flex; justify-content:space-between; align-items:center;}
         .notes-input { flex: 1; width: 100%; padding: 15px; border: none; font-size: 16px; font-family: inherit; resize: none; outline: none; background: #fffbeb; color: #451a03; line-height: 1.6; }
         
-        /* 🎓 Deep Mode: Cornell */
         .cornell-container { display: none; flex: 1; flex-direction: column; height: 100%; }
         .deep-mode .cornell-container { display: flex; }
         .cornell-box { display: flex; flex-direction: column; border-bottom: 1px solid #fcd34d; }
@@ -121,7 +123,6 @@
         .cornell-text { flex: 1; border: none; background: #fffbeb; padding: 10px; font-size: 0.95rem; resize: none; outline: none; font-family: inherit; color: #451a03;}
         .c-cues { height: 25%; } .c-notes { flex: 1; } .c-summary { height: 20%; background: #fff8e1; }
 
-        /* 🔤 English Mode: Card Stream */
         .english-container { display: none; flex: 1; flex-direction: column; height: 100%; overflow: hidden; background: #f9fafb; }
         .ai-tools-bar { padding: 8px; display: flex; gap: 5px; background: #fff; border-bottom: 1px solid #e5e7eb; overflow-x: auto; flex-shrink: 0;}
         .ai-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 12px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; color: #374151; white-space: nowrap; display:flex; align-items:center; gap:4px;}
@@ -323,6 +324,7 @@
             const saved = localStorage.getItem('lite_pocket_v56_data'); // Key v56
             if (saved) { items = JSON.parse(saved); } 
             else {
+                // Compatible with old versions
                 const old = localStorage.getItem('lite_pocket_v55_data') || localStorage.getItem('lite_pocket_v53_data') || localStorage.getItem('lite_pocket_v49_data');
                 if(old) items = JSON.parse(old);
             }
@@ -384,7 +386,7 @@
             else if (mode === 'english') { english.style.display = 'flex'; engTools.style.display = 'flex'; stdFooter.style.display = 'none'; engFooter.style.display = 'grid'; renderVocabCards(); }
         }
 
-        /* --- Universal Input Logic --- */
+        /* --- Universal Input Logic (V49 Enhanced) --- */
         async function confirmAdd() {
             const urlInput = document.getElementById('newUrl').value.trim();
             const titleInput = document.getElementById('newTitle').value.trim();
@@ -394,10 +396,16 @@
             const isUrl = urlInput.startsWith('http');
 
             if (!isUrl) {
-                createItem({ url: '#note-' + Date.now(), title: title || urlInput, tags: [...tags, '筆記'], domain: '📝 Note', content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p><p>請在此貼上 Kobo 劃線、PDF 摘要，或是直接開始寫作。</p></div><br>`, date: new Date().toLocaleDateString() });
+                // Book/Note Mode
+                createItem({
+                    url: '#note-' + Date.now(), title: title || urlInput, tags: [...tags, '筆記'], domain: '📝 Note',
+                    content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p><p>請在此貼上 Kobo 劃線、PDF 摘要，或是直接開始寫作。</p></div><br>`,
+                    date: new Date().toLocaleDateString()
+                });
                 clearInput(); return;
             }
 
+            // Web Mode
             const domain = new URL(urlInput).hostname.replace('www.','');
             const newItem = createItem({ url: urlInput, title: title, tags: tags, domain: domain, content: null, date: new Date().toLocaleDateString() });
             clearInput();
@@ -409,23 +417,35 @@
                 let reader = new Readability(doc); 
                 let article = reader.parse(); 
                 const idx = items.findIndex(i => i.id === newItem.id);
-                if(idx > -1 && article) {
+                if(idx > -1) {
                     items[idx].date = dInfo.date; 
-                    const header = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">🔗 來源：${domain} | 📅 ${dInfo.date}</p>`;
-                    items[idx].content = header + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
-                    items[idx].title = article.title || items[idx].title; 
-                    save(); render(); 
+                    if(article) {
+                        const header = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">🔗 來源：${domain} | 📅 ${dInfo.date}</p>`;
+                        items[idx].content = header + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
+                        items[idx].title = article.title || items[idx].title; 
+                        save(); render(); 
+                    }
                 } 
             }
         }
 
         async function detectTitle(url) {
-            const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return;
+            const titleInput = document.getElementById('newTitle');
+            if(titleInput.value.trim() !== '') return;
             updateTitleBar('loading'); titleInput.placeholder = '偵測中...';
             try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`); const d = await res.json();
-                if(d.contents) { const m = d.contents.match(/<title>(.*?)<\/title>/i); if(m && m[1]) { titleInput.value = new DOMParser().parseFromString(m[1], 'text/html').body.textContent; updateTitleBar('success'); } else { throw new Error(); } }
-            } catch(e) { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); }
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                const d = await res.json();
+                if(d.contents) {
+                    const m = d.contents.match(/<title>(.*?)<\/title>/i);
+                    if(m && m[1]) {
+                        titleInput.value = new DOMParser().parseFromString(m[1], 'text/html').body.textContent;
+                        updateTitleBar('success');
+                    } else { throw new Error(); }
+                }
+            } catch(e) {
+                titleInput.placeholder = '請手動輸入'; updateTitleBar('error');
+            }
         }
 
         function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
@@ -440,7 +460,8 @@
                 document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, 'yellow');
                 let context = ""; const node = sel.anchorNode;
                 if(node && node.parentElement) { context = node.parentElement.innerText.trim(); if(context.length > 200) context = "..." + text + "..."; }
-                currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context }); renderVocabCards();
+                currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context });
+                renderVocabCards();
             }
             document.getElementById('floatingMenu').style.display = 'none';
         }
@@ -520,7 +541,7 @@
             } catch (e) { document.getElementById('userNotes').value = item.notes || ''; currentVocabCards = []; switchMode('lite'); }
         }
 
-        /* List Functions */
+        /* --- V49 List Features Restored! --- */
         function renameItem(id) { const item = items.find(i => i.id === id); const newTitle = prompt("修改標題 (可加 #標籤)：", item.title + (item.tags ? ' #'+item.tags.join(' #') : '')); if (newTitle) { const {title, tags} = extractTags(newTitle); item.title = title; item.tags = tags; save(); render(); } }
         function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s;save();render();}}
         function filterByTag(tag) { currentFilterTag = currentFilterTag === tag ? null : tag; render(); }
@@ -542,9 +563,12 @@
         function captureReader(){ const el=document.getElementById('readerWrapper'); document.getElementById('loadingMask').style.display='flex'; html2canvas(el,{scale:2}).then(c=>{ document.getElementById('loadingMask').style.display='none'; const l=document.createElement('a'); l.download=`Snap_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }); }
         
         function save(){localStorage.setItem('lite_pocket_v56_data',JSON.stringify(items));}
+        
+        /* 🌟 Render Logic (V49 Full Version) */
         function render() { 
             renderTagsBar();
-            const container = document.getElementById('container'); container.innerHTML = ''; 
+            const container = document.getElementById('container'); 
+            container.innerHTML = ''; 
             const searchVal = document.getElementById('searchInput').value.toLowerCase();
             const filtered = items.filter(i => {
                 const matchTab = i.status === currentTab;
@@ -552,7 +576,9 @@
                 const matchSearch = !searchVal || i.title.toLowerCase().includes(searchVal);
                 return matchTab && matchTag && matchSearch;
             });
+
             if(filtered.length===0) container.innerHTML='<div style="text-align:center;color:#999;margin-top:20px">無項目</div>'; 
+            
             filtered.forEach(item => { 
                 const favicon = item.domain==='📝 Note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; 
                 const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"';
@@ -561,11 +587,28 @@
                 const checkDisplay = isSelectMode ? 'block' : 'none'; 
                 const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`; 
                 const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card'; 
+                
                 const div = document.createElement('div'); div.className = activeCard; 
-                div.innerHTML = `<div class="card-header" onclick="${clickAction}"><div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div><div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain} <span class="date-badge">${item.date}</span> ${tagsHtml}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button><button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button></div>`; 
+                div.innerHTML = `
+                    <div class="card-header" onclick="${clickAction}">
+                        <div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div>
+                        <div style="flex:1">
+                            <div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain} <span class="date-badge">${item.date}</span> ${tagsHtml}</div>
+                            <div class="card-title">${item.title}</div>
+                            <span ${noteClass}>📝 筆記</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button>
+                        <button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button>
+                        <button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>
+                        ${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}
+                        <button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button>
+                    </div>`; 
                 container.appendChild(div); 
             }); 
         }
+
         function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, status: 'inbox', content: data.content, notes: '', date: new Date().toLocaleDateString() }; items.unshift(item); save(); render(); }
         async function fetchWithFallbacks(url) { try{ const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`); const d=await res.json(); return d.contents; }catch(e){return null;} }
         function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id);save();render();}}
