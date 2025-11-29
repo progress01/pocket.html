@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V60：介面重整版</title>
+    <title>Lite-Pocket V62：全功能回歸版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* --- 基礎樣式 --- */
         :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --card-bg: #ffffff;
             --border: #e5e7eb; --meta: #6b7280; --input-bg: #ffffff;
             --tag-bg: #e0f2fe; --tag-text: #0284c7; }
@@ -18,51 +19,56 @@
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 80px 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* --- 頂部導航 (左上角工具區) --- */
+        /* --- 導航列 (左上角工具箱) --- */
         .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 55px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        
-        /* 左側：工具箱與標題 */
         .nav-left { display: flex; align-items: center; gap: 10px; }
         .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
-        .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; }
-        .tool-btn:hover { background: var(--tag-bg); color: var(--tag-text); border-color: var(--tag-text); }
+        
+        /* 工具箱按鈕 */
+        .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: 0.2s; }
+        .tool-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* 右側：分頁切換 */
         .nav-menu { display: flex; gap: 5px; background: var(--bg); padding: 3px; border-radius: 8px; }
         .nav-item { cursor: pointer; color: var(--meta); font-size: 0.85rem; padding: 4px 12px; border-radius: 6px; font-weight: 500; transition: 0.2s; }
         .nav-item.active { background: var(--card-bg); color: var(--primary); font-weight:bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .theme-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0 5px; }
         
-        /* 工具選單 (下拉式) */
-        .tool-menu { position: absolute; top: 60px; left: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 160px; z-index: 200; overflow: hidden; }
-        .tool-item { padding: 12px 15px; cursor: pointer; font-size: 0.9rem; color: var(--text); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        /* 工具下拉選單 */
+        .tool-menu { position: absolute; top: 60px; left: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 180px; z-index: 200; overflow: hidden; animation: fadeIn 0.2s; }
+        .tool-item { padding: 12px 15px; cursor: pointer; font-size: 0.9rem; color: var(--text); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); transition: 0.2s; }
         .tool-item:last-child { border-bottom: none; }
         .tool-item:hover { background: var(--bg); color: var(--primary); }
-        .tool-item.danger { color: #ef4444; }
+        .tool-item.danger { color: #ef4444; font-weight: bold; }
+        .tool-item.danger:hover { background: #fee2e2; color: #dc2626; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 
         .main-scroller { height: 100%; overflow-y: auto; padding-bottom: 80px; }
 
-        /* 加入面板 */
+        /* --- 加入面板 --- */
         .add-panel { max-width: 900px; margin: 15px auto; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
         .input-field { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; outline: none; background: var(--input-bg); color: var(--text); }
         .btn-paste { background: #4b5563; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; white-space: nowrap;}
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; }
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; transition: 0.2s;}
+        .btn-confirm:active { transform: scale(0.98); }
+        
         #titleStatus { height: 3px; background: var(--border); width: 100%; border-radius: 2px; overflow: hidden; margin-top: -5px; }
         #titleBar { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s, background 0.3s; }
 
+        /* --- 搜尋與篩選 --- */
         .search-row { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 10px; }
         .search-input { flex:1; padding: 8px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); outline:none; font-size: 0.9rem; }
-        .filter-bar { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 5px; overflow-x: auto; display:none;}
+        .filter-bar { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 5px; overflow-x: auto; }
         .filter-tag { font-size: 0.8rem; padding: 4px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 15px; cursor: pointer; white-space: nowrap; }
         .filter-tag.active { background: var(--primary); color: white; }
 
-        /* 卡片列表 */
+        /* --- 卡片列表 --- */
         .grid-container { max-width: 900px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
         .card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; transition:0.2s; }
         .card.selecting { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
         .card-header { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
         .card-meta { font-size: 0.75rem; color: var(--meta); display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; }
-        .site-icon { font-size: 1.1rem; margin-right: 2px; line-height: 1; }
+        .site-icon { font-size: 1.2rem; margin-right: 2px; line-height: 1; }
         .tag-badge { font-size: 0.7rem; background: var(--tag-bg); color: var(--tag-text); padding: 1px 6px; border-radius: 4px; cursor: pointer; }
         .date-badge { font-size: 0.7rem; background: var(--bg); color: var(--meta); padding: 1px 6px; border-radius: 4px; margin-left: auto; }
         .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -72,22 +78,24 @@
         .btn-text:hover { background: var(--bg); color: var(--primary); }
         .btn-read { color: var(--primary); font-weight: 600; }
 
-        /* 底部工具列 (簡化版) */
+        /* --- 底部工具列 (簡潔版) --- */
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); height: 60px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); z-index: 90; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); }
         .bottom-btn { background: none; border: none; font-size: 0.85rem; display: flex; align-items: center; color: var(--meta); gap: 6px; cursor: pointer; font-weight: 500; padding: 8px 15px; border-radius: 20px; }
-        .bottom-btn.primary { background: var(--tag-bg); color: var(--tag-text); }
-        .bottom-btn.select-mode { color: #8b5cf6; } 
-        
-        /* 閱讀器 & 其他模組 CSS 保持 V57 標準 */
+        .bottom-btn.select-mode { color: #8b5cf6; border: 1px solid #ddd; } 
+        .bottom-btn.export-urls { color: #059669; font-weight: bold; }
+
+        /* --- 閱讀器 Modal --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--card-bg); z-index: 2000; display: none; flex-direction: column; }
         .modal-header { height: 55px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: var(--card-bg); flex-shrink: 0; }
         .modal-title-input { font-weight: bold; font-size: 1.1rem; border: none; outline: none; flex: 1; text-align: center; background: transparent; color: var(--text); margin: 0 10px; }
         .btn-close { font-size: 0.9rem; cursor: pointer; padding: 8px 12px; color: var(--meta); background: var(--bg); border-radius: 6px; display: flex; align-items: center; gap: 4px;}
         .btn-save { font-weight: bold; color: white; background: var(--primary); padding: 6px 15px; border-radius: 20px; border: none; font-size: 0.9rem; cursor: pointer;}
+
         .mode-switch-group { display: flex; background: #e5e7eb; border-radius: 12px; padding: 2px; }
         .mode-btn { border: none; background: none; font-size: 0.8rem; padding: 4px 10px; cursor: pointer; border-radius: 10px; color: #666; transition: 0.2s; white-space: nowrap; }
         .mode-btn.active { background: white; color: var(--primary); font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .mode-btn.active[data-mode="english"] { color: #dc2626; } 
+
         .modal-toolbar { display: flex; gap: 8px; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; align-items: center; flex-shrink: 0;}
         .tool-sep { width: 1px; height: 20px; background: #ccc; margin: 0 5px; flex-shrink: 0; }
         .editor-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: var(--meta); cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink:0; white-space: nowrap;}
@@ -96,12 +104,14 @@
         .audio-btn { background: none; border: none; color: white; padding: 5px 10px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; white-space: nowrap;}
         .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; flex-shrink:0; }
         .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } 
+        
         .reader-content-wrapper { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; transition: 0.3s; }
         .toc-section { width: 0; opacity: 0; overflow-y: auto; background: var(--bg); border-right: 1px solid var(--border); transition: 0.3s; padding: 0; font-size: 0.85rem; }
         .deep-mode .toc-section { width: 220px; padding: 15px; opacity: 1; }
         .toc-item { padding: 4px 0; color: var(--meta); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .toc-item:hover { color: var(--primary); font-weight: bold; }
         .toc-h1 { margin-left: 0; font-weight: bold; } .toc-h2 { margin-left: 10px; } .toc-h3 { margin-left: 20px; }
+
         .article-section { flex: 2; overflow-y: auto; padding: 30px; border-right: 1px solid var(--border); display: flex; justify-content: center; background: var(--card-bg); transition: 0.3s;}
         .article-view { font-size: 18px; line-height: 1.7; color: var(--text); max-width: 800px; width: 100%; outline: none; }
         .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
@@ -111,20 +121,24 @@
         .mask-mode span[style*="background-color"]:hover { color: inherit !important; background-color: #f3f4f6 !important; }
         .chunk-sep { color: #ef4444; font-weight: bold; margin: 0 2px; font-size: 1.1em; user-select: none; }
         .shadowing-mode .article-view { cursor: pointer; } .shadowing-mode .article-view p:hover { background: rgba(37,99,235,0.05); }
+
         .notes-section { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 320px; max-width: 450px; transition: 0.3s; }
         .notes-header { padding: 10px 15px; font-weight: bold; color: #b45309; background: #fffbeb; border-bottom: 1px solid #fcd34d; font-size: 0.9rem; display:flex; justify-content:space-between; align-items:center;}
         .notes-input { flex: 1; width: 100%; padding: 15px; border: none; font-size: 16px; font-family: inherit; resize: none; outline: none; background: #fffbeb; color: #451a03; line-height: 1.6; }
+        
         .cornell-container { display: none; flex: 1; flex-direction: column; height: 100%; }
         .deep-mode .cornell-container { display: flex; }
         .cornell-box { display: flex; flex-direction: column; border-bottom: 1px solid #fcd34d; }
         .cornell-label { font-size: 0.75rem; color: #b45309; background: #fff7ed; padding: 4px 10px; font-weight: bold; }
         .cornell-text { flex: 1; border: none; background: #fffbeb; padding: 10px; font-size: 0.95rem; resize: none; outline: none; font-family: inherit; color: #451a03;}
         .c-cues { height: 25%; } .c-notes { flex: 1; } .c-summary { height: 20%; background: #fff8e1; }
+
         .english-container { display: none; flex: 1; flex-direction: column; height: 100%; overflow: hidden; background: #f9fafb; }
         .ai-tools-bar { padding: 8px; display: flex; gap: 5px; background: #fff; border-bottom: 1px solid #e5e7eb; overflow-x: auto; flex-shrink: 0;}
         .ai-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 12px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; color: #374151; white-space: nowrap; display:flex; align-items:center; gap:4px;}
         .ai-btn:hover { background: #e5e7eb; }
         .ai-btn.copy-success { background: #dcfce7; color: #166534; border-color: #86efac; }
+        
         .cards-stream { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         .vocab-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s; }
         .vocab-card:hover { border-color: #2563eb; }
@@ -135,19 +149,24 @@
         .vc-context:focus { background: white; border-color: #93c5fd; }
         .vc-def { font-size: 0.9rem; border: none; outline: none; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px; width: 100%; background: transparent; }
         .vc-def::placeholder { color: #d1d5db; font-style: italic; }
+        
         .notes-footer { padding: 10px 15px; background: #fffbeb; border-top: 1px solid #fcd34d; display: grid; grid-template-columns: 1fr; gap: 5px; flex-shrink: 0;}
         .btn-share-full { width: 100%; padding: 12px; background: #374151; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; gap: 8px; align-items: center;}
+
+        /* 浮動選單與字典 */
         .floating-menu { position: fixed; z-index: 3000; background: #333; border-radius: 8px; padding: 5px; display: none; gap: 5px; transform: translateX(-50%); box-shadow: 0 4px 15px rgba(0,0,0,0.2); white-space: nowrap; }
         .floating-btn { background: none; border: none; cursor: pointer; width: auto; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.85rem; padding: 0 10px; gap: 4px;}
         .floating-btn:hover { background: rgba(255,255,255,0.2); }
         .float-hl-y { background: #fef08a; color: #333; width: 30px; padding: 0; border-radius: 50%; } 
         .float-hl-g { background: #bbf7d0; color: #333; width: 30px; padding: 0; border-radius: 50%; }
+
         .dict-panel { position: fixed; top: 60px; right: 20px; width: 350px; height: 500px; background: white; border: 1px solid #ccc; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 4000; border-radius: 8px; display: none; flex-direction: column; overflow: hidden; }
         .dict-header { background: #f3f4f6; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
         .dict-select { font-size: 0.8rem; padding: 2px 5px; border-radius: 4px; border: 1px solid #ccc; }
         .dict-body { flex: 1; position: relative; background: #fff; }
         .dict-iframe { width: 100%; height: 100%; border: none; }
         .dict-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; color: #666; display:none;}
+
         @media (max-width: 1024px) { .notes-section { min-width: 280px; } }
         @media (max-width: 768px) {
             .reader-container { flex-direction: column-reverse; }
@@ -159,6 +178,7 @@
             .modal-toolbar { padding: 10px 5px; }
             .mode-switch-group { margin-right: 5px; }
         }
+
         .io-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .io-box { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--border); color: var(--text); }
         .io-textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 0.8rem; resize: none; background: var(--input-bg); color: var(--text); }
@@ -173,7 +193,7 @@
 
     <nav class="navbar">
         <div class="nav-left">
-            <div class="nav-brand">📚 V60</div>
+            <div class="nav-brand">📚 V62</div>
             <button class="tool-btn" onclick="toggleToolMenu()">🔧 工具箱 ▼</button>
             <button class="theme-btn" onclick="toggleTheme()">🌓</button>
         </div>
@@ -204,7 +224,7 @@
 
     <div class="bottom-bar" id="defaultBottomBar">
         <button class="bottom-btn select-mode" onclick="toggleSelectMode()"><span>☑️</span> 選取模式</button>
-        </div>
+    </div>
     <div class="bottom-bar" id="selectBottomBar" style="display:none; background:var(--bg);">
         <button class="bottom-btn" onclick="toggleSelectMode()" style="color:var(--meta);"><span>✕</span> 取消</button>
         <div style="font-weight:bold;color:var(--primary);">已選 <span id="selectCount">0</span> 篇</div>
@@ -225,14 +245,21 @@
         
         <div class="modal-toolbar">
             <div class="toc-toggle-mobile" id="mobileTocBtn" onclick="toggleMobileToc()" style="display:none; cursor:pointer;">📑 目錄</div>
+            
             <div id="eng-tools" style="display:none; gap:5px; align-items:center;">
                 <button class="editor-btn" onclick="toggleMask()" id="btnMask">🙈 遮罩</button>
                 <button class="editor-btn" onclick="toggleShadowing()" id="btnShadow">🗣️ 跟讀</button>
                 <button class="editor-btn" onclick="toggleChunking()" id="btnChunk">✂️ 斷句</button>
                 <div class="tool-sep"></div>
             </div>
+
             <div class="audio-btn-group"><button class="audio-btn" onclick="ttsToggle()" id="ttsPlayBtn">▶ 朗讀</button><button class="audio-btn" onclick="ttsStop()">⏹ 停止</button></div>
+            
             <div class="tool-sep"></div>
+            <button class="editor-btn" onclick="cleanKeepImages()">🖼️ 圖文</button>
+            <button class="editor-btn" onclick="clearStyle()">📝 純文</button>
+            <div class="tool-sep"></div>
+
             <button class="editor-btn" onclick="downloadCurrentHtml()" style="color:#2563eb;font-weight:bold;">📤 匯出講義</button>
             <div class="highlighter hl-yellow" onmousedown="event.preventDefault(); highlight('yellow')"></div>
             <div class="highlighter hl-green" onmousedown="event.preventDefault(); highlight('#bbf7d0')"></div>
@@ -305,10 +332,10 @@
 
         function init() {
             try {
-                const saved = localStorage.getItem('lite_pocket_v60_data'); // V60
+                const saved = localStorage.getItem('lite_pocket_v62_data'); // Key V62
                 if (saved) { items = JSON.parse(saved); } 
                 else {
-                    const oldKeys = ['lite_pocket_v58_data', 'lite_pocket_v57_1_data', 'lite_pocket_v56_data', 'lite_pocket_v49_data'];
+                    const oldKeys = ['lite_pocket_v61_data', 'lite_pocket_v60_data', 'lite_pocket_v58_data', 'lite_pocket_v57_1_data', 'lite_pocket_v56_data'];
                     for(let key of oldKeys) { const old = localStorage.getItem(key); if(old) { try { items = JSON.parse(old); break; } catch(e) {} } }
                 }
                 if (!Array.isArray(items)) items = [];
@@ -329,19 +356,30 @@
             });
         }
 
-        /* V60: Auto Categorization & Tool Menu */
-        function toggleToolMenu() {
-            const menu = document.getElementById('toolMenu');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        /* --- V62: Cleanup Functions (Restored from V39) --- */
+        function cleanKeepImages() {
+            let raw = document.getElementById('articleView').innerHTML;
+            if(!raw || raw.length < 10) return alert('內容太少');
+            let clean = DOMPurify.sanitize(raw, {
+                ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'],
+                ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style'],
+                FORBID_ATTR: ['width','height']
+            });
+            document.getElementById('articleView').innerHTML = clean;
         }
+        function clearStyle() {
+            let txt = document.getElementById('articleView').innerText;
+            document.getElementById('articleView').innerHTML = txt.split('\n').filter(t=>t.trim()).map(t=>`<p>${t}</p>`).join('');
+        }
+
+        function toggleToolMenu() { const menu = document.getElementById('toolMenu'); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; }
 
         async function confirmAdd() {
             const urlInput = document.getElementById('newUrl').value.trim();
             const titleInput = document.getElementById('newTitle').value.trim();
             if (!urlInput && !titleInput) return alert('請輸入網址或標題');
             const { title, tags } = extractTags(titleInput || urlInput || "未命名筆記");
-            
-            // 🌟 V60: 自動標記
+            // V60: Auto Tagging
             if (urlInput.match(/youtube\.com|youtu\.be/i)) tags.push('影音');
             else if (urlInput.match(/\.(jpg|jpeg|png|gif|webp)$/i)) tags.push('圖片');
 
@@ -350,11 +388,9 @@
                 createItem({ url: '#note-' + Date.now(), title: title || urlInput, tags: [...tags, '筆記'], domain: '📝 Note', content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p><p>請在此貼上 Kobo 劃線、PDF 摘要，或是直接開始寫作。</p></div><br>`, date: new Date().toLocaleDateString() });
                 clearInput(); return;
             }
-
             const domain = new URL(urlInput).hostname.replace('www.','');
             const newItem = createItem({ url: urlInput, title: title, tags: tags, domain: domain, content: null, date: new Date().toLocaleDateString() });
             clearInput();
-            
             try {
                 const html = await fetchWithFallbacks(urlInput);
                 const idx = items.findIndex(i => i.id === newItem.id);
@@ -379,7 +415,6 @@
             for (let proxy of proxies) { try { const res = await fetch(proxy.url); if (!res.ok) throw new Error(); let htmlText = proxy.type === 'json' ? (await res.json()).contents : await res.text(); if (htmlText && htmlText.length > 100) return htmlText; } catch (e) {} } return null; 
         }
 
-        /* 🌟 V60: Visual Categories in Render */
         function render() { 
             renderTagsBar(); const container = document.getElementById('container'); container.innerHTML = ''; const searchVal = document.getElementById('searchInput').value.toLowerCase();
             const filtered = items.filter(i => { const matchTab = i.status === currentTab; const matchTag = !currentFilterTag || (i.tags && i.tags.includes(currentFilterTag)); const matchSearch = !searchVal || i.title.toLowerCase().includes(searchVal); return matchTab && matchTag && matchSearch; });
@@ -399,14 +434,13 @@
             }); 
         }
 
-        /* Helpers */
         async function detectTitle(url) { const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return; updateTitleBar('loading'); titleInput.placeholder = '偵測中...'; try { const html = await fetchWithFallbacks(url); if(html) { const m = html.match(/<title>(.*?)<\/title>/i); if(m && m[1]) { titleInput.value = new DOMParser().parseFromString(m[1], 'text/html').body.textContent; updateTitleBar('success'); } else { throw new Error(); } } } catch(e) { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); } }
         function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
         function updateTitleBar(state) { const bar=document.getElementById('titleBar'); if(state==='loading'){bar.style.width='50%';bar.style.background='#f59e0b';}else if(state==='success'){bar.style.width='100%';bar.style.background='#10b981';}else if(state==='error'){bar.style.width='100%';bar.style.background='#ef4444';}else{bar.style.width='0%';} }
         function smartPaste(){navigator.clipboard.readText().then(t=>{if(t){document.getElementById('newUrl').value=t; checkUrlInput();}});} 
         function clearInput(){document.getElementById('newUrl').value='';document.getElementById('newTitle').value='';updateTitleBar('reset');} 
         function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, status: 'inbox', content: data.content, notes: '', date: new Date().toLocaleDateString() }; items.unshift(item); save(); render(); return item; }
-        function save(){localStorage.setItem('lite_pocket_v60_data',JSON.stringify(items));}
+        function save(){localStorage.setItem('lite_pocket_v62_data',JSON.stringify(items));}
         
         function addVocabCard() { event.preventDefault(); const sel = window.getSelection(); const text = sel.toString().trim(); if (text) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, 'yellow'); let context = ""; const node = sel.anchorNode; if(node && node.parentElement) { context = node.parentElement.innerText.trim(); if(context.length > 200) context = "..." + text + "..."; } currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context }); renderVocabCards(); } document.getElementById('floatingMenu').style.display = 'none'; }
         function renderVocabCards() { const list = document.getElementById('vocabCardsList'); if(currentVocabCards.length === 0) { list.innerHTML = `<div style="text-align:center;color:#9ca3af;margin-top:20px;font-size:0.9rem;">選取單字 -> 浮動選單 [📝]<br>自動建立卡片</div>`; return; } list.innerHTML = ''; currentVocabCards.forEach((card, index) => { const el = document.createElement('div'); el.className = 'vocab-card'; el.innerHTML = `<div class="vc-header"><input type="text" class="vc-term" value="${card.term}" oninput="updateCard(${index}, 'term', this.value)"><span class="vc-del" onclick="removeCard(${index})">×</span></div><input type="text" class="vc-def" placeholder="定義 / 筆記..." value="${card.def}" oninput="updateCard(${index}, 'def', this.value)"><textarea class="vc-context" rows="2" oninput="updateCard(${index}, 'context', this.value)">${card.context}</textarea>`; list.appendChild(el); }); }
