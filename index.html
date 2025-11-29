@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V57.1：緊急修復版</title>
+    <title>Lite-Pocket V60：介面重整版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -16,25 +16,37 @@
             --tag-bg: #0c4a6e; --tag-text: #7dd3fc; }
 
         * { box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 100px 0; height: 100vh; overflow: hidden; transition: 0.3s; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 80px 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* 導航 */
-        .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; display:flex; align-items:center; gap:10px;}
-        .nav-menu { display: flex; gap: 5px; }
-        .nav-item { cursor: pointer; color: var(--meta); font-size: 0.85rem; padding: 4px 12px; border-radius: 4px; font-weight: 500; transition: 0.2s; }
-        .nav-item.active { background: var(--bg); color: var(--primary); font-weight:bold; }
-        .theme-btn { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 5px; display: flex; align-items: center; gap: 4px; color: var(--text); }
+        /* --- 頂部導航 (左上角工具區) --- */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 55px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         
+        /* 左側：工具箱與標題 */
+        .nav-left { display: flex; align-items: center; gap: 10px; }
+        .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
+        .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 500; }
+        .tool-btn:hover { background: var(--tag-bg); color: var(--tag-text); border-color: var(--tag-text); }
+
+        /* 右側：分頁切換 */
+        .nav-menu { display: flex; gap: 5px; background: var(--bg); padding: 3px; border-radius: 8px; }
+        .nav-item { cursor: pointer; color: var(--meta); font-size: 0.85rem; padding: 4px 12px; border-radius: 6px; font-weight: 500; transition: 0.2s; }
+        .nav-item.active { background: var(--card-bg); color: var(--primary); font-weight:bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        /* 工具選單 (下拉式) */
+        .tool-menu { position: absolute; top: 60px; left: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 160px; z-index: 200; overflow: hidden; }
+        .tool-item { padding: 12px 15px; cursor: pointer; font-size: 0.9rem; color: var(--text); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .tool-item:last-child { border-bottom: none; }
+        .tool-item:hover { background: var(--bg); color: var(--primary); }
+        .tool-item.danger { color: #ef4444; }
+
         .main-scroller { height: 100%; overflow-y: auto; padding-bottom: 80px; }
-        
+
         /* 加入面板 */
         .add-panel { max-width: 900px; margin: 15px auto; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
         .input-field { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; outline: none; background: var(--input-bg); color: var(--text); }
         .btn-paste { background: #4b5563; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; white-space: nowrap;}
         .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; }
-        
         #titleStatus { height: 3px; background: var(--border); width: 100%; border-radius: 2px; overflow: hidden; margin-top: -5px; }
         #titleBar { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s, background 0.3s; }
 
@@ -50,7 +62,7 @@
         .card.selecting { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
         .card-header { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
         .card-meta { font-size: 0.75rem; color: var(--meta); display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; }
-        .site-icon { width: 14px; height: 14px; border-radius: 2px; }
+        .site-icon { font-size: 1.1rem; margin-right: 2px; line-height: 1; }
         .tag-badge { font-size: 0.7rem; background: var(--tag-bg); color: var(--tag-text); padding: 1px 6px; border-radius: 4px; cursor: pointer; }
         .date-badge { font-size: 0.7rem; background: var(--bg); color: var(--meta); padding: 1px 6px; border-radius: 4px; margin-left: auto; }
         .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -60,25 +72,22 @@
         .btn-text:hover { background: var(--bg); color: var(--primary); }
         .btn-read { color: var(--primary); font-weight: 600; }
 
-        /* 底部工具列 */
-        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); height: 70px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); z-index: 90; padding: 0 10px; padding-bottom: env(safe-area-inset-bottom); }
-        .bottom-btn { background: none; border: none; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; color: var(--meta); gap: 4px; cursor: pointer; min-width: 55px; padding: 0 5px;}
-        .bottom-btn span { font-size: 1.4rem; }
+        /* 底部工具列 (簡化版) */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); height: 60px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); z-index: 90; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); }
+        .bottom-btn { background: none; border: none; font-size: 0.85rem; display: flex; align-items: center; color: var(--meta); gap: 6px; cursor: pointer; font-weight: 500; padding: 8px 15px; border-radius: 20px; }
+        .bottom-btn.primary { background: var(--tag-bg); color: var(--tag-text); }
         .bottom-btn.select-mode { color: #8b5cf6; } 
-        .bottom-btn.export-urls { color: #059669; font-weight: bold; }
-
-        /* 閱讀器 Modal */
+        
+        /* 閱讀器 & 其他模組 CSS 保持 V57 標準 */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--card-bg); z-index: 2000; display: none; flex-direction: column; }
         .modal-header { height: 55px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: var(--card-bg); flex-shrink: 0; }
         .modal-title-input { font-weight: bold; font-size: 1.1rem; border: none; outline: none; flex: 1; text-align: center; background: transparent; color: var(--text); margin: 0 10px; }
         .btn-close { font-size: 0.9rem; cursor: pointer; padding: 8px 12px; color: var(--meta); background: var(--bg); border-radius: 6px; display: flex; align-items: center; gap: 4px;}
         .btn-save { font-weight: bold; color: white; background: var(--primary); padding: 6px 15px; border-radius: 20px; border: none; font-size: 0.9rem; cursor: pointer;}
-
         .mode-switch-group { display: flex; background: #e5e7eb; border-radius: 12px; padding: 2px; }
         .mode-btn { border: none; background: none; font-size: 0.8rem; padding: 4px 10px; cursor: pointer; border-radius: 10px; color: #666; transition: 0.2s; white-space: nowrap; }
         .mode-btn.active { background: white; color: var(--primary); font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .mode-btn.active[data-mode="english"] { color: #dc2626; } 
-
         .modal-toolbar { display: flex; gap: 8px; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; align-items: center; flex-shrink: 0;}
         .tool-sep { width: 1px; height: 20px; background: #ccc; margin: 0 5px; flex-shrink: 0; }
         .editor-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: var(--meta); cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink:0; white-space: nowrap;}
@@ -87,43 +96,35 @@
         .audio-btn { background: none; border: none; color: white; padding: 5px 10px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; white-space: nowrap;}
         .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; flex-shrink:0; }
         .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } 
-        
-        /* 閱讀器佈局 */
         .reader-content-wrapper { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; transition: 0.3s; }
         .toc-section { width: 0; opacity: 0; overflow-y: auto; background: var(--bg); border-right: 1px solid var(--border); transition: 0.3s; padding: 0; font-size: 0.85rem; }
         .deep-mode .toc-section { width: 220px; padding: 15px; opacity: 1; }
         .toc-item { padding: 4px 0; color: var(--meta); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .toc-item:hover { color: var(--primary); font-weight: bold; }
         .toc-h1 { margin-left: 0; font-weight: bold; } .toc-h2 { margin-left: 10px; } .toc-h3 { margin-left: 20px; }
-
         .article-section { flex: 2; overflow-y: auto; padding: 30px; border-right: 1px solid var(--border); display: flex; justify-content: center; background: var(--card-bg); transition: 0.3s;}
         .article-view { font-size: 18px; line-height: 1.7; color: var(--text); max-width: 800px; width: 100%; outline: none; }
         .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
         .inline-note-box { display: block; margin: 10px 0; padding: 8px 12px; background: #fff7ed; border-left: 4px solid #f97316; color: #9a3412; font-size: 0.95rem; border-radius: 4px; }
         .inline-note-box::before { content: '📝 筆記：'; font-weight: bold; margin-right: 5px; color: #ea580c; }
-        
         .mask-mode span[style*="background-color"] { color: transparent !important; background-color: #374151 !important; border-radius: 3px; cursor: help; transition: 0.2s; }
         .mask-mode span[style*="background-color"]:hover { color: inherit !important; background-color: #f3f4f6 !important; }
         .chunk-sep { color: #ef4444; font-weight: bold; margin: 0 2px; font-size: 1.1em; user-select: none; }
         .shadowing-mode .article-view { cursor: pointer; } .shadowing-mode .article-view p:hover { background: rgba(37,99,235,0.05); }
-
         .notes-section { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 320px; max-width: 450px; transition: 0.3s; }
         .notes-header { padding: 10px 15px; font-weight: bold; color: #b45309; background: #fffbeb; border-bottom: 1px solid #fcd34d; font-size: 0.9rem; display:flex; justify-content:space-between; align-items:center;}
         .notes-input { flex: 1; width: 100%; padding: 15px; border: none; font-size: 16px; font-family: inherit; resize: none; outline: none; background: #fffbeb; color: #451a03; line-height: 1.6; }
-        
         .cornell-container { display: none; flex: 1; flex-direction: column; height: 100%; }
         .deep-mode .cornell-container { display: flex; }
         .cornell-box { display: flex; flex-direction: column; border-bottom: 1px solid #fcd34d; }
         .cornell-label { font-size: 0.75rem; color: #b45309; background: #fff7ed; padding: 4px 10px; font-weight: bold; }
         .cornell-text { flex: 1; border: none; background: #fffbeb; padding: 10px; font-size: 0.95rem; resize: none; outline: none; font-family: inherit; color: #451a03;}
         .c-cues { height: 25%; } .c-notes { flex: 1; } .c-summary { height: 20%; background: #fff8e1; }
-
         .english-container { display: none; flex: 1; flex-direction: column; height: 100%; overflow: hidden; background: #f9fafb; }
         .ai-tools-bar { padding: 8px; display: flex; gap: 5px; background: #fff; border-bottom: 1px solid #e5e7eb; overflow-x: auto; flex-shrink: 0;}
         .ai-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 12px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; color: #374151; white-space: nowrap; display:flex; align-items:center; gap:4px;}
         .ai-btn:hover { background: #e5e7eb; }
         .ai-btn.copy-success { background: #dcfce7; color: #166534; border-color: #86efac; }
-        
         .cards-stream { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
         .vocab-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s; }
         .vocab-card:hover { border-color: #2563eb; }
@@ -134,25 +135,19 @@
         .vc-context:focus { background: white; border-color: #93c5fd; }
         .vc-def { font-size: 0.9rem; border: none; outline: none; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px; width: 100%; background: transparent; }
         .vc-def::placeholder { color: #d1d5db; font-style: italic; }
-        
         .notes-footer { padding: 10px 15px; background: #fffbeb; border-top: 1px solid #fcd34d; display: grid; grid-template-columns: 1fr; gap: 5px; flex-shrink: 0;}
         .btn-share-full { width: 100%; padding: 12px; background: #374151; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; gap: 8px; align-items: center;}
-
-        /* 浮動選單與字典 */
         .floating-menu { position: fixed; z-index: 3000; background: #333; border-radius: 8px; padding: 5px; display: none; gap: 5px; transform: translateX(-50%); box-shadow: 0 4px 15px rgba(0,0,0,0.2); white-space: nowrap; }
         .floating-btn { background: none; border: none; cursor: pointer; width: auto; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.85rem; padding: 0 10px; gap: 4px;}
         .floating-btn:hover { background: rgba(255,255,255,0.2); }
         .float-hl-y { background: #fef08a; color: #333; width: 30px; padding: 0; border-radius: 50%; } 
         .float-hl-g { background: #bbf7d0; color: #333; width: 30px; padding: 0; border-radius: 50%; }
-
         .dict-panel { position: fixed; top: 60px; right: 20px; width: 350px; height: 500px; background: white; border: 1px solid #ccc; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 4000; border-radius: 8px; display: none; flex-direction: column; overflow: hidden; }
         .dict-header { background: #f3f4f6; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
         .dict-select { font-size: 0.8rem; padding: 2px 5px; border-radius: 4px; border: 1px solid #ccc; }
         .dict-body { flex: 1; position: relative; background: #fff; }
         .dict-iframe { width: 100%; height: 100%; border: none; }
         .dict-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; color: #666; display:none;}
-
-        /* RWD 優化 */
         @media (max-width: 1024px) { .notes-section { min-width: 280px; } }
         @media (max-width: 768px) {
             .reader-container { flex-direction: column-reverse; }
@@ -164,7 +159,6 @@
             .modal-toolbar { padding: 10px 5px; }
             .mode-switch-group { margin-right: 5px; }
         }
-
         .io-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .io-box { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--border); color: var(--text); }
         .io-textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 0.8rem; resize: none; background: var(--input-bg); color: var(--text); }
@@ -178,10 +172,20 @@
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">📚 V57.1 <button class="theme-btn" onclick="toggleTheme()">🌓 模式</button></div>
+        <div class="nav-left">
+            <div class="nav-brand">📚 V60</div>
+            <button class="tool-btn" onclick="toggleToolMenu()">🔧 工具箱 ▼</button>
+            <button class="theme-btn" onclick="toggleTheme()">🌓</button>
+        </div>
         <div class="nav-menu">
             <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">待讀</div>
             <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">已讀</div>
+        </div>
+        <div class="tool-menu" id="toolMenu">
+            <div class="tool-item" onclick="openExportModal()">📋 備份資料 (JSON)</div>
+            <div class="tool-item" onclick="openImportModal()">📥 還原資料</div>
+            <div class="tool-item" onclick="exportListToHtml()">📄 匯出清單 (HTML)</div>
+            <div class="tool-item danger" onclick="clearReadItems()">🧹 清除已讀</div>
         </div>
     </nav>
 
@@ -199,16 +203,12 @@
     </div>
 
     <div class="bottom-bar" id="defaultBottomBar">
-        <button class="bottom-btn select-mode" onclick="toggleSelectMode()"><span>☑️</span>選取</button>
-        <button class="bottom-btn" onclick="openImportModal()"><span>📥</span>還原</button>
-        <button class="bottom-btn" onclick="exportListToHtml()"><span>📄</span>清單</button>
-        <button class="bottom-btn" onclick="openExportModal()"><span>📋</span>備份</button>
-        <button class="bottom-btn clear" onclick="clearReadItems()"><span>🧹</span>清理</button>
-    </div>
+        <button class="bottom-btn select-mode" onclick="toggleSelectMode()"><span>☑️</span> 選取模式</button>
+        </div>
     <div class="bottom-bar" id="selectBottomBar" style="display:none; background:var(--bg);">
-        <button class="bottom-btn" onclick="toggleSelectMode()" style="color:var(--meta);"><span>✕</span>取消</button>
+        <button class="bottom-btn" onclick="toggleSelectMode()" style="color:var(--meta);"><span>✕</span> 取消</button>
         <div style="font-weight:bold;color:var(--primary);">已選 <span id="selectCount">0</span> 篇</div>
-        <button class="bottom-btn export-urls" onclick="exportSelectedUrls()"><span>🔗</span>匯出網址</button>
+        <button class="bottom-btn export-urls" onclick="exportSelectedUrls()"><span>🔗</span> 匯出網址</button>
     </div>
 
     <div class="modal-overlay" id="readerModal">
@@ -225,14 +225,12 @@
         
         <div class="modal-toolbar">
             <div class="toc-toggle-mobile" id="mobileTocBtn" onclick="toggleMobileToc()" style="display:none; cursor:pointer;">📑 目錄</div>
-            
             <div id="eng-tools" style="display:none; gap:5px; align-items:center;">
                 <button class="editor-btn" onclick="toggleMask()" id="btnMask">🙈 遮罩</button>
                 <button class="editor-btn" onclick="toggleShadowing()" id="btnShadow">🗣️ 跟讀</button>
                 <button class="editor-btn" onclick="toggleChunking()" id="btnChunk">✂️ 斷句</button>
                 <div class="tool-sep"></div>
             </div>
-
             <div class="audio-btn-group"><button class="audio-btn" onclick="ttsToggle()" id="ttsPlayBtn">▶ 朗讀</button><button class="audio-btn" onclick="ttsStop()">⏹ 停止</button></div>
             <div class="tool-sep"></div>
             <button class="editor-btn" onclick="downloadCurrentHtml()" style="color:#2563eb;font-weight:bold;">📤 匯出講義</button>
@@ -248,13 +246,11 @@
             </div>
             <div class="notes-section">
                 <textarea id="userNotes" class="notes-input" placeholder="Lite模式：隨手筆記..."></textarea>
-                
                 <div class="cornell-container">
                     <div class="cornell-box c-cues"><div class="cornell-label">🔑 關鍵字</div><textarea id="noteCues" class="cornell-text"></textarea></div>
                     <div class="cornell-box c-notes"><div class="cornell-label">📝 主要筆記</div><textarea id="noteMain" class="cornell-text"></textarea></div>
                     <div class="cornell-box c-summary"><div class="cornell-label">💡 總結</div><textarea id="noteSummary" class="cornell-text"></textarea></div>
                 </div>
-
                 <div class="english-container">
                     <div class="ai-tools-bar">
                         <span style="font-size:0.7rem;color:#888;align-self:center;">🤖 AI:</span>
@@ -265,7 +261,6 @@
                     <div class="cards-stream" id="vocabCardsList"></div>
                     <textarea id="engQa" style="display:none;"></textarea>
                 </div>
-
                 <div class="notes-footer" id="noteFooter">
                     <button class="btn-share-full" onclick="shareDraft()">📤 分享草稿</button>
                 </div>
@@ -306,285 +301,127 @@
     <div class="loading-mask" id="loadingMask">📸 正在截圖...</div>
 
     <script>
-        let items = [];
-        let currentTab = 'inbox';
-        let currentId = null;
-        let isSelectMode = false;
-        let selectedIds = new Set();
-        let currentMode = 'lite';
-        let currentWord = '';
-        let isShadowing = false;
-        let isChunking = false;
-        let currentVocabCards = []; 
-        let currentFilterTag = null;
+        let items = []; let currentTab = 'inbox'; let currentId = null; let isSelectMode = false; let selectedIds = new Set(); let currentMode = 'lite'; let currentWord = ''; let isShadowing = false; let isChunking = false; let currentVocabCards = []; let currentFilterTag = null;
 
         function init() {
-            const saved = localStorage.getItem('lite_pocket_v57_1_data'); // Updated key
-            if (saved) { items = JSON.parse(saved); } 
-            else {
-                // Compatible with old versions
-                const old = localStorage.getItem('lite_pocket_v57_data') || localStorage.getItem('lite_pocket_v56_data') || localStorage.getItem('lite_pocket_v55_data') || localStorage.getItem('lite_pocket_v53_data');
-                if(old) items = JSON.parse(old);
-            }
+            try {
+                const saved = localStorage.getItem('lite_pocket_v60_data'); // V60
+                if (saved) { items = JSON.parse(saved); } 
+                else {
+                    const oldKeys = ['lite_pocket_v58_data', 'lite_pocket_v57_1_data', 'lite_pocket_v56_data', 'lite_pocket_v49_data'];
+                    for(let key of oldKeys) { const old = localStorage.getItem(key); if(old) { try { items = JSON.parse(old); break; } catch(e) {} } }
+                }
+                if (!Array.isArray(items)) items = [];
+            } catch (e) { console.error(e); items = []; }
             if (localStorage.getItem('lite_pocket_theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
-            
             const params = new URLSearchParams(window.location.search);
-            if (params.get('add')) {
-                document.getElementById('newUrl').value = params.get('add');
-                if (params.get('title')) { document.getElementById('newTitle').value = params.get('title'); updateTitleBar('success'); } 
-                else detectTitle(params.get('add'));
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            if (params.get('add')) { document.getElementById('newUrl').value = params.get('add'); if (params.get('title')) { document.getElementById('newTitle').value = params.get('title'); updateTitleBar('success'); } else detectTitle(params.get('add')); window.history.replaceState({}, document.title, window.location.pathname); }
             render();
-            
             document.addEventListener('mousedown', function(e) { 
                 if (!e.target.closest('.floating-menu')) document.getElementById('floatingMenu').style.display = 'none'; 
-                if (window.innerWidth < 768) {
-                    if (!e.target.closest('.toc-section') && !e.target.closest('#mobileTocBtn')) document.getElementById('readerWrapper').classList.remove('toc-open');
-                }
+                if (!e.target.closest('.tool-menu') && !e.target.closest('.tool-btn')) document.getElementById('toolMenu').style.display = 'none';
+                if (window.innerWidth < 768) { if (!e.target.closest('.toc-section') && !e.target.closest('#mobileTocBtn')) document.getElementById('readerWrapper').classList.remove('toc-open'); } 
             });
             document.getElementById('articleView').addEventListener('click', function(e) {
                 if (currentMode !== 'english') return;
-                if (isChunking) {
-                    const sel = window.getSelection();
-                    if (sel.isCollapsed && e.target.closest('p')) {
-                        const range = sel.getRangeAt(0); const span = document.createElement('span'); span.className = 'chunk-sep'; span.innerText = '|'; range.insertNode(span); range.collapse(false);
-                    }
-                }
-                if (isShadowing) {
-                    let target = e.target;
-                    if (target.tagName !== 'P' && target.tagName !== 'DIV') target = target.closest('p') || target.closest('div');
-                    if (target) { const text = target.innerText.replace(/\|/g, ''); speakText(text); }
-                }
+                if (isChunking) { const sel = window.getSelection(); if (sel.isCollapsed && e.target.closest('p')) { const range = sel.getRangeAt(0); const span = document.createElement('span'); span.className = 'chunk-sep'; span.innerText = '|'; range.insertNode(span); range.collapse(false); } }
+                if (isShadowing) { let target = e.target; if (target.tagName !== 'P' && target.tagName !== 'DIV') target = target.closest('p') || target.closest('div'); if (target) { const text = target.innerText.replace(/\|/g, ''); speakText(text); } }
             });
         }
 
-        /* --- Mode Switching --- */
-        function switchMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`mode-${mode}`).classList.add('active');
-
-            const wrapper = document.getElementById('readerWrapper');
-            const userNotes = document.getElementById('userNotes');
-            const cornell = document.querySelector('.cornell-container');
-            const english = document.querySelector('.english-container');
-            const engTools = document.getElementById('eng-tools');
-            const toc = document.getElementById('tocSection');
-            const stdFooter = document.getElementById('noteFooter');
-            const engFooter = document.getElementById('engFooter');
-            const mobileTocBtn = document.getElementById('mobileTocBtn');
-
-            userNotes.style.display = 'none'; cornell.style.display = 'none'; english.style.display = 'none'; engTools.style.display = 'none';
-            wrapper.classList.remove('deep-mode'); toc.style.width = '0'; toc.style.opacity = '0';
-            stdFooter.style.display = 'block'; engFooter.style.display = 'none'; mobileTocBtn.style.display = 'none';
-
-            if (mode === 'lite') { userNotes.style.display = 'block'; }
-            else if (mode === 'deep') { cornell.style.display = 'flex'; wrapper.classList.add('deep-mode'); generateTOC(); if(window.innerWidth < 768) mobileTocBtn.style.display = 'block'; }
-            else if (mode === 'english') { english.style.display = 'flex'; engTools.style.display = 'flex'; stdFooter.style.display = 'none'; engFooter.style.display = 'grid'; renderVocabCards(); }
+        /* V60: Auto Categorization & Tool Menu */
+        function toggleToolMenu() {
+            const menu = document.getElementById('toolMenu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        /* --- Universal Input Logic --- */
         async function confirmAdd() {
             const urlInput = document.getElementById('newUrl').value.trim();
             const titleInput = document.getElementById('newTitle').value.trim();
             if (!urlInput && !titleInput) return alert('請輸入網址或標題');
-
             const { title, tags } = extractTags(titleInput || urlInput || "未命名筆記");
-            const isUrl = urlInput.startsWith('http');
+            
+            // 🌟 V60: 自動標記
+            if (urlInput.match(/youtube\.com|youtu\.be/i)) tags.push('影音');
+            else if (urlInput.match(/\.(jpg|jpeg|png|gif|webp)$/i)) tags.push('圖片');
 
+            const isUrl = urlInput.startsWith('http');
             if (!isUrl) {
-                // Book/Note Mode - Manual Entry
-                const item = createItem({
-                    url: '#note-' + Date.now(), title: title || urlInput, tags: [...tags, '筆記'], domain: '📝 Note',
-                    content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p><p>請在此貼上 Kobo 劃線、PDF 摘要，或是直接開始寫作。</p></div><br>`,
-                    date: new Date().toLocaleDateString()
-                });
-                clearInput(); 
-                return;
+                createItem({ url: '#note-' + Date.now(), title: title || urlInput, tags: [...tags, '筆記'], domain: '📝 Note', content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p><p>請在此貼上 Kobo 劃線、PDF 摘要，或是直接開始寫作。</p></div><br>`, date: new Date().toLocaleDateString() });
+                clearInput(); return;
             }
 
-            // Web Mode
             const domain = new URL(urlInput).hostname.replace('www.','');
             const newItem = createItem({ url: urlInput, title: title, tags: tags, domain: domain, content: null, date: new Date().toLocaleDateString() });
             clearInput();
             
             try {
                 const html = await fetchWithFallbacks(urlInput);
-                if(html) { 
-                    let doc = new DOMParser().parseFromString(html, 'text/html'); 
-                    const dInfo = extractDateInfo(doc, html);
-                    let reader = new Readability(doc); 
-                    let article = reader.parse(); 
-                    
-                    if(newItem && newItem.id) {
-                        const idx = items.findIndex(i => i.id === newItem.id);
-                        if(idx > -1 && article) {
+                const idx = items.findIndex(i => i.id === newItem.id);
+                if(idx > -1) {
+                    if(html) { 
+                        let doc = new DOMParser().parseFromString(html, 'text/html'); const dInfo = extractDateInfo(doc, html); let reader = new Readability(doc); let article = reader.parse(); 
+                        if(article) {
                             items[idx].date = dInfo.date; 
                             const header = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">🔗 來源：${domain} | 📅 ${dInfo.date}</p>`;
                             items[idx].content = header + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
                             items[idx].title = article.title || items[idx].title; 
-                            save(); render(); 
-                        }
-                    }
+                        } else { items[idx].content = `<div style="padding:20px;text-align:center;">⚠️ 無法解析本文，請點擊「原文連結」查看。</div>`; }
+                    } else { items[idx].content = `<div style="padding:20px;text-align:center;">⚠️ 抓取失敗，請點擊「原文連結」查看，或手動貼上內容。</div>`; }
+                    save(); render(); 
                 }
-            } catch(e) { console.error("Fetch Error", e); }
+            } catch(e) { console.error(e); }
         }
 
-        async function detectTitle(url) {
-            const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return;
-            updateTitleBar('loading'); titleInput.placeholder = '偵測中...';
-            try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`); const d = await res.json();
-                if(d.contents) { const m = d.contents.match(/<title>(.*?)<\/title>/i); if(m && m[1]) { titleInput.value = new DOMParser().parseFromString(m[1], 'text/html').body.textContent; updateTitleBar('success'); } else { throw new Error(); } }
-            } catch(e) { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); }
+        async function fetchWithFallbacks(url) {
+            const ts = `&t=${Date.now()}`; const encodedUrl = encodeURIComponent(url);
+            const proxies = [{ url: `https://api.allorigins.win/get?url=${encodedUrl}${ts}`, type: 'json' }, { url: `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`, type: 'text' }, { url: `https://corsproxy.io/?${encodedUrl}`, type: 'text' }];
+            for (let proxy of proxies) { try { const res = await fetch(proxy.url); if (!res.ok) throw new Error(); let htmlText = proxy.type === 'json' ? (await res.json()).contents : await res.text(); if (htmlText && htmlText.length > 100) return htmlText; } catch (e) {} } return null; 
         }
 
+        /* 🌟 V60: Visual Categories in Render */
+        function render() { 
+            renderTagsBar(); const container = document.getElementById('container'); container.innerHTML = ''; const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = items.filter(i => { const matchTab = i.status === currentTab; const matchTag = !currentFilterTag || (i.tags && i.tags.includes(currentFilterTag)); const matchSearch = !searchVal || i.title.toLowerCase().includes(searchVal); return matchTab && matchTag && matchSearch; });
+            if(filtered.length===0) container.innerHTML='<div style="text-align:center;color:#999;margin-top:20px">無項目</div>'; 
+            filtered.forEach(item => { 
+                let typeIcon = '📄'; 
+                if (item.tags && item.tags.includes('影音')) typeIcon = '🎬';
+                else if (item.tags && item.tags.includes('圖片')) typeIcon = '🖼️';
+                else if (item.domain === '📝 Note') typeIcon = '📝';
+
+                const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"'; 
+                let tagsHtml = ''; if(item.tags && item.tags.length > 0) tagsHtml = item.tags.map(t => `<span class="tag-badge">#${t}</span>`).join(' '); 
+                const isChecked = selectedIds.has(item.id) ? 'checked' : ''; const checkDisplay = isSelectMode ? 'block' : 'none'; const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`; const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card'; 
+                
+                const div = document.createElement('div'); div.className = activeCard; 
+                div.innerHTML = `<div class="card-header" onclick="${clickAction}"><div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div><div style="flex:1"><div class="card-meta"><span class="site-icon">${typeIcon}</span> ${item.domain} <span class="date-badge">${item.date}</span> ${tagsHtml}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button><button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️ 刪除</button></div>`; container.appendChild(div); 
+            }); 
+        }
+
+        /* Helpers */
+        async function detectTitle(url) { const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return; updateTitleBar('loading'); titleInput.placeholder = '偵測中...'; try { const html = await fetchWithFallbacks(url); if(html) { const m = html.match(/<title>(.*?)<\/title>/i); if(m && m[1]) { titleInput.value = new DOMParser().parseFromString(m[1], 'text/html').body.textContent; updateTitleBar('success'); } else { throw new Error(); } } } catch(e) { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); } }
         function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
         function updateTitleBar(state) { const bar=document.getElementById('titleBar'); if(state==='loading'){bar.style.width='50%';bar.style.background='#f59e0b';}else if(state==='success'){bar.style.width='100%';bar.style.background='#10b981';}else if(state==='error'){bar.style.width='100%';bar.style.background='#ef4444';}else{bar.style.width='0%';} }
         function smartPaste(){navigator.clipboard.readText().then(t=>{if(t){document.getElementById('newUrl').value=t; checkUrlInput();}});} 
         function clearInput(){document.getElementById('newUrl').value='';document.getElementById('newTitle').value='';updateTitleBar('reset');} 
-
-        /* Vocab Cards */
-        function addVocabCard() {
-            event.preventDefault(); const sel = window.getSelection(); const text = sel.toString().trim();
-            if (text) {
-                document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, 'yellow');
-                let context = ""; const node = sel.anchorNode;
-                if(node && node.parentElement) { context = node.parentElement.innerText.trim(); if(context.length > 200) context = "..." + text + "..."; }
-                currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context });
-                renderVocabCards();
-            }
-            document.getElementById('floatingMenu').style.display = 'none';
-        }
-        function renderVocabCards() {
-            const list = document.getElementById('vocabCardsList');
-            if(currentVocabCards.length === 0) { list.innerHTML = `<div style="text-align:center;color:#9ca3af;margin-top:20px;font-size:0.9rem;">選取單字 -> 浮動選單 [📝]<br>自動建立卡片</div>`; return; }
-            list.innerHTML = '';
-            currentVocabCards.forEach((card, index) => {
-                const el = document.createElement('div'); el.className = 'vocab-card';
-                el.innerHTML = `<div class="vc-header"><input type="text" class="vc-term" value="${card.term}" oninput="updateCard(${index}, 'term', this.value)"><span class="vc-del" onclick="removeCard(${index})">×</span></div><input type="text" class="vc-def" placeholder="定義 / 筆記..." value="${card.def}" oninput="updateCard(${index}, 'def', this.value)"><textarea class="vc-context" rows="2" oninput="updateCard(${index}, 'context', this.value)">${card.context}</textarea>`;
-                list.appendChild(el);
-            });
-        }
+        function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, status: 'inbox', content: data.content, notes: '', date: new Date().toLocaleDateString() }; items.unshift(item); save(); render(); return item; }
+        function save(){localStorage.setItem('lite_pocket_v60_data',JSON.stringify(items));}
+        
+        function addVocabCard() { event.preventDefault(); const sel = window.getSelection(); const text = sel.toString().trim(); if (text) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, 'yellow'); let context = ""; const node = sel.anchorNode; if(node && node.parentElement) { context = node.parentElement.innerText.trim(); if(context.length > 200) context = "..." + text + "..."; } currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context }); renderVocabCards(); } document.getElementById('floatingMenu').style.display = 'none'; }
+        function renderVocabCards() { const list = document.getElementById('vocabCardsList'); if(currentVocabCards.length === 0) { list.innerHTML = `<div style="text-align:center;color:#9ca3af;margin-top:20px;font-size:0.9rem;">選取單字 -> 浮動選單 [📝]<br>自動建立卡片</div>`; return; } list.innerHTML = ''; currentVocabCards.forEach((card, index) => { const el = document.createElement('div'); el.className = 'vocab-card'; el.innerHTML = `<div class="vc-header"><input type="text" class="vc-term" value="${card.term}" oninput="updateCard(${index}, 'term', this.value)"><span class="vc-del" onclick="removeCard(${index})">×</span></div><input type="text" class="vc-def" placeholder="定義 / 筆記..." value="${card.def}" oninput="updateCard(${index}, 'def', this.value)"><textarea class="vc-context" rows="2" oninput="updateCard(${index}, 'context', this.value)">${card.context}</textarea>`; list.appendChild(el); }); }
         function updateCard(index, field, value) { currentVocabCards[index][field] = value; }
         function removeCard(index) { currentVocabCards.splice(index, 1); renderVocabCards(); }
-        function copyAiPrompt(type) {
-            const sel = window.getSelection().toString().trim(); if(!sel) return alert('請先選取文章中的文字');
-            let prompt = "";
-            if(type === 'grammar') prompt = `Please analyze the grammatical structure:\n\n"${sel}"`;
-            if(type === 'rewrite') prompt = `Please provide 3 academic rewrite options:\n\n"${sel}"`;
-            if(type === 'explain') prompt = `Please explain the meaning (C1/C2 level):\n\n"${sel}"`;
-            navigator.clipboard.writeText(prompt).then(() => { alert('已複製指令！請貼給 ChatGPT'); });
-        }
-        function exportAnkiCsv() {
-            if(currentVocabCards.length === 0) return alert('沒有卡片可匯出');
-            let csvContent = "data:text/csv;charset=utf-8,";
-            currentVocabCards.forEach(c => { csvContent += `${c.term} [${c.def.replace(/,/g, ' ')}],${c.context.replace(/,/g, ' ').replace(/\n/g, ' ')}\r\n`; });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `Anki_Export_${Date.now()}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        }
-        function shareDraft() {
-            saveReader(); const item = items.find(i => i.id === currentId); let text = `【${item.title}】\n🔗 ${item.url}\n\n`;
-            if (currentMode === 'english') {
-                const qa = document.getElementById('engQa').value; if (qa) text += `[🤖 AI Notes]\n${qa}\n\n`;
-                if (currentVocabCards.length > 0) { text += `[🔤 Vocabulary]\n`; currentVocabCards.forEach(c => { text += `● ${c.term}`; if (c.def) text += ` : ${c.def}`; if (c.context) text += `\n   > "${c.context}"`; text += `\n`; }); } else { text += `(無單字卡)\n`; }
-            } else if (currentMode === 'deep') {
-                const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value;
-                if (main) text += `[📝 Notes]\n${main}\n\n`; if (sum) text += `[💡 Summary]\n${sum}\n`;
-            } else { const notes = document.getElementById('userNotes').value; if (notes) text += `[📝 Notes]\n${notes}\n`; }
-            if (navigator.share) { navigator.share({ title: item.title, text: text, url: item.url }).catch((err) => { if (err.name !== 'AbortError') copyToClipboardFallback(text); }); } else { copyToClipboardFallback(text); }
-        }
+        function copyAiPrompt(type) { const sel = window.getSelection().toString().trim(); if(!sel) return alert('請先選取文章中的文字'); let prompt = ""; if(type === 'grammar') prompt = `Please analyze the grammatical structure:\n\n"${sel}"`; if(type === 'rewrite') prompt = `Please provide 3 academic rewrite options:\n\n"${sel}"`; if(type === 'explain') prompt = `Please explain the meaning (C1/C2 level):\n\n"${sel}"`; navigator.clipboard.writeText(prompt).then(() => { alert('已複製指令！請貼給 ChatGPT'); }); }
+        function exportAnkiCsv() { if(currentVocabCards.length === 0) return alert('沒有卡片可匯出'); let csvContent = "data:text/csv;charset=utf-8,"; currentVocabCards.forEach(c => { csvContent += `${c.term} [${c.def.replace(/,/g, ' ')}],${c.context.replace(/,/g, ' ').replace(/\n/g, ' ')}\r\n`; }); const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `Anki_Export_${Date.now()}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
+        function switchMode(mode) { currentMode = mode; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${mode}`).classList.add('active'); const wrapper = document.getElementById('readerWrapper'); const userNotes = document.getElementById('userNotes'); const cornell = document.querySelector('.cornell-container'); const english = document.querySelector('.english-container'); const engTools = document.getElementById('eng-tools'); const toc = document.getElementById('tocSection'); const stdFooter = document.getElementById('noteFooter'); const engFooter = document.getElementById('engFooter'); const mobileTocBtn = document.getElementById('mobileTocBtn'); userNotes.style.display = 'none'; cornell.style.display = 'none'; english.style.display = 'none'; engTools.style.display = 'none'; wrapper.classList.remove('deep-mode'); toc.style.width = '0'; toc.style.opacity = '0'; stdFooter.style.display = 'block'; engFooter.style.display = 'none'; mobileTocBtn.style.display = 'none'; if (mode === 'lite') { userNotes.style.display = 'block'; } else if (mode === 'deep') { cornell.style.display = 'flex'; wrapper.classList.add('deep-mode'); generateTOC(); if(window.innerWidth < 768) mobileTocBtn.style.display = 'block'; } else if (mode === 'english') { english.style.display = 'flex'; engTools.style.display = 'flex'; stdFooter.style.display = 'none'; engFooter.style.display = 'grid'; renderVocabCards(); } }
+        function saveReader() { if (!currentId) return; const content = document.getElementById('articleView').innerHTML; const title = document.getElementById('readerTitleInput').value; const noteObj = { lite: document.getElementById('userNotes').value, deep: { cue: document.getElementById('noteCues').value, main: document.getElementById('noteMain').value, sum: document.getElementById('noteSummary').value }, eng: { cards: currentVocabCards, qa: document.getElementById('engQa').value }, lastMode: currentMode }; const idx = items.findIndex(i => i.id === currentId); if(idx > -1) { items[idx].content = content; items[idx].notes = JSON.stringify(noteObj); items[idx].title = title; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); } }
+        function openReader(id, isError=false) { currentId = id; const item = items.find(i => i.id === id); document.getElementById('readerModal').style.display = 'flex'; document.getElementById('readerTitleInput').value = item.title; const view = document.getElementById('articleView'); view.innerHTML = item.content || (isError ? '⚠️ 內容抓取失敗' : '無內容'); try { const noteObj = JSON.parse(item.notes); document.getElementById('userNotes').value = noteObj.lite || ''; document.getElementById('noteCues').value = noteObj.deep?.cue || ''; document.getElementById('noteMain').value = noteObj.deep?.main || ''; document.getElementById('noteSummary').value = noteObj.deep?.sum || ''; currentVocabCards = noteObj.eng?.cards || []; document.getElementById('engQa').value = noteObj.eng?.qa || ''; switchMode(noteObj.lastMode || 'lite'); } catch (e) { document.getElementById('userNotes').value = item.notes || ''; currentVocabCards = []; switchMode('lite'); } }
+        function shareDraft() { saveReader(); const item = items.find(i => i.id === currentId); let text = `【${item.title}】\n🔗 ${item.url}\n\n`; if (currentMode === 'english') { const qa = document.getElementById('engQa').value; if (qa) text += `[🤖 AI Notes]\n${qa}\n\n`; if (currentVocabCards.length > 0) { text += `[🔤 Vocabulary]\n`; currentVocabCards.forEach(c => { text += `● ${c.term}`; if (c.def) text += ` : ${c.def}`; if (c.context) text += `\n   > "${c.context}"`; text += `\n`; }); } else { text += `(無單字卡)\n`; } } else if (currentMode === 'deep') { const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value; if (main) text += `[📝 Notes]\n${main}\n\n`; if (sum) text += `[💡 Summary]\n${sum}\n`; } else { const notes = document.getElementById('userNotes').value; if (notes) text += `[📝 Notes]\n${notes}\n`; } if (navigator.share) { navigator.share({ title: item.title, text: text, url: item.url }).catch((err) => { if (err.name !== 'AbortError') copyToClipboardFallback(text); }); } else { copyToClipboardFallback(text); } }
         function copyToClipboardFallback(text) { navigator.clipboard.writeText(text).then(() => { alert('📋 內容已複製！'); }).catch(() => { alert('❌ 複製失敗'); }); }
-
-        /* HTML Export */
-        function downloadCurrentHtml() {
-            const item = items.find(i => i.id === currentId); const title = document.getElementById('readerTitleInput').value || '筆記'; const content = document.getElementById('articleView').innerHTML; let notesHtml = '', customStyle = '';
-            if (currentMode === 'english') {
-                let cardsHtml = currentVocabCards.length > 0 ? currentVocabCards.map(c => `<div class="vocab-card"><div class="term">${c.term}</div><div class="def">${c.def || ''}</div><div class="context">"${c.context}"</div></div>`).join('') : '<div style="color:#999;">無單字卡</div>';
-                notesHtml = `<h3 style="border-bottom:2px solid #ddd;padding-bottom:5px;">🔤 單字積累</h3><div class="cards-grid">${cardsHtml}</div>`;
-                customStyle = `.cards-grid{display:grid;grid-template-columns:1fr;gap:10px}.vocab-card{background:white;border:1px solid #eee;border-left:4px solid #2563eb;padding:10px;border-radius:4px}.term{font-weight:bold;font-size:1.1em}.def{color:#666;font-size:0.9em}.context{font-size:0.85em;color:#888;font-style:italic;background:#f9f9f9;padding:4px;}`;
-            } else if (currentMode === 'deep') {
-                const cue = document.getElementById('noteCues').value; const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value;
-                notesHtml = `<div class="c-sec"><div class="c-lbl">🔑 Cues</div><pre>${cue}</pre></div><div class="c-sec"><div class="c-lbl">📝 Notes</div><pre>${main}</pre></div><div class="c-sec sum"><div class="c-lbl">💡 Summary</div><pre>${sum}</pre></div>`;
-                customStyle = `.c-sec{margin-bottom:15px;border:1px solid #fcd34d;border-radius:6px}.c-lbl{background:#fffbeb;color:#b45309;padding:5px 10px;font-weight:bold;border-bottom:1px solid #fcd34d}pre{padding:10px;white-space:pre-wrap;margin:0;font-family:inherit}.sum{border-color:#f59e0b;box-shadow:0 2px 5px rgba(245,158,11,0.1)}`;
-            } else { notesHtml = `<h3>📝 筆記</h3><pre style="white-space:pre-wrap;background:#fffbeb;padding:15px;border-radius:8px;">${document.getElementById('userNotes').value}</pre>`; }
-            const exportTemplate = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:system-ui,-apple-system,sans-serif;background:#f3f4f6;padding:20px;line-height:1.6}.container{max-width:1000px;margin:0 auto;background:white;border-radius:12px;display:flex;flex-wrap:wrap}.header{width:100%;background:#333;color:white;padding:20px}.article-col{flex:2;padding:30px;min-width:300px;border-right:1px solid #eee}.notes-col{flex:1;padding:20px;background:#f9fafb;min-width:280px}img{max-width:100%}${customStyle}@media(max-width:768px){.container{flex-direction:column}.article-col{border-right:none;border-bottom:1px solid #eee}}</style></head><body><div class="container"><div class="header"><h1>${title}</h1><p>來源：${item.domain}</p></div><div class="article-col">${content}</div><div class="notes-col">${notesHtml}</div></div></body></html>`;
-            const blob = new Blob([exportTemplate], { type: 'text/html' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${title}_講義.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-        }
-
-        /* Reader State Logic */
-        function saveReader() {
-            if (!currentId) return;
-            const content = document.getElementById('articleView').innerHTML; const title = document.getElementById('readerTitleInput').value;
-            const noteObj = { lite: document.getElementById('userNotes').value, deep: { cue: document.getElementById('noteCues').value, main: document.getElementById('noteMain').value, sum: document.getElementById('noteSummary').value }, eng: { cards: currentVocabCards, qa: document.getElementById('engQa').value }, lastMode: currentMode };
-            const idx = items.findIndex(i => i.id === currentId);
-            if(idx > -1) { items[idx].content = content; items[idx].notes = JSON.stringify(noteObj); items[idx].title = title; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); }
-        }
-        function openReader(id, isError=false) {
-            currentId = id; const item = items.find(i => i.id === id);
-            document.getElementById('readerModal').style.display = 'flex'; document.getElementById('readerTitleInput').value = item.title;
-            const view = document.getElementById('articleView'); view.innerHTML = item.content || (isError ? '⚠️ 內容抓取失敗' : '無內容');
-            try {
-                const noteObj = JSON.parse(item.notes);
-                document.getElementById('userNotes').value = noteObj.lite || ''; document.getElementById('noteCues').value = noteObj.deep?.cue || ''; document.getElementById('noteMain').value = noteObj.deep?.main || ''; document.getElementById('noteSummary').value = noteObj.deep?.sum || '';
-                currentVocabCards = noteObj.eng?.cards || []; document.getElementById('engQa').value = noteObj.eng?.qa || '';
-                switchMode(noteObj.lastMode || 'lite');
-            } catch (e) { document.getElementById('userNotes').value = item.notes || ''; currentVocabCards = []; switchMode('lite'); }
-        }
-
-        /* List Functions */
+        function downloadCurrentHtml() { const item = items.find(i => i.id === currentId); const title = document.getElementById('readerTitleInput').value || '筆記'; const content = document.getElementById('articleView').innerHTML; let notesHtml = '', customStyle = ''; if (currentMode === 'english') { let cardsHtml = currentVocabCards.length > 0 ? currentVocabCards.map(c => `<div class="vocab-card"><div class="term">${c.term}</div><div class="def">${c.def || ''}</div><div class="context">"${c.context}"</div></div>`).join('') : '<div style="color:#999;">無單字卡</div>'; notesHtml = `<h3 style="border-bottom:2px solid #ddd;padding-bottom:5px;">🔤 單字積累</h3><div class="cards-grid">${cardsHtml}</div>`; customStyle = `.cards-grid{display:grid;grid-template-columns:1fr;gap:10px}.vocab-card{background:white;border:1px solid #eee;border-left:4px solid #2563eb;padding:10px;border-radius:4px}.term{font-weight:bold;font-size:1.1em}.def{color:#666;font-size:0.9em}.context{font-size:0.85em;color:#888;font-style:italic;background:#f9f9f9;padding:4px;}`; } else if (currentMode === 'deep') { const cue = document.getElementById('noteCues').value; const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value; notesHtml = `<div class="c-sec"><div class="c-lbl">🔑 Cues</div><pre>${cue}</pre></div><div class="c-sec"><div class="c-lbl">📝 Notes</div><pre>${main}</pre></div><div class="c-sec sum"><div class="c-lbl">💡 Summary</div><pre>${sum}</pre></div>`; customStyle = `.c-sec{margin-bottom:15px;border:1px solid #fcd34d;border-radius:6px}.c-lbl{background:#fffbeb;color:#b45309;padding:5px 10px;font-weight:bold;border-bottom:1px solid #fcd34d}pre{padding:10px;white-space:pre-wrap;margin:0;font-family:inherit}.sum{border-color:#f59e0b;box-shadow:0 2px 5px rgba(245,158,11,0.1)}`; } else { notesHtml = `<h3>📝 筆記</h3><pre style="white-space:pre-wrap;background:#fffbeb;padding:15px;border-radius:8px;">${document.getElementById('userNotes').value}</pre>`; } const exportTemplate = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:system-ui,-apple-system,sans-serif;background:#f3f4f6;padding:20px;line-height:1.6}.container{max-width:1000px;margin:0 auto;background:white;border-radius:12px;display:flex;flex-wrap:wrap}.header{width:100%;background:#333;color:white;padding:20px}.article-col{flex:2;padding:30px;min-width:300px;border-right:1px solid #eee}.notes-col{flex:1;padding:20px;background:#f9fafb;min-width:280px}img{max-width:100%}${customStyle}@media(max-width:768px){.container{flex-direction:column}.article-col{border-right:none;border-bottom:1px solid #eee}}</style></head><body><div class="container"><div class="header"><h1>${title}</h1><p>來源：${item.domain}</p></div><div class="article-col">${content}</div><div class="notes-col">${notesHtml}</div></div></body></html>`; const blob = new Blob([exportTemplate], { type: 'text/html' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${title}_講義.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
         function renameItem(id) { const item = items.find(i => i.id === id); const newTitle = prompt("修改標題 (可加 #標籤)：", item.title + (item.tags ? ' #'+item.tags.join(' #') : '')); if (newTitle) { const {title, tags} = extractTags(newTitle); item.title = title; item.tags = tags; save(); render(); } }
         function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s;save();render();}}
-        function filterByTag(tag) { currentFilterTag = currentFilterTag === tag ? null : tag; render(); }
-        function renderTagsBar() { const allTags = new Set(); items.forEach(i => { if(i.tags) i.tags.forEach(t => allTags.add(t)); }); const bar = document.getElementById('filterBar'); if (allTags.size === 0) { bar.style.display = 'none'; return; } bar.style.display = 'flex'; bar.innerHTML = ''; allTags.forEach(tag => { const active = currentFilterTag === tag ? 'active' : ''; bar.innerHTML += `<div class="filter-tag ${active}" onclick="filterByTag('${tag}')">#${tag}</div>`; }); }
-
-        function lookupWord() { const sel = window.getSelection(); currentWord = sel.toString().trim(); if (!currentWord) return; document.getElementById('floatingMenu').style.display = 'none'; document.getElementById('dictPanel').style.display = 'flex'; refreshDict(); }
-        function refreshDict() { const source = document.getElementById('dictSource').value; const iframe = document.getElementById('dictFrame'); const fallback = document.getElementById('dictFallback'); fallback.style.display = 'none'; iframe.style.display = 'block'; if (source === 'dictcom') { iframe.style.display = 'none'; fallback.style.display = 'flex'; } else if (source === 'google') { iframe.src = `https://translate.google.com/m?sl=en&tl=zh-TW&q=${encodeURIComponent(currentWord)}`; } else if (source === 'cambridge') { iframe.src = `https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${encodeURIComponent(currentWord)}`; } }
-        function openDictPopup() { const source = document.getElementById('dictSource').value; let url = ''; if (source === 'dictcom') url = `https://www.dictionary.com/browse/${encodeURIComponent(currentWord)}`; else if (source === 'google') url = `https://translate.google.com/?sl=en&tl=zh-TW&text=${encodeURIComponent(currentWord)}`; else url = `https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${encodeURIComponent(currentWord)}`; window.open(url, 'dictPopup', 'width=400,height=600,top=100,left=100'); }
-        function toggleMask() { document.getElementById('readerWrapper').classList.toggle('mask-mode'); document.getElementById('btnMask').classList.toggle('active'); }
-        function toggleShadowing() { isShadowing = !isShadowing; document.getElementById('btnShadow').classList.toggle('active'); if(isShadowing) { document.getElementById('readerWrapper').classList.add('shadowing-mode'); isChunking = false; document.getElementById('btnChunk').classList.remove('active'); } else { document.getElementById('readerWrapper').classList.remove('shadowing-mode'); window.speechSynthesis.cancel(); } }
-        function toggleChunking() { isChunking = !isChunking; document.getElementById('btnChunk').classList.toggle('active'); if(isChunking) { isShadowing = false; document.getElementById('btnShadow').classList.remove('active'); document.getElementById('readerWrapper').classList.remove('shadowing-mode'); } }
-        function speakText(text) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'en-US'; u.rate = 0.9; window.speechSynthesis.speak(u); }
-        function checkSelection() { const selection = window.getSelection(); const menu = document.getElementById('floatingMenu'); if (selection.toString().length > 0 && document.getElementById('articleView').contains(selection.anchorNode)) { const range = selection.getRangeAt(0); const rect = range.getBoundingClientRect(); menu.style.display = 'flex'; menu.style.top = (rect.top - 45) + 'px'; menu.style.left = (rect.left + rect.width / 2) + 'px'; } else { menu.style.display = 'none'; } }
-        function applyHighlight(color) { event.preventDefault(); document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, color); document.getElementById('floatingMenu').style.display = 'none'; }
-        function generateTOC() { const article = document.getElementById('articleView'); const tocDiv = document.getElementById('tocSection'); const headings = article.querySelectorAll('h1, h2, h3'); if (headings.length === 0) { tocDiv.innerHTML = '<div style="padding:10px;color:#999;">無標題</div>'; return; } let html = '<div style="font-weight:bold;margin-bottom:10px;color:var(--primary);">📑 目錄</div>'; headings.forEach((h, index) => { if (!h.id) h.id = 'h-' + index; const cls = h.tagName === 'H1' ? 'toc-h1' : (h.tagName === 'H2' ? 'toc-h2' : 'toc-h3'); html += `<div class="toc-item ${cls}" onclick="document.getElementById('${h.id}').scrollIntoView({behavior:'smooth'})">${h.innerText}</div>`; }); tocDiv.innerHTML = html; }
-        function toggleMobileToc() { document.getElementById('readerWrapper').classList.toggle('toc-open'); }
-        function ttsToggle() { window.speechSynthesis.speaking ? window.speechSynthesis.cancel() : speakText(document.getElementById('articleView').innerText); }
-        function ttsStop() { window.speechSynthesis.cancel(); }
-        function captureReader(){ const el=document.getElementById('readerWrapper'); document.getElementById('loadingMask').style.display='flex'; html2canvas(el,{scale:2}).then(c=>{ document.getElementById('loadingMask').style.display='none'; const l=document.createElement('a'); l.download=`Snap_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }); }
-        
-        function save(){localStorage.setItem('lite_pocket_v57_1_data',JSON.stringify(items));}
-        function render() { 
-            renderTagsBar();
-            const container = document.getElementById('container'); container.innerHTML = ''; 
-            const searchVal = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = items.filter(i => {
-                const matchTab = i.status === currentTab;
-                const matchTag = !currentFilterTag || (i.tags && i.tags.includes(currentFilterTag));
-                const matchSearch = !searchVal || i.title.toLowerCase().includes(searchVal);
-                return matchTab && matchTag && matchSearch;
-            });
-            if(filtered.length===0) container.innerHTML='<div style="text-align:center;color:#999;margin-top:20px">無項目</div>'; 
-            filtered.forEach(item => { 
-                const favicon = item.domain==='📝 Note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; 
-                const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"';
-                let tagsHtml = ''; if(item.tags && item.tags.length > 0) tagsHtml = item.tags.map(t => `<span class="tag-badge">#${t}</span>`).join(' ');
-                const isChecked = selectedIds.has(item.id) ? 'checked' : ''; 
-                const checkDisplay = isSelectMode ? 'block' : 'none'; 
-                const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`; 
-                const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card'; 
-                const div = document.createElement('div'); div.className = activeCard; 
-                div.innerHTML = `<div class="card-header" onclick="${clickAction}"><div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div><div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain} <span class="date-badge">${item.date}</span> ${tagsHtml}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button><button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️ 刪除</button></div>`; 
-                container.appendChild(div); 
-            }); 
-        }
-        function createItem(data) { 
-            const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, status: 'inbox', content: data.content, notes: '', date: new Date().toLocaleDateString() }; 
-            items.unshift(item); save(); render(); 
-            return item; // 修正回傳值
-        }
-        async function fetchWithFallbacks(url) { try{ const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`); const d=await res.json(); return d.contents; }catch(e){return null;} }
         function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id);save();render();}}
         function switchTab(t){currentTab=t;document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active');render();}
         function openExportModal(){document.getElementById('exportModal').style.display='flex';document.getElementById('exportArea').value=JSON.stringify(items);}
@@ -601,6 +438,8 @@
         function toggleTheme(){ if(document.body.getAttribute('data-theme')==='dark'){document.body.removeAttribute('data-theme');localStorage.setItem('lite_pocket_theme','light');}else{document.body.setAttribute('data-theme','dark');localStorage.setItem('lite_pocket_theme','dark');}} 
         function clearReadItems() { if(confirm('清除所有「已讀」？')) { items = items.filter(i=>i.status==='inbox'); save(); render(); } }
         function extractDateInfo(doc, html) { let metaDate = null; const selectors = ['meta[property="article:published_time"]', 'meta[property="article:modified_time"]', 'meta[property="og:updated_time"]', 'meta[name="pubdate"]', 'meta[name="date"]', 'meta[name="lastmod"]', 'time[datetime]']; for (let sel of selectors) { const el = doc.querySelector(sel); if (el) { const val = el.getAttribute('content') || el.getAttribute('datetime'); if (val) { try { const d = new Date(val); if(!isNaN(d.getTime())) metaDate = d; } catch(e){} } } if (metaDate) break; } if (metaDate) return { date: metaDate.toLocaleDateString(), type: 'single' }; return { date: new Date().toLocaleDateString(), type: 'single' }; }
+        function renderTagsBar() { const allTags = new Set(); items.forEach(i => { if(i.tags) i.tags.forEach(t => allTags.add(t)); }); const bar = document.getElementById('filterBar'); if (allTags.size === 0) { bar.style.display = 'none'; return; } bar.style.display = 'flex'; bar.innerHTML = ''; allTags.forEach(tag => { const active = currentFilterTag === tag ? 'active' : ''; bar.innerHTML += `<div class="filter-tag ${active}" onclick="filterByTag('${tag}')">#${tag}</div>`; }); }
+        function filterByTag(tag) { currentFilterTag = currentFilterTag === tag ? null : tag; render(); }
 
         init();
     </script>
