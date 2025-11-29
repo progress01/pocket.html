@@ -3,26 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V44：原生分享版</title>
+    <title>Lite-Pocket V49：雙重筆記版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root {
-            --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --card-bg: #ffffff;
+        :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --card-bg: #ffffff;
             --border: #e5e7eb; --meta: #6b7280; --input-bg: #ffffff;
-            --tag-bg: #e0f2fe; --tag-text: #0284c7;
-        }
-        [data-theme="dark"] {
-            --primary: #60a5fa; --bg: #111827; --text: #f3f4f6; --card-bg: #1f2937;
+            --tag-bg: #e0f2fe; --tag-text: #0284c7; }
+        [data-theme="dark"] { --primary: #60a5fa; --bg: #111827; --text: #f3f4f6; --card-bg: #1f2937;
             --border: #374151; --meta: #9ca3af; --input-bg: #374151;
-            --tag-bg: #0c4a6e; --tag-text: #7dd3fc;
-        }
+            --tag-bg: #0c4a6e; --tag-text: #7dd3fc; }
 
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 100px 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* 導航 */
         .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; display:flex; align-items:center; gap:10px;}
         .nav-menu { display: flex; gap: 5px; }
@@ -31,8 +26,6 @@
         .theme-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; }
 
         .main-scroller { height: 100%; overflow-y: auto; padding-bottom: 80px; }
-
-        /* 新增面板 */
         .add-panel { max-width: 900px; margin: 15px auto; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
         .input-row { display: flex; gap: 8px; align-items: center; }
         .input-field { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; outline: none; background: var(--input-bg); color: var(--text); }
@@ -43,39 +36,32 @@
         .status-indicator.loading { background: #f59e0b; animation: pulse 1s infinite; }
         .status-indicator.success { background: #10b981; }
         @keyframes pulse { 0% {opacity: 0.5;} 50% {opacity: 1;} 100% {opacity: 0.5;} }
-
-        /* 篩選標籤列 */
+        
         .filter-bar { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 5px; overflow-x: auto; display:none;}
         .filter-tag { font-size: 0.8rem; padding: 4px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 15px; cursor: pointer; white-space: nowrap; }
         .filter-tag.active { background: var(--primary); color: white; }
 
-        /* 列表 */
         .grid-container { max-width: 900px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
         .card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; transition:0.2s; }
         .card.selecting { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
-        
         .card-header { display: flex; align-items: flex-start; gap: 10px; }
         .card-meta { font-size: 0.75rem; color: var(--meta); display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; }
         .site-icon { width: 14px; height: 14px; border-radius: 2px; }
-        
         .tag-badge { font-size: 0.7rem; background: var(--tag-bg); color: var(--tag-text); padding: 1px 6px; border-radius: 4px; cursor: pointer; }
         .date-badge { font-size: 0.7rem; background: var(--bg); color: var(--meta); padding: 1px 6px; border-radius: 4px; margin-left: auto; }
-        
         .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
         .card-note-badge { font-size: 0.7rem; background: #fffbeb; color: #b45309; padding: 2px 6px; border-radius: 4px; border: 1px solid #fcd34d; display: inline-block; margin-top: 5px;}
-        
         .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px solid var(--border); }
         .btn-text { background: none; border: none; font-size: 0.85rem; color: var(--meta); cursor: pointer; padding: 5px 8px; border-radius: 4px; display:flex; align-items:center; gap:4px; }
         .btn-text:hover { background: var(--bg); color: var(--primary); }
         .btn-read { color: var(--primary); font-weight: 600; }
 
-        /* 底部工具列 */
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); height: 70px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); z-index: 90; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); }
         .bottom-btn { background: none; border: none; font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; color: var(--meta); gap: 4px; cursor: pointer; min-width: 60px;}
         .bottom-btn span { font-size: 1.5rem; }
         .bottom-btn.select-mode { color: #8b5cf6; } 
+        .bottom-btn.export-urls { color: #059669; font-weight: bold; }
 
-        /* 閱讀器 Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--card-bg); z-index: 2000; display: none; flex-direction: column; }
         .modal-header { height: 55px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: var(--card-bg); flex-shrink: 0; }
         .modal-title-input { font-weight: bold; font-size: 1.1rem; border: none; outline: none; flex: 1; text-align: center; background: transparent; color: var(--text); }
@@ -85,34 +71,44 @@
         .modal-toolbar { display: flex; gap: 8px; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; align-items: center; flex-shrink: 0;}
         .tool-sep { width: 1px; height: 20px; background: #ccc; margin: 0 5px; }
         .editor-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: var(--meta); cursor: pointer; display: flex; align-items: center; gap: 5px;}
-        
-        /* 朗讀按鈕 */
         .audio-btn-group { display: flex; align-items: center; background: #f97316; color: white; border-radius: 20px; padding: 0 5px; }
         .audio-btn { background: none; border: none; color: white; padding: 5px 10px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; gap: 5px; }
-        
-        /* 雙欄結構 */
-        .reader-container { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; }
-        .article-section { flex: 2; overflow-y: auto; padding: 30px; border-right: 1px solid var(--border); display: flex; justify-content: center; background: var(--card-bg);}
+        .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; }
+        .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } .hl-pink { background: #fbcfe8; }
+        .layout-toggle-btn { font-size: 1.2rem; cursor: pointer; color: var(--meta); padding: 5px; margin-left: 10px; border: 1px solid var(--border); border-radius: 4px;}
+        .layout-toggle-btn:hover { background: var(--bg); color: var(--primary); }
+
+        /* 🌟 V49: 雙重筆記浮動選單 */
+        .floating-menu { position: fixed; z-index: 3000; background: #333; border-radius: 8px; padding: 5px; display: none; gap: 5px; transform: translateX(-50%); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .floating-btn { background: none; border: none; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
+        .floating-btn:hover { background: rgba(255,255,255,0.2); }
+        .float-hl-y { background: #fef08a; color: #333; } .float-hl-g { background: #bbf7d0; color: #333; } .float-hl-p { background: #fbcfe8; color: #333; }
+
+        .reader-container { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; transition: 0.3s; }
+        .reader-container.focus-mode .notes-section { display: none; }
+        .reader-container.focus-mode .article-section { flex: 1; border-right: none; }
+
+        .article-section { flex: 2; overflow-y: auto; padding: 30px; border-right: 1px solid var(--border); display: flex; justify-content: center; background: var(--card-bg); transition: 0.3s;}
         .article-view { font-size: 18px; line-height: 1.7; color: var(--text); max-width: 800px; width: 100%; outline: none; }
         .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
         .article-view h1 { font-size: 1.6rem; line-height: 1.3; margin-bottom: 1rem; }
         
-        .notes-section { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 300px; max-width: 450px; }
-        .notes-header { padding: 10px 15px; font-weight: bold; color: #b45309; background: #fffbeb; border-bottom: 1px solid #fcd34d; font-size: 0.9rem; }
+        .inline-note-box { display: block; margin: 10px 0; padding: 8px 12px; background: #fff7ed; border-left: 4px solid #f97316; color: #9a3412; font-size: 0.95rem; outline: none; border-radius: 4px; }
+        .inline-note-box::before { content: '📝 筆記：'; font-weight: bold; margin-right: 5px; color: #ea580c; }
+
+        .notes-section { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 300px; max-width: 450px; transition: 0.3s; }
+        .notes-header { padding: 10px 15px; font-weight: bold; color: #b45309; background: #fffbeb; border-bottom: 1px solid #fcd34d; font-size: 0.9rem; display:flex; justify-content:space-between; align-items:center;}
+        .notes-tools-btn { background: white; border: 1px solid #fcd34d; font-size: 0.8rem; color: #b45309; cursor: pointer; padding: 2px 8px; border-radius: 4px; margin-left: 5px;}
         .notes-input { flex: 1; width: 100%; padding: 15px; border: none; font-size: 16px; font-family: inherit; resize: none; outline: none; background: #fffbeb; color: #451a03; line-height: 1.6; }
-        
-        /* 🌟 V44 分享按鈕 */
-        .notes-footer { padding: 10px 15px; background: #fffbeb; border-top: 1px solid #fcd34d; }
+        .notes-footer { padding: 10px 15px; background: #fffbeb; border-top: 1px solid #fcd34d; display: grid; grid-template-columns: 1fr; gap: 5px; }
         .btn-share-full { width: 100%; padding: 12px; background: #374151; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; gap: 8px; align-items: center;}
 
-        /* 📱 手機/平板 RWD */
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .reader-container { flex-direction: column-reverse; }
             .article-section { border-right: none; padding: 20px; flex: 1; }
             .notes-section { flex: none; height: 200px; min-width: 100%; max-width: 100%; border-bottom: 1px solid var(--border); }
         }
 
-        /* Modals */
         .io-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .io-box { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--border); color: var(--text); }
         .io-textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 0.8rem; resize: none; background: var(--input-bg); color: var(--text); }
@@ -121,14 +117,12 @@
         .io-btn.primary { background: var(--primary); color: white; }
         .io-btn.cancel { background: var(--bg); color: var(--text); }
         .loading-mask { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; font-weight: bold; color: #555; }
-        .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; }
-        .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } .hl-pink { background: #fbcfe8; }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">📚 V44 <button class="theme-btn" onclick="toggleTheme()" title="切換模式">🌓</button></div>
+        <div class="nav-brand">📚 V49 <button class="theme-btn" onclick="toggleTheme()" title="切換模式">🌓</button></div>
         <div class="nav-menu">
             <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">待讀</div>
             <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">已讀</div>
@@ -169,7 +163,10 @@
         <div class="modal-header">
             <div class="btn-close" onclick="closeReader()">✕</div>
             <input type="text" class="modal-title-input" id="readerTitleInput" placeholder="文章標題">
-            <button class="btn-save" onclick="saveReader()">儲存</button>
+            <div style="display:flex; align-items:center;">
+                <button class="layout-toggle-btn" onclick="toggleFocusMode()" title="專注模式">◧</button>
+                <button class="btn-save" onclick="saveReader()" style="margin-left:10px;">儲存</button>
+            </div>
         </div>
         
         <div class="modal-toolbar">
@@ -190,25 +187,34 @@
         </div>
 
         <div class="reader-content-wrapper" id="readerWrapper">
-            <div class="article-section"><div class="article-view" id="articleView" contenteditable="true" placeholder="文章內容..."></div></div>
+            <div class="article-section" onmouseup="checkSelection()">
+                <div class="article-view" id="articleView" contenteditable="true" placeholder="文章內容..."></div>
+            </div>
             <div class="notes-section">
-                <div class="notes-header">📝 思考筆記</div>
-                <textarea id="userNotes" class="notes-input" placeholder="在这里輸入重點..."></textarea>
-                <div class="notes-footer">
-                    <button class="btn-share-full" onclick="shareDraft()">
-                        📤 分享至 App (Keep/Line)
-                    </button>
+                <div class="notes-header">
+                    <span>📝 思考筆記</span>
+                    <div>
+                        <button class="notes-tools-btn" onclick="insertBullet()">•</button>
+                        <button class="notes-tools-btn" onclick="insertArrow()">➜</button>
+                        <button class="notes-tools-btn" onclick="insertDivider()">__</button>
+                    </div>
                 </div>
+                <textarea id="userNotes" class="notes-input" placeholder="在这輸入，或在文章中選取文字按💬插入..."></textarea>
+                <div class="notes-footer"><button class="btn-share-full" onclick="shareDraft()">📤 分享 / 複製草稿</button></div>
             </div>
         </div>
     </div>
 
-    <div class="io-overlay" id="exportModal"><div class="io-box"><h3>📋 備份資料</h3><p style="font-size:0.8rem;color:gray">全選複製，貼到 Keep 保存</p><textarea id="exportArea" class="io-textarea" readonly></textarea><div class="io-buttons">
-        <button class="io-btn" onclick="shareBackup()" style="background:#059669;color:white;">📤 分享代碼</button>
-        <button class="io-btn cancel" onclick="closeIO()">關閉</button><button class="io-btn primary" onclick="copyExport()">複製</button>
-    </div></div></div>
-    
-    <div class="io-overlay" id="importModal"><div class="io-box"><h3>📥 還原資料</h3><textarea id="importArea" class="io-textarea"></textarea><div class="io-buttons"><button class="io-btn cancel" onclick="closeIO()">取消</button><button class="io-btn primary" onclick="doImport()">還原</button></div></div></div>
+    <div class="floating-menu" id="floatingMenu">
+        <button class="floating-btn float-hl-y" onmousedown="applyHighlight('yellow')" title="黃色重點"></button>
+        <button class="floating-btn float-hl-g" onmousedown="applyHighlight('#bbf7d0')" title="綠色重點"></button>
+        <div style="width:1px;height:20px;background:#555;margin:0 5px;"></div>
+        <button class="floating-btn" title="插入文中眉批" onmousedown="insertInlineNote()">💬</button>
+        <button class="floating-btn" title="摘錄原文到筆記欄" onmousedown="quoteToNote()">📝</button>
+    </div>
+
+    <div class="io-overlay" id="exportModal"><div class="io-box"><h3>📋 複製到 Google Keep</h3><textarea id="exportArea" class="io-textarea" readonly></textarea><div class="io-buttons"><button class="io-btn cancel" onclick="closeIO()">關閉</button><button class="io-btn primary" onclick="copyExport()">複製</button></div></div></div>
+    <div class="io-overlay" id="importModal"><div class="io-box"><h3>📥 從 Google Keep 還原</h3><textarea id="importArea" class="io-textarea"></textarea><div class="io-buttons"><button class="io-btn cancel" onclick="closeIO()">取消</button><button class="io-btn primary" onclick="doImport()">還原</button></div></div></div>
     <div class="loading-mask" id="loadingMask">📸 正在截圖...</div>
 
     <script>
@@ -220,144 +226,180 @@
         let speechUtterance = null;
         let speechRate = 1.0;
         let currentFilterTag = null;
+        let isFocusMode = false;
 
         function init() {
-            const saved = localStorage.getItem('lite_pocket_v44_data');
+            const saved = localStorage.getItem('lite_pocket_v49_data'); // 升級Key
             if (saved) items = JSON.parse(saved);
             else {
-                const old = localStorage.getItem('lite_pocket_v43_data');
+                const old = localStorage.getItem('lite_pocket_v48_data');
                 if(old) items = JSON.parse(old);
             }
             if (localStorage.getItem('lite_pocket_theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
 
             const params = new URLSearchParams(window.location.search);
-            const addUrl = params.get('add');
-            const addTitle = params.get('title');
-            if (addUrl) {
-                document.getElementById('newUrl').value = addUrl;
-                if (addTitle) {
-                    document.getElementById('newTitle').value = addTitle;
-                    updateTitleBar('success');
-                } else {
-                    detectTitle(addUrl);
-                }
+            if (params.get('add')) {
+                document.getElementById('newUrl').value = params.get('add');
+                const t = params.get('title');
+                if (t) { document.getElementById('newTitle').value = t; updateTitleBar('success'); } 
+                else detectTitle(params.get('add'));
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             render();
+            document.addEventListener('mousedown', function(e) {
+                if (!e.target.closest('.floating-menu')) { document.getElementById('floatingMenu').style.display = 'none'; }
+            });
         }
 
-        /* --- 🌟 V44 原生分享增強 --- */
+        /* --- 🌟 V49 核心功能 --- */
+        function checkSelection() {
+            const selection = window.getSelection();
+            const menu = document.getElementById('floatingMenu');
+            if (selection.toString().length > 0 && document.getElementById('articleView').contains(selection.anchorNode)) {
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+                menu.style.display = 'flex';
+                menu.style.top = (rect.top - 45) + 'px';
+                menu.style.left = (rect.left + rect.width / 2) + 'px';
+            } else {
+                menu.style.display = 'none';
+            }
+        }
+
+        function applyHighlight(color) {
+            event.preventDefault();
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('hiliteColor', false, color);
+            document.getElementById('floatingMenu').style.display = 'none';
+        }
+
+        // 1. 文中插入 (V48功能)
+        function insertInlineNote() {
+            event.preventDefault();
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            const range = selection.getRangeAt(0);
+            const span = document.createElement('div');
+            span.className = 'inline-note-box';
+            span.contentEditable = "true";
+            span.innerText = "在此輸入...";
+            span.oninput = syncInlineNotesToMain;
+
+            range.collapse(false);
+            range.insertNode(span);
+            document.getElementById('floatingMenu').style.display = 'none';
+            span.focus();
+            
+            const newRange = document.createRange();
+            newRange.selectNodeContents(span);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+            syncInlineNotesToMain();
+        }
+
+        // 2. 🌟 摘錄到筆記 (V49功能)
+        function quoteToNote() {
+            event.preventDefault();
+            const selection = window.getSelection();
+            const text = selection.toString().trim();
+            if (text) {
+                // 幫原文畫黃底
+                document.execCommand('styleWithCSS', false, true);
+                document.execCommand('hiliteColor', false, 'yellow');
+                
+                const ta = document.getElementById('userNotes');
+                insertAtCursor(ta, `\n> "${text}"\n👉 `); // 插入引用格式
+                
+                // 若非專注模式，自動聚焦筆記欄
+                if (!isFocusMode) ta.focus();
+            }
+            document.getElementById('floatingMenu').style.display = 'none';
+        }
+
+        function syncInlineNotesToMain() {
+            const articleDiv = document.getElementById('articleView');
+            const inlineNotes = articleDiv.querySelectorAll('.inline-note-box');
+            if (inlineNotes.length === 0) return;
+
+            let collectedNotes = "\n--- 文中筆記彙整 ---\n";
+            inlineNotes.forEach(note => {
+                const text = note.innerText.replace('📝 筆記：', '').trim();
+                if (text && text !== "在此輸入..." && text !== "📝 筆記：在此輸入...") {
+                    collectedNotes += `• ${text}\n`;
+                }
+            });
+
+            const mainNote = document.getElementById('userNotes');
+            if (!mainNote.value.includes('--- 文中筆記彙整 ---')) {
+                mainNote.value += collectedNotes;
+            } else {
+                const parts = mainNote.value.split('--- 文中筆記彙整 ---');
+                mainNote.value = parts[0].trim() + collectedNotes;
+            }
+        }
+        function bindLiveSync() {
+            document.querySelectorAll('.inline-note-box').forEach(el => { el.oninput = syncInlineNotesToMain; });
+        }
+
+        /* --- 基礎功能 --- */
         function shareDraft() {
-            saveReader();
+            syncInlineNotesToMain(); saveReader();
             const item = items.find(i => i.id === currentId);
             const notes = document.getElementById('userNotes').value;
-            
             let text = `【${item.title}】\n\n`;
             if(notes) text += `📝 筆記：\n${notes}\n\n`;
             text += `🔗 連結：${item.url}`;
-
-            if (navigator.share) {
-                navigator.share({ title: item.title, text: text, url: item.url }).catch(()=>{});
-            } else {
-                navigator.clipboard.writeText(text).then(() => alert('✅ 已複製！請手動貼到 Keep。'));
-            }
+            if (navigator.share) { navigator.share({ title: item.title, text: text, url: item.url }).catch(()=>{}); } else { navigator.clipboard.writeText(text).then(() => alert('✅ 草稿已複製！')); }
         }
-
-        function shareBackup() {
-            const data = JSON.stringify(items);
-            if (navigator.share) {
-                navigator.share({ title: 'Pocket備份', text: data }).catch(()=>{});
-            } else {
-                copyExport();
-            }
+        function openReader(id, isError=false) {
+            currentId = id; const item = items.find(i => i.id === id);
+            document.getElementById('readerModal').style.display = 'flex';
+            document.getElementById('readerTitleInput').value = item.title;
+            document.getElementById('userNotes').value = item.notes || '';
+            const view = document.getElementById('articleView');
+            if (item.content) { view.innerHTML = item.content; bindLiveSync(); } 
+            else if (isError) { view.innerHTML = `<div style="text-align:center;padding:20px;color:#999;">⚠️ 自動抓取失敗，請手動貼上</div>`; } 
+            else { view.innerHTML = '無內容'; }
         }
-
-        function toggleTheme() {
-            if (document.body.getAttribute('data-theme') === 'dark') {
-                document.body.removeAttribute('data-theme'); localStorage.setItem('lite_pocket_theme', 'light');
-            } else {
-                document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('lite_pocket_theme', 'dark');
-            }
-        }
-
-        function extractTags(text) {
-            const tags = text.match(/#[\w\u4e00-\u9fa5]+/g) || [];
-            const cleanTitle = text.replace(/#[\w\u4e00-\u9fa5]+/g, '').trim();
-            return { title: cleanTitle, tags: tags.map(t => t.replace('#', '')) };
-        }
+        
+        function highlight(c) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, c); }
+        function insertBullet() { insertAtCursor(document.getElementById('userNotes'), "• "); }
+        function insertArrow() { insertAtCursor(document.getElementById('userNotes'), " ➜ "); }
+        function insertDivider() { insertAtCursor(document.getElementById('userNotes'), "\n------------------\n"); }
+        function insertAtCursor(field, value) { if (field.selectionStart || field.selectionStart == '0') { var startPos = field.selectionStart; var endPos = field.selectionEnd; field.value = field.value.substring(0, startPos) + value + field.value.substring(endPos, field.value.length); field.selectionStart = startPos + value.length; field.selectionEnd = startPos + value.length; } else { field.value += value; } field.focus(); autoResize(field); }
+        function autoResize(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
+        function toggleFocusMode() { isFocusMode = !isFocusMode; const container = document.getElementById('readerWrapper'); if (isFocusMode) container.classList.add('focus-mode'); else container.classList.remove('focus-mode'); }
+        function toggleTheme() { if (document.body.getAttribute('data-theme') === 'dark') { document.body.removeAttribute('data-theme'); localStorage.setItem('lite_pocket_theme', 'light'); } else { document.body.setAttribute('data-theme', 'dark'); localStorage.setItem('lite_pocket_theme', 'dark'); } }
+        function extractTags(text) { const tags = text.match(/#[\w\u4e00-\u9fa5]+/g) || []; const cleanTitle = text.replace(/#[\w\u4e00-\u9fa5]+/g, '').trim(); return { title: cleanTitle, tags: tags.map(t => t.replace('#', '')) }; }
         function filterByTag(tag) { currentFilterTag = currentFilterTag === tag ? null : tag; render(); }
-        function renderTagsBar() {
-            const allTags = new Set(); items.forEach(i => { if(i.tags) i.tags.forEach(t => allTags.add(t)); });
-            const bar = document.getElementById('filterBar');
-            if (allTags.size === 0) { bar.style.display = 'none'; return; }
-            bar.style.display = 'flex'; bar.innerHTML = '';
-            allTags.forEach(tag => {
-                const active = currentFilterTag === tag ? 'active' : '';
-                bar.innerHTML += `<div class="filter-tag ${active}" onclick="filterByTag('${tag}')">#${tag}</div>`;
-            });
-        }
+        function renderTagsBar() { const allTags = new Set(); items.forEach(i => { if(i.tags) i.tags.forEach(t => allTags.add(t)); }); const bar = document.getElementById('filterBar'); if (allTags.size === 0) { bar.style.display = 'none'; return; } bar.style.display = 'flex'; bar.innerHTML = ''; allTags.forEach(tag => { const active = currentFilterTag === tag ? 'active' : ''; bar.innerHTML += `<div class="filter-tag ${active}" onclick="filterByTag('${tag}')">#${tag}</div>`; }); }
         function ttsToggle() { if (window.speechSynthesis.speaking) { if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); updatePlayBtn(true); } else { window.speechSynthesis.pause(); updatePlayBtn(false); } } else { ttsPlay(); } }
         function ttsPlay() { const content = document.getElementById('articleView').innerText; if (!content.trim()) return alert('無內容'); window.speechSynthesis.cancel(); speechUtterance = new SpeechSynthesisUtterance(content); speechUtterance.rate = speechRate; speechUtterance.lang = 'zh-TW'; speechUtterance.onend = () => { updatePlayBtn(false); }; window.speechSynthesis.speak(speechUtterance); updatePlayBtn(true); }
         function ttsStop() { window.speechSynthesis.cancel(); updatePlayBtn(false); }
         function ttsSpeed() { speechRate = speechRate >= 2.0 ? 0.8 : speechRate + 0.25; document.getElementById('ttsSpeedDisp').innerText = speechRate + 'x'; if (window.speechSynthesis.speaking) { ttsStop(); setTimeout(ttsPlay, 200); } }
         function updatePlayBtn(isPlaying) { document.getElementById('ttsPlayBtn').innerText = isPlaying ? '⏸' : '▶'; }
-
         function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
         async function detectTitle(url) { const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return; updateTitleBar('loading'); titleInput.placeholder = '偵測中...'; const detected = await fetchTitle(url); if (detected) { titleInput.value = detected; updateTitleBar('success'); } else { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); } }
         function updateTitleBar(state) { const bar=document.getElementById('titleBar'); if(state==='loading'){bar.style.width='50%';bar.style.background='#f59e0b';}else if(state==='success'){bar.style.width='100%';bar.style.background='#10b981';}else if(state==='error'){bar.style.width='100%';bar.style.background='#ef4444';}else{bar.style.width='0%';} }
         function clearInput(){ document.getElementById('newUrl').value=''; document.getElementById('newTitle').value=''; updateTitleBar('reset'); }
         async function fetchTitle(url) { try{const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);const d=await res.json();if(d.contents){const m=d.contents.match(/<title>(.*?)<\/title>/i);if(m&&m[1])return new DOMParser().parseFromString(m[1],'text/html').body.textContent;}}catch(e){}return null;}
-        async function confirmAdd() {
-            const url = document.getElementById('newUrl').value.trim();
-            const rawTitle = document.getElementById('newTitle').value.trim();
-            const { title, tags } = extractTags(rawTitle || (url ? url : "新筆記"));
-            if(!url) { createItem({url:'#', title:title, tags:tags, domain:'note', content:'', date:new Date().toLocaleDateString()}); clearInput(); return; }
-            const domain = new URL(url).hostname.replace('www.','');
-            const newItem = createItem({url:url, title:title, tags:tags, domain:domain, content:null, date:new Date().toLocaleDateString()});
-            clearInput();
-            const html = await fetchWithFallbacks(url);
-            if(html) {
-                let doc = new DOMParser().parseFromString(html, 'text/html');
-                let reader = new Readability(doc);
-                let article = reader.parse();
-                const idx = items.findIndex(i=>i.id===newItem.id);
-                if(idx>-1) {
-                    if(items[idx].title === url) items[idx].title = article.title;
-                    if(article) items[idx].content = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;">來源: ${domain}</p>` + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
-                    save(); render();
-                }
-            } else { const idx = items.findIndex(i=>i.id===newItem.id); if(idx>-1) openReader(newItem.id, true); }
-        }
+        async function confirmAdd() { const url = document.getElementById('newUrl').value.trim(); const rawTitle = document.getElementById('newTitle').value.trim(); const { title, tags } = extractTags(rawTitle || (url ? url : "新筆記")); if(!url) { createItem({url:'#', title:title, tags:tags, domain:'note', content:'', date:new Date().toLocaleDateString()}); clearInput(); return; } const domain = new URL(url).hostname.replace('www.',''); const newItem = createItem({url:url, title:title, tags:tags, domain:domain, content:null, date:new Date().toLocaleDateString()}); clearInput(); const html = await fetchWithFallbacks(url); if(html) { let doc = new DOMParser().parseFromString(html, 'text/html'); const dInfo = extractDateInfo(doc, html); let reader = new Readability(doc); let article = reader.parse(); const idx = items.findIndex(i=>i.id===newItem.id); if(idx>-1) { items[idx].date = dInfo.date; items[idx].type = dInfo.type; if(article) { items[idx].content = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;">📅 ${dInfo.date} | 來源: ${domain}</p>` + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']}); save(); render(); } } } else { const idx = items.findIndex(i=>i.id===newItem.id); if(idx>-1) openReader(newItem.id, true); } }
         async function fetchWithFallbacks(url) { const encodedUrl = encodeURIComponent(url); const proxies = [{ url: `https://api.allorigins.win/get?url=${encodedUrl}`, type: 'json' }, { url: `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`, type: 'text' }]; for (let proxy of proxies) { try { const res = await fetch(proxy.url); if (!res.ok) throw new Error(); let htmlText = proxy.type === 'json' ? (await res.json()).contents : await res.text(); if (htmlText && htmlText.length > 100) return htmlText; } catch (e) {} } return null; }
-        function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, timestamp: Date.now(), status: 'inbox', content: data.content, notes: data.notes || '', date: data.date }; items.unshift(item); save(); render(); return item; }
+        function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, timestamp: Date.now(), status: 'inbox', content: data.content, notes: data.notes || '', date: data.date || new Date().toLocaleDateString(), type: data.type || 'single' }; items.unshift(item); save(); render(); return item; }
         function renameItem(id) { const item = items.find(i => i.id === id); const newTitle = prompt("修改標題 (可加 #標籤)：", item.title + (item.tags ? ' #'+item.tags.join(' #') : '')); if (newTitle) { const {title, tags} = extractTags(newTitle); item.title = title; item.tags = tags; save(); render(); } }
-        function openReader(id, isError=false) { currentId = id; const item = items.find(i => i.id === id); document.getElementById('readerModal').style.display = 'flex'; document.getElementById('readerTitleInput').value = item.title; document.getElementById('userNotes').value = item.notes || ''; const view = document.getElementById('articleView'); if (item.content) { view.innerHTML = item.content; } else if (isError) { view.innerHTML = `<div style="text-align:center;padding:20px;color:#999;">⚠️ 自動抓取失敗，請手動貼上</div>`; } else { view.innerHTML = '無內容'; } }
-        function saveReader() { if (!currentId) return; const content = document.getElementById('articleView').innerHTML; const notes = document.getElementById('userNotes').value; const rawTitle = document.getElementById('readerTitleInput').value; const idx = items.findIndex(i => i.id === currentId); if(idx > -1) { items[idx].content = content; items[idx].notes = notes; const {title, tags} = extractTags(rawTitle); items[idx].title = title; if(tags.length>0) items[idx].tags = tags; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); ttsStop(); } }
+        function saveReader() { if (!currentId) return; const content = document.getElementById('articleView').innerHTML; const notes = document.getElementById('userNotes').value; const title = document.getElementById('readerTitleInput').value; const idx = items.findIndex(i => i.id === currentId); if(idx > -1) { items[idx].content = content; items[idx].notes = notes; items[idx].title = title; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); ttsStop(); } }
         function closeReader() { document.getElementById('readerModal').style.display = 'none'; ttsStop(); }
         function cleanKeepImages() { let raw = document.getElementById('articleView').innerHTML; if(!raw || raw.length < 10) return alert('內容太少'); let clean = DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'], ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style'], FORBID_ATTR: ['width','height'] }); document.getElementById('articleView').innerHTML = clean; alert('🖼️ 排版完成'); }
         function clearStyle() { let txt=document.getElementById('articleView').innerText;document.getElementById('articleView').innerHTML=txt.split('\n').filter(t=>t.trim()).map(t=>`<p>${t}</p>`).join(''); }
         function captureReader(){ const el=document.getElementById('readerWrapper'); const m=document.getElementById('loadingMask'); m.style.display='flex'; const ta=document.getElementById('userNotes'); const d=document.createElement('div'); d.style.cssText=getComputedStyle(ta).cssText; d.style.height='auto'; d.style.minHeight='80px'; d.innerText=ta.value; ta.replaceWith(d); html2canvas(el,{scale:2,useCORS:true,backgroundColor:'#ffffff',scrollHeight:el.scrollHeight,windowHeight:el.scrollHeight}).then(c=>{ d.replaceWith(ta); m.style.display='none'; const l=document.createElement('a'); l.download=`Note_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }).catch(()=>{d.replaceWith(ta);m.style.display='none';alert('失敗');}); }
-        function highlight(c) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, c); }
         function toggleSelectMode() { isSelectMode = !isSelectMode; if (!isSelectMode) selectedIds.clear(); document.getElementById('defaultBottomBar').style.display = isSelectMode ? 'none' : 'flex'; document.getElementById('selectBottomBar').style.display = isSelectMode ? 'flex' : 'none'; render(); }
         function toggleCheck(id) { if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id); document.getElementById('selectCount').innerText = selectedIds.size; render(); }
         function exportSelectedUrls() { if (selectedIds.size === 0) return alert('請先勾選'); const urls = items.filter(i => selectedIds.has(i.id) && i.url.startsWith('http')).map(i => i.url); if (urls.length === 0) return alert('無有效網址'); navigator.clipboard.writeText(urls.join('\n')).then(() => { alert(`✅ 已複製 ${urls.length} 個網址！`); toggleSelectMode(); }); }
         async function smartPaste(){try{const t=await navigator.clipboard.readText();if(t){document.getElementById('newUrl').value=t;checkUrlInput();}else alert('剪貼簿空');}catch(e){alert('請手動貼上');}}
         async function pasteToEditor(){try{const t=await navigator.clipboard.readText();document.getElementById('articleView').focus();document.execCommand('insertText',false,t);}catch(e){alert('請手動貼上');}}
         function clearReadItems() { if(confirm('清除所有「已讀」？')) { items = items.filter(i=>i.status==='inbox'); save(); render(); } }
-        function render() { 
-            renderTagsBar(); const container = document.getElementById('container'); container.innerHTML = ''; 
-            const filtered = items.filter(i => i.status === currentTab && (!currentFilterTag || (i.tags && i.tags.includes(currentFilterTag))));
-            if(filtered.length===0) container.innerHTML = '<div style="text-align:center;color:#999;margin-top:30px;">無項目</div>'; 
-            filtered.forEach(item => { 
-                const favicon = item.domain==='note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"'; 
-                let tagsHtml = ''; if(item.tags && item.tags.length > 0) tagsHtml = item.tags.map(t => `<span class="tag-badge">#${t}</span>`).join(' ');
-                const dateDisplay = item.date ? `<span class="date-badge">📅 ${item.date}</span>` : '';
-                const isChecked = selectedIds.has(item.id) ? 'checked' : ''; const checkDisplay = isSelectMode ? 'block' : 'none'; const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`; const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card';
-                const div = document.createElement('div'); div.className = activeCard; 
-                div.innerHTML = `<div class="card-header" onclick="${clickAction}"><div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div><div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain} ${dateDisplay} ${tagsHtml}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button><button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button></div>`; container.appendChild(div); 
-            }); 
-        }
-        function save(){localStorage.setItem('lite_pocket_v44_data',JSON.stringify(items));}
+        function render() { renderTagsBar(); const container = document.getElementById('container'); container.innerHTML = ''; const filtered = items.filter(i => i.status === currentTab && (!currentFilterTag || (i.tags && i.tags.includes(currentFilterTag)))); if(filtered.length===0) container.innerHTML = '<div style="text-align:center;color:#999;margin-top:30px;">無項目</div>'; filtered.forEach(item => { const favicon = item.domain==='note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"'; let tagsHtml = ''; if(item.tags && item.tags.length > 0) tagsHtml = item.tags.map(t => `<span class="tag-badge">#${t}</span>`).join(' '); const dateIcon = item.type === 'list' ? '📂 ' : '📅 '; const dateClass = item.type === 'list' ? 'date-badge list-type' : 'date-badge'; const dateDisplay = item.date ? `<span class="${dateClass}">${dateIcon}${item.date}</span>` : ''; const isChecked = selectedIds.has(item.id) ? 'checked' : ''; const checkDisplay = isSelectMode ? 'block' : 'none'; const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`; const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card'; const div = document.createElement('div'); div.className = activeCard; div.innerHTML = `<div class="card-header" onclick="${clickAction}"><div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div><div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain} ${dateDisplay} ${tagsHtml}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button><button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button></div>`; container.appendChild(div); }); }
+        function save(){localStorage.setItem('lite_pocket_v49_data',JSON.stringify(items));}
         function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s;save();render();}}
         function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id);save();render();}}
         function switchTab(t){currentTab=t;document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active');render();}
@@ -366,7 +408,7 @@
         function openImportModal(){document.getElementById('importModal').style.display='flex';document.getElementById('importArea').value='';}
         function doImport(){try{const n=JSON.parse(document.getElementById('importArea').value);if(Array.isArray(n)){if(confirm(`還原 ${n.length} 筆?`)){items=n;save();render();alert('成功');closeIO();}}}catch(e){alert('格式錯誤');}}
         function closeIO(){document.getElementById('exportModal').style.display='none';document.getElementById('importModal').style.display='none';}
-        function magicFormat(){ let raw = document.getElementById('articleView').innerHTML; if(!raw || raw.length < 50) return alert('內容太少'); try { let doc = new DOMParser().parseFromString(raw, 'text/html'); let reader = new Readability(doc); let article = reader.parse(); if(article) { const clean = DOMPurify.sanitize(article.content, {ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'], ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style']}); document.getElementById('articleView').innerHTML = clean; } } catch(e){} }
+        function extractDateInfo(doc, html) { let metaDate = null; const selectors = ['meta[property="article:published_time"]', 'meta[property="article:modified_time"]', 'meta[property="og:updated_time"]', 'meta[name="pubdate"]', 'meta[name="date"]', 'meta[name="lastmod"]', 'time[datetime]']; for (let sel of selectors) { const el = doc.querySelector(sel); if (el) { const val = el.getAttribute('content') || el.getAttribute('datetime'); if (val) { try { const d = new Date(val); if(!isNaN(d.getTime())) metaDate = d; } catch(e){} } } if (metaDate) break; } const dateRegex = /(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/g; let matches, maxDate = null, count = 0; while ((matches = dateRegex.exec(html)) !== null) { try { const d = new Date(matches[0].replace(/-/g, '/')); if (!isNaN(d.getTime()) && d.getFullYear() > 2000 && d <= new Date()) { if (!maxDate || d > maxDate) maxDate = d; count++; } } catch(e){} } if (count > 5 && maxDate) return { date: maxDate.toLocaleDateString(), type: 'list' }; if (metaDate) return { date: metaDate.toLocaleDateString(), type: 'single' }; return { date: new Date().toLocaleDateString(), type: 'single' }; }
 
         init();
     </script>
