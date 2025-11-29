@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V53.1：全能學習版</title>
+    <title>Lite-Pocket V56：全能學習版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -33,30 +33,39 @@
         .btn-paste { background: #4b5563; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; }
         
+        #titleStatus { height: 3px; background: var(--border); width: 100%; border-radius: 2px; overflow: hidden; margin-top: -5px; }
+        #titleBar { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s, background 0.3s; }
+
         .search-row { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 10px; }
         .search-input { flex:1; padding: 8px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); outline:none; font-size: 0.9rem; }
         .filter-bar { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 5px; overflow-x: auto; display:none;}
         .filter-tag { font-size: 0.8rem; padding: 4px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 15px; cursor: pointer; white-space: nowrap; }
-        
+        .filter-tag.active { background: var(--primary); color: white; }
+
+        /* 卡片列表 (V49樣式回歸) */
         .grid-container { max-width: 900px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
         .card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; transition:0.2s; }
         .card.selecting { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
-        .card-header { display: flex; align-items: flex-start; gap: 10px; }
+        .card-header { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
         .card-meta { font-size: 0.75rem; color: var(--meta); display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; }
         .site-icon { width: 14px; height: 14px; border-radius: 2px; }
         .tag-badge { font-size: 0.7rem; background: var(--tag-bg); color: var(--tag-text); padding: 1px 6px; border-radius: 4px; cursor: pointer; }
         .date-badge { font-size: 0.7rem; background: var(--bg); color: var(--meta); padding: 1px 6px; border-radius: 4px; margin-left: auto; }
-        .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+        .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-note-badge { font-size: 0.7rem; background: #fffbeb; color: #b45309; padding: 2px 6px; border-radius: 4px; border: 1px solid #fcd34d; display: inline-block; margin-top: 5px;}
         .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px solid var(--border); }
-        .btn-text { background: none; border: none; font-size: 0.85rem; color: var(--meta); cursor: pointer; padding: 5px 8px; border-radius: 4px; display:flex; align-items:center; gap:4px; }
+        .btn-text { background: none; border: none; font-size: 0.85rem; color: var(--meta); cursor: pointer; padding: 5px 8px; border-radius: 4px; display:flex; align-items:center; gap:4px; white-space:nowrap; }
+        .btn-text:hover { background: var(--bg); color: var(--primary); }
         .btn-read { color: var(--primary); font-weight: 600; }
 
+        /* 底部工具列 */
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); height: 70px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); z-index: 90; padding: 0 10px; padding-bottom: env(safe-area-inset-bottom); }
         .bottom-btn { background: none; border: none; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; color: var(--meta); gap: 4px; cursor: pointer; min-width: 55px; padding: 0 5px;}
         .bottom-btn span { font-size: 1.4rem; }
-        .bottom-btn.select-mode { color: #8b5cf6; } .bottom-btn.export-urls { color: #059669; font-weight: bold; }
+        .bottom-btn.select-mode { color: #8b5cf6; } 
+        .bottom-btn.export-urls { color: #059669; font-weight: bold; }
 
-        /* --- 閱讀器核心 --- */
+        /* 閱讀器 Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--card-bg); z-index: 2000; display: none; flex-direction: column; }
         .modal-header { height: 55px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: var(--card-bg); flex-shrink: 0; }
         .modal-title-input { font-weight: bold; font-size: 1.1rem; border: none; outline: none; flex: 1; text-align: center; background: transparent; color: var(--text); margin: 0 10px; }
@@ -133,7 +142,7 @@
         .notes-footer { padding: 10px 15px; background: #fffbeb; border-top: 1px solid #fcd34d; display: grid; grid-template-columns: 1fr; gap: 5px; flex-shrink: 0;}
         .btn-share-full { width: 100%; padding: 12px; background: #374151; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; gap: 8px; align-items: center;}
 
-        /* --- 浮動選單與字典 --- */
+        /* 浮動選單與字典 */
         .floating-menu { position: fixed; z-index: 3000; background: #333; border-radius: 8px; padding: 5px; display: none; gap: 5px; transform: translateX(-50%); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .floating-btn { background: none; border: none; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
         .floating-btn:hover { background: rgba(255,255,255,0.2); }
@@ -146,33 +155,19 @@
         .dict-iframe { width: 100%; height: 100%; border: none; }
         .dict-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; color: #666; display:none;}
 
-        /* --- 手機/平板優化 --- */
-        /* 平板 (768px - 1024px) */
-        @media (max-width: 1024px) {
-             .notes-section { min-width: 280px; }
-        }
-
-        /* 手機 (<768px) */
+        /* RWD 優化 */
+        @media (max-width: 1024px) { .notes-section { min-width: 280px; } }
         @media (max-width: 768px) {
-            .reader-container { flex-direction: column; } /* 改為 Column，文章在上 */
-            .article-section { border-right: none; flex: 1; border-bottom: 1px solid var(--border); }
-            /* 筆記區在手機上固定高度，改為 Column-reverse 則筆記在下 */
             .reader-container { flex-direction: column-reverse; }
+            .article-section { border-right: none; flex: 1; border-bottom: 1px solid var(--border); }
             .notes-section { flex: none; height: 45vh; min-width: 100%; border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-            
-            /* 目錄改為抽屜 */
             .deep-mode .toc-section { position: absolute; left: 0; top: 0; bottom: 0; width: 260px; z-index: 50; box-shadow: 2px 0 10px rgba(0,0,0,0.2); transform: translateX(-100%); transition: 0.3s; opacity: 1; background: var(--bg);}
             .deep-mode.toc-open .toc-section { transform: translateX(0); }
-            
-            /* 字典改為 Bottom Sheet */
             .dict-panel { width: 100%; left: 0; right: 0; bottom: 0; top: auto; height: 60vh; border-radius: 12px 12px 0 0; border: none; box-shadow: 0 -2px 20px rgba(0,0,0,0.2); }
-            
-            /* 英文工具列優化 */
             .modal-toolbar { padding: 10px 5px; }
             .mode-switch-group { margin-right: 5px; }
         }
 
-        /* --- 匯出入彈窗 --- */
         .io-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; }
         .io-box { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--border); color: var(--text); }
         .io-textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 0.8rem; resize: none; background: var(--input-bg); color: var(--text); }
@@ -186,7 +181,7 @@
 <body>
 
     <nav class="navbar">
-        <div class="nav-brand">📚 V53.1 <button class="theme-btn" onclick="toggleTheme()">🌓</button></div>
+        <div class="nav-brand">📚 V56 <button class="theme-btn" onclick="toggleTheme()">🌓</button></div>
         <div class="nav-menu">
             <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">待讀</div>
             <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">已讀</div>
@@ -198,7 +193,7 @@
             <div class="input-row"><button class="btn-paste" onclick="smartPaste()">📋 貼上</button><div style="flex:1"></div><button class="btn-paste" style="background:none;color:var(--meta);" onclick="clearInput()">✕</button></div>
             <input type="text" id="newUrl" class="input-field" placeholder="網址 (或留空建立純筆記)..." oninput="checkUrlInput()">
             <input type="text" id="newTitle" class="input-field" placeholder="標題 #標籤">
-            <div id="titleStatus" style="height:2px;background:var(--border);width:100%;"><div id="titleBar" style="height:100%;width:0%;background:var(--primary);transition:0.3s"></div></div>
+            <div id="titleStatus"><div id="titleBar"></div></div>
             <button class="btn-confirm" onclick="confirmAdd()">＋ 加入</button>
         </div>
         <div class="search-row"><input type="text" class="search-input" id="searchInput" placeholder="🔍 搜尋標題..." oninput="render()"></div>
@@ -233,14 +228,12 @@
         
         <div class="modal-toolbar">
             <div class="toc-toggle-mobile" id="mobileTocBtn" onclick="toggleMobileToc()" style="display:none; cursor:pointer;">📑</div>
-            
             <div id="eng-tools" style="display:none; gap:5px; align-items:center;">
                 <button class="editor-btn" onclick="toggleMask()" id="btnMask" title="遮罩複習">🙈</button>
                 <button class="editor-btn" onclick="toggleShadowing()" id="btnShadow" title="點擊跟讀">🗣️</button>
                 <button class="editor-btn" onclick="toggleChunking()" id="btnChunk" title="斷句工具">✂️</button>
                 <div class="tool-sep"></div>
             </div>
-
             <div class="audio-btn-group"><button class="audio-btn" onclick="ttsToggle()" id="ttsPlayBtn">▶</button><button class="audio-btn" onclick="ttsStop()">⏹</button></div>
             <div class="tool-sep"></div>
             <button class="editor-btn" onclick="downloadCurrentHtml()" title="匯出講義HTML" style="color:#2563eb;font-weight:bold;">📤</button>
@@ -251,11 +244,9 @@
 
         <div class="reader-content-wrapper" id="readerWrapper">
             <div class="toc-section" id="tocSection"></div>
-            
             <div class="article-section" onmouseup="checkSelection()" id="articleContainer">
                 <div class="article-view" id="articleView" contenteditable="true" placeholder="文章內容..."></div>
             </div>
-            
             <div class="notes-section">
                 <textarea id="userNotes" class="notes-input" placeholder="Lite模式：隨手筆記..."></textarea>
                 
@@ -326,12 +317,13 @@
         let isShadowing = false;
         let isChunking = false;
         let currentVocabCards = []; 
+        let currentFilterTag = null;
 
         function init() {
-            const saved = localStorage.getItem('lite_pocket_v53_data');
+            const saved = localStorage.getItem('lite_pocket_v56_data'); // Key v56
             if (saved) { items = JSON.parse(saved); } 
             else {
-                const old = localStorage.getItem('lite_pocket_v52_data') || localStorage.getItem('lite_pocket_v51_data');
+                const old = localStorage.getItem('lite_pocket_v55_data') || localStorage.getItem('lite_pocket_v53_data') || localStorage.getItem('lite_pocket_v49_data');
                 if(old) items = JSON.parse(old);
             }
             if (localStorage.getItem('lite_pocket_theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
@@ -345,7 +337,6 @@
             }
             render();
             
-            // Event Listeners
             document.addEventListener('mousedown', function(e) { 
                 if (!e.target.closest('.floating-menu')) document.getElementById('floatingMenu').style.display = 'none'; 
                 if (window.innerWidth < 768) {
@@ -384,29 +375,13 @@
             const engFooter = document.getElementById('engFooter');
             const mobileTocBtn = document.getElementById('mobileTocBtn');
 
-            userNotes.style.display = 'none';
-            cornell.style.display = 'none';
-            english.style.display = 'none';
-            engTools.style.display = 'none';
-            wrapper.classList.remove('deep-mode');
-            toc.style.width = '0'; toc.style.opacity = '0';
-            stdFooter.style.display = 'block'; engFooter.style.display = 'none';
-            mobileTocBtn.style.display = 'none';
+            userNotes.style.display = 'none'; cornell.style.display = 'none'; english.style.display = 'none'; engTools.style.display = 'none';
+            wrapper.classList.remove('deep-mode'); toc.style.width = '0'; toc.style.opacity = '0';
+            stdFooter.style.display = 'block'; engFooter.style.display = 'none'; mobileTocBtn.style.display = 'none';
 
-            if (mode === 'lite') {
-                userNotes.style.display = 'block';
-            } else if (mode === 'deep') {
-                cornell.style.display = 'flex'; 
-                wrapper.classList.add('deep-mode'); 
-                generateTOC();
-                if(window.innerWidth < 768) mobileTocBtn.style.display = 'block';
-            } else if (mode === 'english') {
-                english.style.display = 'flex'; 
-                engTools.style.display = 'flex';
-                stdFooter.style.display = 'none'; 
-                engFooter.style.display = 'grid'; // Grid layout for 2 buttons
-                renderVocabCards();
-            }
+            if (mode === 'lite') { userNotes.style.display = 'block'; }
+            else if (mode === 'deep') { cornell.style.display = 'flex'; wrapper.classList.add('deep-mode'); generateTOC(); if(window.innerWidth < 768) mobileTocBtn.style.display = 'block'; }
+            else if (mode === 'english') { english.style.display = 'flex'; engTools.style.display = 'flex'; stdFooter.style.display = 'none'; engFooter.style.display = 'grid'; renderVocabCards(); }
         }
 
         /* --- Universal Input Logic --- */
@@ -419,19 +394,10 @@
             const isUrl = urlInput.startsWith('http');
 
             if (!isUrl) {
-                // Book/Note Mode
-                createItem({
-                    url: '#note-' + Date.now(),
-                    title: title || urlInput,
-                    tags: [...tags, '筆記'],
-                    domain: '📝 Note',
-                    content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p><p>請在此貼上 Kobo 劃線、PDF 摘要，或是直接開始寫作。</p></div><br>`,
-                    date: new Date().toLocaleDateString()
-                });
+                createItem({ url: '#note-' + Date.now(), title: title || urlInput, tags: [...tags, '筆記'], domain: '📝 Note', content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p><p>請在此貼上 Kobo 劃線、PDF 摘要，或是直接開始寫作。</p></div><br>`, date: new Date().toLocaleDateString() });
                 clearInput(); return;
             }
 
-            // Web Mode
             const domain = new URL(urlInput).hostname.replace('www.','');
             const newItem = createItem({ url: urlInput, title: title, tags: tags, domain: domain, content: null, date: new Date().toLocaleDateString() });
             clearInput();
@@ -439,11 +405,13 @@
             const html = await fetchWithFallbacks(urlInput);
             if(html) { 
                 let doc = new DOMParser().parseFromString(html, 'text/html'); 
+                const dInfo = extractDateInfo(doc, html);
                 let reader = new Readability(doc); 
                 let article = reader.parse(); 
                 const idx = items.findIndex(i => i.id === newItem.id);
                 if(idx > -1 && article) {
-                    const header = `<h1>${article.title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">🔗 來源：${domain}</p>`;
+                    items[idx].date = dInfo.date; 
+                    const header = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">🔗 來源：${domain} | 📅 ${dInfo.date}</p>`;
                     items[idx].content = header + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']});
                     items[idx].title = article.title || items[idx].title; 
                     save(); render(); 
@@ -451,188 +419,116 @@
             }
         }
 
-        /* --- Vocab Cards Logic --- */
+        async function detectTitle(url) {
+            const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return;
+            updateTitleBar('loading'); titleInput.placeholder = '偵測中...';
+            try {
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`); const d = await res.json();
+                if(d.contents) { const m = d.contents.match(/<title>(.*?)<\/title>/i); if(m && m[1]) { titleInput.value = new DOMParser().parseFromString(m[1], 'text/html').body.textContent; updateTitleBar('success'); } else { throw new Error(); } }
+            } catch(e) { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); }
+        }
+
+        function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
+        function updateTitleBar(state) { const bar=document.getElementById('titleBar'); if(state==='loading'){bar.style.width='50%';bar.style.background='#f59e0b';}else if(state==='success'){bar.style.width='100%';bar.style.background='#10b981';}else if(state==='error'){bar.style.width='100%';bar.style.background='#ef4444';}else{bar.style.width='0%';} }
+        function smartPaste(){navigator.clipboard.readText().then(t=>{if(t){document.getElementById('newUrl').value=t; checkUrlInput();}});} 
+        function clearInput(){document.getElementById('newUrl').value='';document.getElementById('newTitle').value='';updateTitleBar('reset');} 
+
+        /* Vocab Cards */
         function addVocabCard() {
-            event.preventDefault(); 
-            const sel = window.getSelection();
-            const text = sel.toString().trim();
+            event.preventDefault(); const sel = window.getSelection(); const text = sel.toString().trim();
             if (text) {
-                document.execCommand('styleWithCSS', false, true);
-                document.execCommand('hiliteColor', false, 'yellow');
-                
-                let context = "";
-                const node = sel.anchorNode;
-                if(node && node.parentElement) {
-                    context = node.parentElement.innerText.trim();
-                    if(context.length > 200) context = "..." + text + "..."; 
-                }
-                currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context });
-                renderVocabCards();
-                if(currentMode !== 'english') { /* Optional: switchMode('english'); */ }
+                document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, 'yellow');
+                let context = ""; const node = sel.anchorNode;
+                if(node && node.parentElement) { context = node.parentElement.innerText.trim(); if(context.length > 200) context = "..." + text + "..."; }
+                currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context }); renderVocabCards();
             }
             document.getElementById('floatingMenu').style.display = 'none';
         }
-
         function renderVocabCards() {
             const list = document.getElementById('vocabCardsList');
-            if(currentVocabCards.length === 0) {
-                list.innerHTML = `<div style="text-align:center;color:#9ca3af;margin-top:20px;font-size:0.9rem;">選取單字 -> 浮動選單 [📝]<br>自動建立卡片</div>`; return;
-            }
+            if(currentVocabCards.length === 0) { list.innerHTML = `<div style="text-align:center;color:#9ca3af;margin-top:20px;font-size:0.9rem;">選取單字 -> 浮動選單 [📝]<br>自動建立卡片</div>`; return; }
             list.innerHTML = '';
             currentVocabCards.forEach((card, index) => {
-                const el = document.createElement('div');
-                el.className = 'vocab-card';
-                el.innerHTML = `
-                    <div class="vc-header">
-                        <input type="text" class="vc-term" value="${card.term}" oninput="updateCard(${index}, 'term', this.value)">
-                        <span class="vc-del" onclick="removeCard(${index})">×</span>
-                    </div>
-                    <input type="text" class="vc-def" placeholder="定義 / 筆記..." value="${card.def}" oninput="updateCard(${index}, 'def', this.value)">
-                    <textarea class="vc-context" rows="2" oninput="updateCard(${index}, 'context', this.value)">${card.context}</textarea>
-                `;
+                const el = document.createElement('div'); el.className = 'vocab-card';
+                el.innerHTML = `<div class="vc-header"><input type="text" class="vc-term" value="${card.term}" oninput="updateCard(${index}, 'term', this.value)"><span class="vc-del" onclick="removeCard(${index})">×</span></div><input type="text" class="vc-def" placeholder="定義 / 筆記..." value="${card.def}" oninput="updateCard(${index}, 'def', this.value)"><textarea class="vc-context" rows="2" oninput="updateCard(${index}, 'context', this.value)">${card.context}</textarea>`;
                 list.appendChild(el);
             });
         }
-
         function updateCard(index, field, value) { currentVocabCards[index][field] = value; }
         function removeCard(index) { currentVocabCards.splice(index, 1); renderVocabCards(); }
         function copyAiPrompt(type) {
-            const sel = window.getSelection().toString().trim();
-            if(!sel) return alert('請先選取文章中的文字');
+            const sel = window.getSelection().toString().trim(); if(!sel) return alert('請先選取文章中的文字');
             let prompt = "";
             if(type === 'grammar') prompt = `Please analyze the grammatical structure:\n\n"${sel}"`;
             if(type === 'rewrite') prompt = `Please provide 3 academic rewrite options:\n\n"${sel}"`;
             if(type === 'explain') prompt = `Please explain the meaning (C1/C2 level):\n\n"${sel}"`;
             navigator.clipboard.writeText(prompt).then(() => { alert('已複製指令！請貼給 ChatGPT'); });
         }
-
         function exportAnkiCsv() {
             if(currentVocabCards.length === 0) return alert('沒有卡片可匯出');
             let csvContent = "data:text/csv;charset=utf-8,";
-            currentVocabCards.forEach(c => {
-                const front = `${c.term} [${c.def.replace(/,/g, ' ')}]`;
-                const back = c.context.replace(/,/g, ' ').replace(/\n/g, ' ');
-                csvContent += `${front},${back}\r\n`;
-            });
+            currentVocabCards.forEach(c => { csvContent += `${c.term} [${c.def.replace(/,/g, ' ')}],${c.context.replace(/,/g, ' ').replace(/\n/g, ' ')}\r\n`; });
             const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Anki_Export_${Date.now()}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `Anki_Export_${Date.now()}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
-        
-        /* 修正後的 Share Draft: 全模式支援 */
         function shareDraft() {
-            saveReader();
-            const item = items.find(i => i.id === currentId);
-            let text = `【${item.title}】\n🔗 ${item.url}\n\n`;
-
+            saveReader(); const item = items.find(i => i.id === currentId); let text = `【${item.title}】\n🔗 ${item.url}\n\n`;
             if (currentMode === 'english') {
-                const qa = document.getElementById('engQa').value;
-                if (qa) text += `[🤖 AI Notes]\n${qa}\n\n`;
-                if (currentVocabCards.length > 0) {
-                    text += `[🔤 Vocabulary]\n`;
-                    currentVocabCards.forEach(c => { text += `● ${c.term}`; if (c.def) text += ` : ${c.def}`; if (c.context) text += `\n   > "${c.context}"`; text += `\n`; });
-                } else { text += `(無單字卡)\n`; }
+                const qa = document.getElementById('engQa').value; if (qa) text += `[🤖 AI Notes]\n${qa}\n\n`;
+                if (currentVocabCards.length > 0) { text += `[🔤 Vocabulary]\n`; currentVocabCards.forEach(c => { text += `● ${c.term}`; if (c.def) text += ` : ${c.def}`; if (c.context) text += `\n   > "${c.context}"`; text += `\n`; }); } else { text += `(無單字卡)\n`; }
             } else if (currentMode === 'deep') {
-                const main = document.getElementById('noteMain').value;
-                const sum = document.getElementById('noteSummary').value;
-                if (main) text += `[📝 Notes]\n${main}\n\n`;
-                if (sum) text += `[💡 Summary]\n${sum}\n`;
-            } else {
-                const notes = document.getElementById('userNotes').value;
-                if (notes) text += `[📝 Notes]\n${notes}\n`;
-            }
-
-            if (navigator.share) {
-                navigator.share({ title: item.title, text: text, url: item.url }).catch((err) => { if (err.name !== 'AbortError') { copyToClipboardFallback(text); } });
-            } else { copyToClipboardFallback(text); }
+                const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value;
+                if (main) text += `[📝 Notes]\n${main}\n\n`; if (sum) text += `[💡 Summary]\n${sum}\n`;
+            } else { const notes = document.getElementById('userNotes').value; if (notes) text += `[📝 Notes]\n${notes}\n`; }
+            if (navigator.share) { navigator.share({ title: item.title, text: text, url: item.url }).catch((err) => { if (err.name !== 'AbortError') copyToClipboardFallback(text); }); } else { copyToClipboardFallback(text); }
         }
         function copyToClipboardFallback(text) { navigator.clipboard.writeText(text).then(() => { alert('📋 內容已複製！'); }).catch(() => { alert('❌ 複製失敗'); }); }
 
-        /* --- Handout Export Logic --- */
+        /* HTML Export */
         function downloadCurrentHtml() {
-            const item = items.find(i => i.id === currentId);
-            const title = document.getElementById('readerTitleInput').value || '筆記';
-            const content = document.getElementById('articleView').innerHTML;
-            let notesHtml = '', customStyle = '';
-
+            const item = items.find(i => i.id === currentId); const title = document.getElementById('readerTitleInput').value || '筆記'; const content = document.getElementById('articleView').innerHTML; let notesHtml = '', customStyle = '';
             if (currentMode === 'english') {
                 let cardsHtml = currentVocabCards.length > 0 ? currentVocabCards.map(c => `<div class="vocab-card"><div class="term">${c.term}</div><div class="def">${c.def || ''}</div><div class="context">"${c.context}"</div></div>`).join('') : '<div style="color:#999;">無單字卡</div>';
                 notesHtml = `<h3 style="border-bottom:2px solid #ddd;padding-bottom:5px;">🔤 單字積累</h3><div class="cards-grid">${cardsHtml}</div>`;
                 customStyle = `.cards-grid{display:grid;grid-template-columns:1fr;gap:10px}.vocab-card{background:white;border:1px solid #eee;border-left:4px solid #2563eb;padding:10px;border-radius:4px}.term{font-weight:bold;font-size:1.1em}.def{color:#666;font-size:0.9em}.context{font-size:0.85em;color:#888;font-style:italic;background:#f9f9f9;padding:4px;}`;
             } else if (currentMode === 'deep') {
-                const cue = document.getElementById('noteCues').value;
-                const main = document.getElementById('noteMain').value;
-                const sum = document.getElementById('noteSummary').value;
+                const cue = document.getElementById('noteCues').value; const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value;
                 notesHtml = `<div class="c-sec"><div class="c-lbl">🔑 Cues</div><pre>${cue}</pre></div><div class="c-sec"><div class="c-lbl">📝 Notes</div><pre>${main}</pre></div><div class="c-sec sum"><div class="c-lbl">💡 Summary</div><pre>${sum}</pre></div>`;
                 customStyle = `.c-sec{margin-bottom:15px;border:1px solid #fcd34d;border-radius:6px}.c-lbl{background:#fffbeb;color:#b45309;padding:5px 10px;font-weight:bold;border-bottom:1px solid #fcd34d}pre{padding:10px;white-space:pre-wrap;margin:0;font-family:inherit}.sum{border-color:#f59e0b;box-shadow:0 2px 5px rgba(245,158,11,0.1)}`;
-            } else {
-                notesHtml = `<h3>📝 筆記</h3><pre style="white-space:pre-wrap;background:#fffbeb;padding:15px;border-radius:8px;">${document.getElementById('userNotes').value}</pre>`;
-            }
-
+            } else { notesHtml = `<h3>📝 筆記</h3><pre style="white-space:pre-wrap;background:#fffbeb;padding:15px;border-radius:8px;">${document.getElementById('userNotes').value}</pre>`; }
             const exportTemplate = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:system-ui,-apple-system,sans-serif;background:#f3f4f6;padding:20px;line-height:1.6}.container{max-width:1000px;margin:0 auto;background:white;border-radius:12px;display:flex;flex-wrap:wrap}.header{width:100%;background:#333;color:white;padding:20px}.article-col{flex:2;padding:30px;min-width:300px;border-right:1px solid #eee}.notes-col{flex:1;padding:20px;background:#f9fafb;min-width:280px}img{max-width:100%}${customStyle}@media(max-width:768px){.container{flex-direction:column}.article-col{border-right:none;border-bottom:1px solid #eee}}</style></head><body><div class="container"><div class="header"><h1>${title}</h1><p>來源：${item.domain}</p></div><div class="article-col">${content}</div><div class="notes-col">${notesHtml}</div></div></body></html>`;
-            const blob = new Blob([exportTemplate], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `${title}_講義.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+            const blob = new Blob([exportTemplate], { type: 'text/html' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${title}_講義.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
 
-        /* --- Standard Reader Logic --- */
+        /* Reader State Logic */
         function saveReader() {
             if (!currentId) return;
-            const content = document.getElementById('articleView').innerHTML;
-            const title = document.getElementById('readerTitleInput').value;
-            const noteObj = {
-                lite: document.getElementById('userNotes').value,
-                deep: { cue: document.getElementById('noteCues').value, main: document.getElementById('noteMain').value, sum: document.getElementById('noteSummary').value },
-                eng: { cards: currentVocabCards, qa: document.getElementById('engQa').value },
-                lastMode: currentMode
-            };
+            const content = document.getElementById('articleView').innerHTML; const title = document.getElementById('readerTitleInput').value;
+            const noteObj = { lite: document.getElementById('userNotes').value, deep: { cue: document.getElementById('noteCues').value, main: document.getElementById('noteMain').value, sum: document.getElementById('noteSummary').value }, eng: { cards: currentVocabCards, qa: document.getElementById('engQa').value }, lastMode: currentMode };
             const idx = items.findIndex(i => i.id === currentId);
             if(idx > -1) { items[idx].content = content; items[idx].notes = JSON.stringify(noteObj); items[idx].title = title; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); }
         }
-
         function openReader(id, isError=false) {
             currentId = id; const item = items.find(i => i.id === id);
-            document.getElementById('readerModal').style.display = 'flex';
-            document.getElementById('readerTitleInput').value = item.title;
-            const view = document.getElementById('articleView');
-            view.innerHTML = item.content || (isError ? '⚠️ 內容抓取失敗' : '無內容');
-            
+            document.getElementById('readerModal').style.display = 'flex'; document.getElementById('readerTitleInput').value = item.title;
+            const view = document.getElementById('articleView'); view.innerHTML = item.content || (isError ? '⚠️ 內容抓取失敗' : '無內容');
             try {
                 const noteObj = JSON.parse(item.notes);
-                document.getElementById('userNotes').value = noteObj.lite || '';
-                document.getElementById('noteCues').value = noteObj.deep?.cue || '';
-                document.getElementById('noteMain').value = noteObj.deep?.main || '';
-                document.getElementById('noteSummary').value = noteObj.deep?.sum || '';
-                currentVocabCards = noteObj.eng?.cards || [];
-                document.getElementById('engQa').value = noteObj.eng?.qa || '';
+                document.getElementById('userNotes').value = noteObj.lite || ''; document.getElementById('noteCues').value = noteObj.deep?.cue || ''; document.getElementById('noteMain').value = noteObj.deep?.main || ''; document.getElementById('noteSummary').value = noteObj.deep?.sum || '';
+                currentVocabCards = noteObj.eng?.cards || []; document.getElementById('engQa').value = noteObj.eng?.qa || '';
                 switchMode(noteObj.lastMode || 'lite');
-            } catch (e) {
-                document.getElementById('userNotes').value = item.notes || '';
-                currentVocabCards = [];
-                switchMode('lite');
-            }
+            } catch (e) { document.getElementById('userNotes').value = item.notes || ''; currentVocabCards = []; switchMode('lite'); }
         }
 
-        /* --- Tools & Helpers --- */
+        /* List Functions */
+        function renameItem(id) { const item = items.find(i => i.id === id); const newTitle = prompt("修改標題 (可加 #標籤)：", item.title + (item.tags ? ' #'+item.tags.join(' #') : '')); if (newTitle) { const {title, tags} = extractTags(newTitle); item.title = title; item.tags = tags; save(); render(); } }
+        function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s;save();render();}}
+        function filterByTag(tag) { currentFilterTag = currentFilterTag === tag ? null : tag; render(); }
+        function renderTagsBar() { const allTags = new Set(); items.forEach(i => { if(i.tags) i.tags.forEach(t => allTags.add(t)); }); const bar = document.getElementById('filterBar'); if (allTags.size === 0) { bar.style.display = 'none'; return; } bar.style.display = 'flex'; bar.innerHTML = ''; allTags.forEach(tag => { const active = currentFilterTag === tag ? 'active' : ''; bar.innerHTML += `<div class="filter-tag ${active}" onclick="filterByTag('${tag}')">#${tag}</div>`; }); }
+
         function lookupWord() { const sel = window.getSelection(); currentWord = sel.toString().trim(); if (!currentWord) return; document.getElementById('floatingMenu').style.display = 'none'; document.getElementById('dictPanel').style.display = 'flex'; refreshDict(); }
-        function refreshDict() {
-            const source = document.getElementById('dictSource').value; const iframe = document.getElementById('dictFrame'); const fallback = document.getElementById('dictFallback');
-            fallback.style.display = 'none'; iframe.style.display = 'block';
-            if (source === 'dictcom') { iframe.style.display = 'none'; fallback.style.display = 'flex'; } 
-            else if (source === 'google') { iframe.src = `https://translate.google.com/m?sl=en&tl=zh-TW&q=${encodeURIComponent(currentWord)}`; } 
-            else if (source === 'cambridge') { iframe.src = `https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${encodeURIComponent(currentWord)}`; }
-        }
-        function openDictPopup() {
-            const source = document.getElementById('dictSource').value; let url = '';
-            if (source === 'dictcom') url = `https://www.dictionary.com/browse/${encodeURIComponent(currentWord)}`;
-            else if (source === 'google') url = `https://translate.google.com/?sl=en&tl=zh-TW&text=${encodeURIComponent(currentWord)}`;
-            else url = `https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${encodeURIComponent(currentWord)}`;
-            window.open(url, 'dictPopup', 'width=400,height=600,top=100,left=100');
-        }
+        function refreshDict() { const source = document.getElementById('dictSource').value; const iframe = document.getElementById('dictFrame'); const fallback = document.getElementById('dictFallback'); fallback.style.display = 'none'; iframe.style.display = 'block'; if (source === 'dictcom') { iframe.style.display = 'none'; fallback.style.display = 'flex'; } else if (source === 'google') { iframe.src = `https://translate.google.com/m?sl=en&tl=zh-TW&q=${encodeURIComponent(currentWord)}`; } else if (source === 'cambridge') { iframe.src = `https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${encodeURIComponent(currentWord)}`; } }
+        function openDictPopup() { const source = document.getElementById('dictSource').value; let url = ''; if (source === 'dictcom') url = `https://www.dictionary.com/browse/${encodeURIComponent(currentWord)}`; else if (source === 'google') url = `https://translate.google.com/?sl=en&tl=zh-TW&text=${encodeURIComponent(currentWord)}`; else url = `https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${encodeURIComponent(currentWord)}`; window.open(url, 'dictPopup', 'width=400,height=600,top=100,left=100'); }
         function toggleMask() { document.getElementById('readerWrapper').classList.toggle('mask-mode'); document.getElementById('btnMask').classList.toggle('active'); }
         function toggleShadowing() { isShadowing = !isShadowing; document.getElementById('btnShadow').classList.toggle('active'); if(isShadowing) { document.getElementById('readerWrapper').classList.add('shadowing-mode'); isChunking = false; document.getElementById('btnChunk').classList.remove('active'); } else { document.getElementById('readerWrapper').classList.remove('shadowing-mode'); window.speechSynthesis.cancel(); } }
         function toggleChunking() { isChunking = !isChunking; document.getElementById('btnChunk').classList.toggle('active'); if(isChunking) { isShadowing = false; document.getElementById('btnShadow').classList.remove('active'); document.getElementById('readerWrapper').classList.remove('shadowing-mode'); } }
@@ -645,8 +541,31 @@
         function ttsStop() { window.speechSynthesis.cancel(); }
         function captureReader(){ const el=document.getElementById('readerWrapper'); document.getElementById('loadingMask').style.display='flex'; html2canvas(el,{scale:2}).then(c=>{ document.getElementById('loadingMask').style.display='none'; const l=document.createElement('a'); l.download=`Snap_${Date.now()}.png`; l.href=c.toDataURL(); l.click(); }); }
         
-        function save(){localStorage.setItem('lite_pocket_v53_data',JSON.stringify(items));}
-        function render() { const container = document.getElementById('container'); container.innerHTML = ''; const filtered = items.filter(i => i.status === currentTab); filtered.forEach(item => { const div = document.createElement('div'); div.className = 'card'; div.innerHTML = `<div class="card-header" onclick="openReader(${item.id})"><div style="flex:1"><div class="card-title">${item.title}</div><div class="card-meta">${item.domain}</div></div></div><div class="card-actions"><button class="btn-text btn-read" onclick="openReader(${item.id})">📖</button><button class="btn-text" onclick="deleteItem(${item.id})">🗑️</button></div>`; container.appendChild(div); }); }
+        function save(){localStorage.setItem('lite_pocket_v56_data',JSON.stringify(items));}
+        function render() { 
+            renderTagsBar();
+            const container = document.getElementById('container'); container.innerHTML = ''; 
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = items.filter(i => {
+                const matchTab = i.status === currentTab;
+                const matchTag = !currentFilterTag || (i.tags && i.tags.includes(currentFilterTag));
+                const matchSearch = !searchVal || i.title.toLowerCase().includes(searchVal);
+                return matchTab && matchTag && matchSearch;
+            });
+            if(filtered.length===0) container.innerHTML='<div style="text-align:center;color:#999;margin-top:20px">無項目</div>'; 
+            filtered.forEach(item => { 
+                const favicon = item.domain==='📝 Note'?'':`https://www.google.com/s2/favicons?domain=${item.domain}&sz=32`; 
+                const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"';
+                let tagsHtml = ''; if(item.tags && item.tags.length > 0) tagsHtml = item.tags.map(t => `<span class="tag-badge">#${t}</span>`).join(' ');
+                const isChecked = selectedIds.has(item.id) ? 'checked' : ''; 
+                const checkDisplay = isSelectMode ? 'block' : 'none'; 
+                const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`; 
+                const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card'; 
+                const div = document.createElement('div'); div.className = activeCard; 
+                div.innerHTML = `<div class="card-header" onclick="${clickAction}"><div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div><div style="flex:1"><div class="card-meta"><img src="${favicon}" class="site-icon" onerror="this.style.display='none'"> ${item.domain} <span class="date-badge">${item.date}</span> ${tagsHtml}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button><button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️</button></div>`; 
+                container.appendChild(div); 
+            }); 
+        }
         function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, status: 'inbox', content: data.content, notes: '', date: new Date().toLocaleDateString() }; items.unshift(item); save(); render(); }
         async function fetchWithFallbacks(url) { try{ const res=await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`); const d=await res.json(); return d.contents; }catch(e){return null;} }
         function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id);save();render();}}
@@ -657,14 +576,15 @@
         function doImport(){try{items=JSON.parse(document.getElementById('importArea').value);save();render();alert('成功');closeIO();}catch(e){alert('錯誤');}}
         function closeIO(){document.getElementById('exportModal').style.display='none';document.getElementById('importModal').style.display='none';}
         function closeReader(){document.getElementById('readerModal').style.display='none';}
-        function exportListToHtml() { 
-             const list = items.filter(i=>i.status===currentTab).map(i=>`<li><a href="${i.url}" target="_blank">${i.title}</a> (${i.domain})</li>`).join('');
-             const blob = new Blob([`<html><body><h1>閱讀清單</h1><ul>${list}</ul></body></html>`], {type:'text/html'});
-             const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'list.html'; a.click();
-        }
+        function exportListToHtml() { const list = items.filter(i=>i.status===currentTab).map(i=>`<li><a href="${i.url}" target="_blank">${i.title}</a> (${i.domain})</li>`).join(''); const blob = new Blob([`<html><body><h1>閱讀清單</h1><ul>${list}</ul></body></html>`], {type:'text/html'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'list.html'; a.click(); }
         function extractTags(text) { const tags = text.match(/#[\w\u4e00-\u9fa5]+/g) || []; const cleanTitle = text.replace(/#[\w\u4e00-\u9fa5]+/g, '').trim(); return { title: cleanTitle, tags: tags.map(t => t.replace('#', '')) }; }
-        function toggleSelectMode(){alert('清單選取暫略');} function toggleTheme(){ if(document.body.getAttribute('data-theme')==='dark'){document.body.removeAttribute('data-theme');localStorage.setItem('lite_pocket_theme','light');}else{document.body.setAttribute('data-theme','dark');localStorage.setItem('lite_pocket_theme','dark');}} function smartPaste(){navigator.clipboard.readText().then(t=>{if(t)document.getElementById('newUrl').value=t;});} function clearInput(){document.getElementById('newUrl').value='';document.getElementById('newTitle').value='';} function checkUrlInput(){} function detectTitle(){} function updateTitleBar(){} function exportSelectedUrls(){} function clearReadItems(){}
-        
+        function toggleSelectMode() { isSelectMode = !isSelectMode; if (!isSelectMode) selectedIds.clear(); document.getElementById('defaultBottomBar').style.display = isSelectMode ? 'none' : 'flex'; document.getElementById('selectBottomBar').style.display = isSelectMode ? 'flex' : 'none'; render(); }
+        function toggleCheck(id) { if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id); document.getElementById('selectCount').innerText = selectedIds.size; render(); }
+        function exportSelectedUrls() { if (selectedIds.size === 0) return alert('請先勾選'); const urls = items.filter(i => selectedIds.has(i.id) && i.url.startsWith('http')).map(i => i.url); if (urls.length === 0) return alert('無有效網址'); navigator.clipboard.writeText(urls.join('\n')).then(() => { alert(`✅ 已複製 ${urls.length} 個網址！`); toggleSelectMode(); }); }
+        function toggleTheme(){ if(document.body.getAttribute('data-theme')==='dark'){document.body.removeAttribute('data-theme');localStorage.setItem('lite_pocket_theme','light');}else{document.body.setAttribute('data-theme','dark');localStorage.setItem('lite_pocket_theme','dark');}} 
+        function clearReadItems() { if(confirm('清除所有「已讀」？')) { items = items.filter(i=>i.status==='inbox'); save(); render(); } }
+        function extractDateInfo(doc, html) { let metaDate = null; const selectors = ['meta[property="article:published_time"]', 'meta[property="article:modified_time"]', 'meta[property="og:updated_time"]', 'meta[name="pubdate"]', 'meta[name="date"]', 'meta[name="lastmod"]', 'time[datetime]']; for (let sel of selectors) { const el = doc.querySelector(sel); if (el) { const val = el.getAttribute('content') || el.getAttribute('datetime'); if (val) { try { const d = new Date(val); if(!isNaN(d.getTime())) metaDate = d; } catch(e){} } } if (metaDate) break; } if (metaDate) return { date: metaDate.toLocaleDateString(), type: 'single' }; return { date: new Date().toLocaleDateString(), type: 'single' }; }
+
         init();
     </script>
 </body>
