@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V62：全功能回歸版</title>
+    <title>Lite-Pocket V64：集大成版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* --- 基礎樣式 --- */
+        /* --- 基礎設定 --- */
         :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --card-bg: #ffffff;
             --border: #e5e7eb; --meta: #6b7280; --input-bg: #ffffff;
             --tag-bg: #e0f2fe; --tag-text: #0284c7; }
@@ -19,12 +19,10 @@
         * { box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 80px 0; height: 100vh; overflow: hidden; transition: 0.3s; }
         
-        /* --- 導航列 (左上角工具箱) --- */
+        /* --- 導航列 --- */
         .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 55px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .nav-left { display: flex; align-items: center; gap: 10px; }
         .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
-        
-        /* 工具箱按鈕 */
         .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: 0.2s; }
         .tool-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
 
@@ -33,7 +31,6 @@
         .nav-item.active { background: var(--card-bg); color: var(--primary); font-weight:bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .theme-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0 5px; }
         
-        /* 工具下拉選單 */
         .tool-menu { position: absolute; top: 60px; left: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 180px; z-index: 200; overflow: hidden; animation: fadeIn 0.2s; }
         .tool-item { padding: 12px 15px; cursor: pointer; font-size: 0.9rem; color: var(--text); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); transition: 0.2s; }
         .tool-item:last-child { border-bottom: none; }
@@ -78,7 +75,7 @@
         .btn-text:hover { background: var(--bg); color: var(--primary); }
         .btn-read { color: var(--primary); font-weight: 600; }
 
-        /* --- 底部工具列 (簡潔版) --- */
+        /* --- 底部工具列 --- */
         .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); height: 60px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); z-index: 90; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); }
         .bottom-btn { background: none; border: none; font-size: 0.85rem; display: flex; align-items: center; color: var(--meta); gap: 6px; cursor: pointer; font-weight: 500; padding: 8px 15px; border-radius: 20px; }
         .bottom-btn.select-mode { color: #8b5cf6; border: 1px solid #ddd; } 
@@ -105,6 +102,7 @@
         .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; flex-shrink:0; }
         .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } 
         
+        /* 閱讀器佈局 */
         .reader-content-wrapper { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; transition: 0.3s; }
         .toc-section { width: 0; opacity: 0; overflow-y: auto; background: var(--bg); border-right: 1px solid var(--border); transition: 0.3s; padding: 0; font-size: 0.85rem; }
         .deep-mode .toc-section { width: 220px; padding: 15px; opacity: 1; }
@@ -117,6 +115,7 @@
         .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
         .inline-note-box { display: block; margin: 10px 0; padding: 8px 12px; background: #fff7ed; border-left: 4px solid #f97316; color: #9a3412; font-size: 0.95rem; border-radius: 4px; }
         .inline-note-box::before { content: '📝 筆記：'; font-weight: bold; margin-right: 5px; color: #ea580c; }
+        
         .mask-mode span[style*="background-color"] { color: transparent !important; background-color: #374151 !important; border-radius: 3px; cursor: help; transition: 0.2s; }
         .mask-mode span[style*="background-color"]:hover { color: inherit !important; background-color: #f3f4f6 !important; }
         .chunk-sep { color: #ef4444; font-weight: bold; margin: 0 2px; font-size: 1.1em; user-select: none; }
@@ -167,6 +166,7 @@
         .dict-iframe { width: 100%; height: 100%; border: none; }
         .dict-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; color: #666; display:none;}
 
+        /* RWD 優化 */
         @media (max-width: 1024px) { .notes-section { min-width: 280px; } }
         @media (max-width: 768px) {
             .reader-container { flex-direction: column-reverse; }
@@ -193,7 +193,7 @@
 
     <nav class="navbar">
         <div class="nav-left">
-            <div class="nav-brand">📚 V62</div>
+            <div class="nav-brand">📚 V64</div>
             <button class="tool-btn" onclick="toggleToolMenu()">🔧 工具箱 ▼</button>
             <button class="theme-btn" onclick="toggleTheme()">🌓</button>
         </div>
@@ -256,8 +256,9 @@
             <div class="audio-btn-group"><button class="audio-btn" onclick="ttsToggle()" id="ttsPlayBtn">▶ 朗讀</button><button class="audio-btn" onclick="ttsStop()">⏹ 停止</button></div>
             
             <div class="tool-sep"></div>
-            <button class="editor-btn" onclick="cleanKeepImages()">🖼️ 圖文</button>
-            <button class="editor-btn" onclick="clearStyle()">📝 純文</button>
+            <button class="editor-btn" onclick="autoExtract()" style="color:#059669;">🪄 智慧重整</button>
+            <button class="editor-btn" onclick="keepSelectionOnly()" style="color:#ef4444;">✂️ 保留選取</button>
+            <button class="editor-btn" onclick="clearStyle()">📝 純文模式</button>
             <div class="tool-sep"></div>
 
             <button class="editor-btn" onclick="downloadCurrentHtml()" style="color:#2563eb;font-weight:bold;">📤 匯出講義</button>
@@ -332,10 +333,10 @@
 
         function init() {
             try {
-                const saved = localStorage.getItem('lite_pocket_v62_data'); // Key V62
+                const saved = localStorage.getItem('lite_pocket_v64_data'); // Key V64
                 if (saved) { items = JSON.parse(saved); } 
                 else {
-                    const oldKeys = ['lite_pocket_v61_data', 'lite_pocket_v60_data', 'lite_pocket_v58_data', 'lite_pocket_v57_1_data', 'lite_pocket_v56_data'];
+                    const oldKeys = ['lite_pocket_v63_data', 'lite_pocket_v62_data', 'lite_pocket_v61_data', 'lite_pocket_v60_data', 'lite_pocket_v58_data'];
                     for(let key of oldKeys) { const old = localStorage.getItem(key); if(old) { try { items = JSON.parse(old); break; } catch(e) {} } }
                 }
                 if (!Array.isArray(items)) items = [];
@@ -356,22 +357,44 @@
             });
         }
 
-        /* --- V62: Cleanup Functions (Restored from V39) --- */
-        function cleanKeepImages() {
-            let raw = document.getElementById('articleView').innerHTML;
-            if(!raw || raw.length < 10) return alert('內容太少');
-            let clean = DOMPurify.sanitize(raw, {
-                ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'],
-                ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style'],
-                FORBID_ATTR: ['width','height']
-            });
-            document.getElementById('articleView').innerHTML = clean;
+        /* --- V63+V62: Formatting Tools --- */
+        function autoExtract() {
+            const root = document.getElementById('articleView');
+            const doc = document.implementation.createHTMLDocument('temp');
+            doc.body.innerHTML = root.innerHTML;
+            const reader = new Readability(doc);
+            const article = reader.parse();
+            if (article && article.content) {
+                if(confirm('系統已偵測到文章主體，是否替換？')) { root.innerHTML = article.content; }
+            } else { alert('⚠️ 無法自動識別主體，請嘗試使用「✂️ 保留選取」功能。'); }
         }
+
+        function keepSelectionOnly() {
+            const sel = window.getSelection();
+            if(sel.rangeCount > 0 && !sel.isCollapsed) {
+                 if (!document.getElementById('articleView').contains(sel.anchorNode)) return alert('請在文章區域內選取');
+                 const range = sel.getRangeAt(0);
+                 const content = range.cloneContents();
+                 const div = document.createElement('div');
+                 div.appendChild(content);
+                 if(confirm('確定只保留選取的範圍，刪除其他內容嗎？')) { document.getElementById('articleView').innerHTML = div.innerHTML; }
+            } else { alert('請先在文章中「滑鼠選取」您要保留的範圍，再按此按鈕。'); }
+        }
+
         function clearStyle() {
+            if(!confirm('這會移除所有圖片與排版，只保留純文字，確定嗎？')) return;
             let txt = document.getElementById('articleView').innerText;
             document.getElementById('articleView').innerHTML = txt.split('\n').filter(t=>t.trim()).map(t=>`<p>${t}</p>`).join('');
         }
+        
+        function cleanKeepImages() {
+            let raw = document.getElementById('articleView').innerHTML;
+            if(!raw || raw.length < 10) return alert('內容太少');
+            let clean = DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'], ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style'], FORBID_ATTR: ['width','height'] });
+            document.getElementById('articleView').innerHTML = clean;
+        }
 
+        /* --- Core Logic --- */
         function toggleToolMenu() { const menu = document.getElementById('toolMenu'); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; }
 
         async function confirmAdd() {
@@ -379,7 +402,6 @@
             const titleInput = document.getElementById('newTitle').value.trim();
             if (!urlInput && !titleInput) return alert('請輸入網址或標題');
             const { title, tags } = extractTags(titleInput || urlInput || "未命名筆記");
-            // V60: Auto Tagging
             if (urlInput.match(/youtube\.com|youtu\.be/i)) tags.push('影音');
             else if (urlInput.match(/\.(jpg|jpeg|png|gif|webp)$/i)) tags.push('圖片');
 
@@ -440,7 +462,7 @@
         function smartPaste(){navigator.clipboard.readText().then(t=>{if(t){document.getElementById('newUrl').value=t; checkUrlInput();}});} 
         function clearInput(){document.getElementById('newUrl').value='';document.getElementById('newTitle').value='';updateTitleBar('reset');} 
         function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, status: 'inbox', content: data.content, notes: '', date: new Date().toLocaleDateString() }; items.unshift(item); save(); render(); return item; }
-        function save(){localStorage.setItem('lite_pocket_v62_data',JSON.stringify(items));}
+        function save(){localStorage.setItem('lite_pocket_v64_data',JSON.stringify(items));}
         
         function addVocabCard() { event.preventDefault(); const sel = window.getSelection(); const text = sel.toString().trim(); if (text) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, 'yellow'); let context = ""; const node = sel.anchorNode; if(node && node.parentElement) { context = node.parentElement.innerText.trim(); if(context.length > 200) context = "..." + text + "..."; } currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context }); renderVocabCards(); } document.getElementById('floatingMenu').style.display = 'none'; }
         function renderVocabCards() { const list = document.getElementById('vocabCardsList'); if(currentVocabCards.length === 0) { list.innerHTML = `<div style="text-align:center;color:#9ca3af;margin-top:20px;font-size:0.9rem;">選取單字 -> 浮動選單 [📝]<br>自動建立卡片</div>`; return; } list.innerHTML = ''; currentVocabCards.forEach((card, index) => { const el = document.createElement('div'); el.className = 'vocab-card'; el.innerHTML = `<div class="vc-header"><input type="text" class="vc-term" value="${card.term}" oninput="updateCard(${index}, 'term', this.value)"><span class="vc-del" onclick="removeCard(${index})">×</span></div><input type="text" class="vc-def" placeholder="定義 / 筆記..." value="${card.def}" oninput="updateCard(${index}, 'def', this.value)"><textarea class="vc-context" rows="2" oninput="updateCard(${index}, 'context', this.value)">${card.context}</textarea>`; list.appendChild(el); }); }
