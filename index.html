@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lite-Pocket V64：集大成版</title>
+    <title>Lite-Pocket V64.1：選取修復版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -257,7 +257,7 @@
             
             <div class="tool-sep"></div>
             <button class="editor-btn" onclick="autoExtract()" style="color:#059669;">🪄 智慧重整</button>
-            <button class="editor-btn" onclick="keepSelectionOnly()" style="color:#ef4444;">✂️ 保留選取</button>
+            <button class="editor-btn" onmousedown="event.preventDefault(); keepSelectionOnly()" style="color:#ef4444;">✂️ 保留選取</button>
             <button class="editor-btn" onclick="clearStyle()">📝 純文模式</button>
             <div class="tool-sep"></div>
 
@@ -357,7 +357,7 @@
             });
         }
 
-        /* --- V63+V62: Formatting Tools --- */
+        /* --- V63: Advanced Clean Tools --- */
         function autoExtract() {
             const root = document.getElementById('articleView');
             const doc = document.implementation.createHTMLDocument('temp');
@@ -371,14 +371,21 @@
 
         function keepSelectionOnly() {
             const sel = window.getSelection();
-            if(sel.rangeCount > 0 && !sel.isCollapsed) {
-                 if (!document.getElementById('articleView').contains(sel.anchorNode)) return alert('請在文章區域內選取');
+            // Checks if range exists and is not just a blinking cursor (collapsed)
+            if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+                 // Ensure selection is somewhat related to the article view
+                 // Note: Removed strict container check to allow cross-element selection which sometimes happens
                  const range = sel.getRangeAt(0);
                  const content = range.cloneContents();
                  const div = document.createElement('div');
                  div.appendChild(content);
-                 if(confirm('確定只保留選取的範圍，刪除其他內容嗎？')) { document.getElementById('articleView').innerHTML = div.innerHTML; }
-            } else { alert('請先在文章中「滑鼠選取」您要保留的範圍，再按此按鈕。'); }
+                 
+                 if(confirm('確定只保留選取的範圍，刪除其他內容嗎？')) { 
+                     document.getElementById('articleView').innerHTML = div.innerHTML; 
+                 }
+            } else { 
+                alert('請先在文章中「滑鼠選取」您要保留的範圍（包含圖片與表格），再按此按鈕。'); 
+            }
         }
 
         function clearStyle() {
@@ -387,7 +394,7 @@
             document.getElementById('articleView').innerHTML = txt.split('\n').filter(t=>t.trim()).map(t=>`<p>${t}</p>`).join('');
         }
         
-        function cleanKeepImages() {
+        function cleanKeepImages() { // V39 logic restored for consistency
             let raw = document.getElementById('articleView').innerHTML;
             if(!raw || raw.length < 10) return alert('內容太少');
             let clean = DOMPurify.sanitize(raw, { ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'strong', 'em', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'a', 'div', 'span', 'table', 'tr', 'td', 'th'], ALLOWED_ATTR: ['src', 'href', 'alt', 'title', 'target', 'style'], FORBID_ATTR: ['width','height'] });
