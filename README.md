@@ -2,6 +2,7 @@
 
 ## 專案簡介
 基於單一 HTML 檔案開發的個人稍後閱讀管理與筆記工具。不需要安裝資料庫或後端伺服器，所有資料皆儲存在您的瀏覽器本地端（LocalStorage）。
+https://progress01.github.io/pocket.html/
 
 ## 核心功能
 1. 智慧收藏
