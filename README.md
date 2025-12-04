@@ -21,7 +21,7 @@ https://progress01.github.io/pocket.html/
 支援將所有文章與筆記匯出為 JSON 格式備份，或將單篇文章匯出為 HTML 講義。亦可匯出 Anki 通用的 CSV 單字卡。
 
 ## 使用方式
-將 index.html 檔案下載後，直接使用 Chrome、Safari 或 Edge 等現代瀏覽器開啟即可。
+將 index.html 檔案下載後，直接使用 Chrome、Safari 或 Edge 等瀏覽器開啟即可。
 
 注意事項
 由於瀏覽器的安全性限制，若您直接在電腦資料夾中點擊開啟檔案（file 協定），剪貼簿自動貼上功能可能會受限。建議將此檔案部署至 GitHub Pages 等支援 HTTPS 的環境，以獲得最完整的操作體驗。
