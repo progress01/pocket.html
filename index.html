@@ -2,358 +2,292 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Lite-Pocket</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Readability/0.4.4/Readability.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
-    <!-- 🔥 新增 Firebase CDN -->
+    <!-- 核心套件：Markdown 渲染與淨化 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+
+    <!-- Firebase CDN -->
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
 
     <style>
-        /* --- 基礎變數 --- */
+        /* --- 基礎變數與全局設定 --- */
         :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --card-bg: #ffffff;
             --border: #e5e7eb; --meta: #6b7280; --input-bg: #ffffff;
-            --tag-bg: #e0f2fe; --tag-text: #0284c7; }
-        [data-theme="dark"] { --primary: #60a5fa; --bg: #111827; --text: #f3f4f6; --card-bg: #1f2937;
-            --border: #374151; --meta: #9ca3af; --input-bg: #374151;
-            --tag-bg: #0c4a6e; --tag-text: #7dd3fc; }
-
-        * { box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 80px 0; height: 100vh; overflow: hidden; transition: 0.3s; }
+            --tag-bg: #e0f2fe; --tag-text: #0284c7; --ai-bg: #f5f3ff; --ai-border: #ddd6fe; }
         
-        /* 🔥 新增登入畫面樣式 */
-        #login-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; color: white; }
-        .login-box { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; width: 90%; max-width: 350px; }
-        .login-btn { width: 100%; background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-        .login-btn:hover { background: #2563eb; }
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 60px 0 calc(80px + env(safe-area-inset-bottom)) 0; height: 100vh; overflow: hidden; }
+        
+        /* 登入畫面 */
+        #login-screen { position: fixed; inset: 0; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; color: white; padding: 20px; }
+        .login-box { background: var(--card-bg); color: var(--text); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; width: 100%; max-width: 350px; }
+        .login-btn { width: 100%; background: #3b82f6; color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; font-size: 1.05rem; cursor: pointer; margin-top: 20px; transition: 0.2s; }
+        .sync-spinner { display: none; margin-top: 15px; color: var(--meta); font-size: 0.9rem; }
 
         /* --- 導航列 --- */
-        .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 55px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .nav-left { display: flex; align-items: center; gap: 10px; }
-        .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.1rem; }
-        .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: 0.2s; }
-        .tool-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
-
-        .nav-menu { display: flex; gap: 5px; background: var(--bg); padding: 3px; border-radius: 8px; overflow-x: auto; white-space: nowrap; max-width: 50vw; scrollbar-width: none; }
+        .navbar { position: fixed; top: 0; left: 0; right: 0; background: var(--card-bg); height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; border-bottom: 1px solid var(--border); z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .nav-left { display: flex; align-items: center; gap: 8px; }
+        .nav-brand { font-weight: 800; color: var(--primary); font-size: 1.2rem; }
+        .tool-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 0.95rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+        
+        .nav-menu { display: flex; gap: 5px; background: var(--bg); padding: 4px; border-radius: 8px; overflow-x: auto; white-space: nowrap; max-width: 55vw; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .nav-menu::-webkit-scrollbar { display: none; }
-        .nav-item { cursor: pointer; color: var(--meta); font-size: 0.85rem; padding: 4px 12px; border-radius: 6px; font-weight: 500; transition: 0.2s; }
+        .nav-item { cursor: pointer; color: var(--meta); font-size: 0.9rem; padding: 6px 14px; border-radius: 6px; font-weight: 500; transition: 0.2s; }
         .nav-item.active { background: var(--card-bg); color: var(--primary); font-weight:bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .theme-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0 5px; }
-        
-        .tool-menu { position: absolute; top: 60px; left: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 200px; z-index: 200; overflow: hidden; animation: fadeIn 0.2s; }
-        .tool-item { padding: 12px 15px; cursor: pointer; font-size: 0.9rem; color: var(--text); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); transition: 0.2s; }
-        .tool-item:last-child { border-bottom: none; }
-        .tool-item:hover { background: var(--bg); color: var(--primary); }
+
+        .tool-menu { position: absolute; top: 65px; left: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.15); display: none; flex-direction: column; min-width: 220px; z-index: 200; overflow: hidden; }
+        .tool-item { padding: 14px 15px; cursor: pointer; font-size: 0.95rem; color: var(--text); display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+        .tool-item:hover { background: var(--bg); }
         .tool-item.danger { color: #ef4444; font-weight: bold; }
-        .tool-item.danger:hover { background: #fee2e2; color: #dc2626; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(-5px); } to { opacity:1; transform:translateY(0); } }
 
-        .main-scroller { height: 100%; overflow-y: auto; padding-bottom: 80px; }
+        .main-scroller { height: 100%; overflow-y: auto; padding-bottom: 100px; -webkit-overflow-scrolling: touch; }
 
-        /* --- 加入面板 --- */
-        .add-panel { max-width: 900px; margin: 15px auto; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
-        .input-row { display: flex; gap: 8px; align-items: center; }
-        .input-field { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; outline: none; background: var(--input-bg); color: var(--text); }
-        .btn-paste { background: #4b5563; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; white-space: nowrap;}
-        .btn-confirm { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; transition: 0.2s;}
-        .btn-confirm:active { transform: scale(0.98); }
+        /* --- 捕獲面板 (Add Panel) --- */
+        .add-panel { max-width: 900px; margin: 15px auto; padding: 15px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; margin-inline: 15px; }
+        .input-row { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+        .input-field { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; outline: none; background: var(--input-bg); color: var(--text); }
+        .ai-summary-input { width: 100%; padding: 12px; border: 1px dashed var(--ai-border); border-radius: 8px; font-size: 0.95rem; outline: none; background: var(--ai-bg); color: var(--text); resize: vertical; min-height: 80px; font-family: inherit; transition: 0.2s; }
+        .ai-summary-input:focus { border: 1px solid #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1); }
+        .btn-paste { background: #4b5563; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.95rem; white-space: nowrap;}
+        .btn-confirm { background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 1.05rem; cursor: pointer; width: 100%; transition: 0.2s;}
         
-        #titleStatus { height: 3px; background: var(--border); width: 100%; border-radius: 2px; overflow: hidden; margin-top: -5px; }
-        #titleBar { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s, background 0.3s; }
+        #titleStatus { height: 4px; background: var(--border); width: 100%; border-radius: 2px; overflow: hidden; margin-top: -6px; }
+        #titleBar { height: 100%; width: 0%; background: var(--primary); transition: 0.3s; }
 
-        /* --- 搜尋與篩選 --- */
-        .search-row { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 10px; }
-        .search-input { flex:1; padding: 8px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); outline:none; font-size: 0.9rem; }
-        .filter-bar { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; gap: 5px; overflow-x: auto; }
-        .filter-tag { font-size: 0.8rem; padding: 4px 10px; background: var(--tag-bg); color: var(--tag-text); border-radius: 15px; cursor: pointer; white-space: nowrap; }
-        .filter-tag.active { background: var(--primary); color: white; }
+        /* --- 搜尋與智慧標籤列 --- */
+        .search-row { max-width: 900px; margin: 0 auto 10px auto; padding: 0 15px; display: flex; }
+        .search-input { flex:1; padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); outline:none; font-size: 1rem; }
+        
+        /* 智慧標籤過濾列 (Smart Folders) */
+        .filter-bar { max-width: 900px; margin: 0 auto 15px auto; padding: 0 15px; display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; align-items: center; }
+        .filter-bar::-webkit-scrollbar { display: none; }
+        .filter-tag { font-size: 0.85rem; padding: 6px 14px; background: white; color: var(--meta); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: bold; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
+        .filter-tag.active { background: var(--tag-bg); color: var(--primary); border-color: var(--primary); }
 
         /* --- 卡片列表 --- */
-        .grid-container { max-width: 900px; margin: 0 auto; padding: 0 15px; display: grid; gap: 12px; }
-        .card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; transition:0.2s; }
-        .card.selecting { border-color: var(--primary); background: rgba(37, 99, 235, 0.05); }
-        .card-header { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
-        .card-meta { font-size: 0.75rem; color: var(--meta); display: flex; align-items: center; gap: 6px; width: 100%; flex-wrap: wrap; }
-        .site-icon { font-size: 1.2rem; margin-right: 2px; line-height: 1; }
-        .tag-badge { font-size: 0.7rem; background: var(--tag-bg); color: var(--tag-text); padding: 1px 6px; border-radius: 4px; cursor: pointer; }
-        .date-badge { font-size: 0.7rem; background: var(--bg); color: var(--meta); padding: 1px 6px; border-radius: 4px; margin-left: auto; }
-        .card-title { font-weight: 700; font-size: 1.05rem; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-note-badge { font-size: 0.7rem; background: #fffbeb; color: #b45309; padding: 2px 6px; border-radius: 4px; border: 1px solid #fcd34d; display: inline-block; margin-top: 5px;}
-        .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; padding-top: 10px; border-top: 1px solid var(--border); overflow-x: auto; gap: 5px;}
-        .btn-text { background: none; border: none; font-size: 0.85rem; color: var(--meta); cursor: pointer; padding: 5px 8px; border-radius: 4px; display:flex; align-items:center; gap:4px; white-space:nowrap; }
+        .grid-container { max-width: 900px; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .card { background: var(--card-bg); padding: 16px; border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; transition:0.2s; }
+        .card-header { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+        .card-meta { font-size: 0.8rem; color: var(--meta); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+        .site-icon { font-size: 1.2rem; margin-right: 2px; }
+        .date-badge { background: var(--bg); padding: 2px 8px; border-radius: 4px; margin-left: auto; }
+        .card-title { font-weight: 700; font-size: 1.1rem; line-height: 1.45; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 4px;}
+        .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tag-badge { font-size: 0.75rem; background: var(--tag-bg); color: var(--tag-text); padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        .card-ai-badge { font-size: 0.75rem; background: var(--ai-bg); color: #6d28d9; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--ai-border); font-weight: bold;}
+        
+        .card-actions { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); overflow-x: auto; gap: 8px; scrollbar-width: none; }
+        .card-actions::-webkit-scrollbar { display: none; }
+        .btn-text { background: none; border: none; font-size: 0.9rem; color: var(--meta); cursor: pointer; padding: 6px 10px; border-radius: 6px; display:flex; align-items:center; gap:4px; white-space:nowrap; font-weight: 500; }
         .btn-text:hover { background: var(--bg); color: var(--primary); }
-        .btn-read { color: var(--primary); font-weight: 600; }
+        .btn-read { color: var(--primary); font-weight: 700; }
 
-        /* 其餘原有 UI CSS 保持不變... */
-        .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); height: 60px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border); z-index: 90; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); }
-        .bottom-btn { background: none; border: none; font-size: 0.85rem; display: flex; align-items: center; color: var(--meta); gap: 6px; cursor: pointer; font-weight: 500; padding: 8px 15px; border-radius: 20px; }
-        .bottom-btn.select-mode { color: #8b5cf6; border: 1px solid #ddd; } 
-        .bottom-btn.export-urls { color: #059669; font-weight: bold; }
-
+        /* --- 閱讀器 / 涵攝面板 (Modal) --- */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--card-bg); z-index: 2000; display: none; flex-direction: column; }
-        .modal-header { height: 55px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; background: var(--card-bg); flex-shrink: 0; }
-        .modal-title-input { font-weight: bold; font-size: 1.1rem; border: none; outline: none; flex: 1; text-align: center; background: transparent; color: var(--text); margin: 0 10px; }
-        .btn-close { font-size: 0.9rem; cursor: pointer; padding: 8px 12px; color: var(--meta); background: var(--bg); border-radius: 6px; display: flex; align-items: center; gap: 4px;}
-        .btn-save { font-weight: bold; color: white; background: var(--primary); padding: 6px 15px; border-radius: 20px; border: none; font-size: 0.9rem; cursor: pointer;}
-        .mode-switch-group { display: flex; background: #e5e7eb; border-radius: 12px; padding: 2px; }
-        .mode-btn { border: none; background: none; font-size: 0.8rem; padding: 4px 10px; cursor: pointer; border-radius: 10px; color: #666; transition: 0.2s; white-space: nowrap; }
-        .mode-btn.active { background: white; color: var(--primary); font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        .mode-btn.active[data-mode="english"] { color: #dc2626; } 
-
-        .modal-toolbar { display: flex; gap: 8px; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; align-items: center; flex-shrink: 0;}
-        .tool-sep { width: 1px; height: 20px; background: #ccc; margin: 0 5px; flex-shrink: 0; }
-        .editor-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.85rem; color: var(--meta); cursor: pointer; display: flex; align-items: center; gap: 5px; flex-shrink:0; white-space: nowrap;}
-        .editor-btn.active { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
-        .audio-btn-group { display: flex; align-items: center; background: #f97316; color: white; border-radius: 20px; padding: 0 5px; flex-shrink: 0;}
-        .audio-btn { background: none; border: none; color: white; padding: 5px 10px; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; white-space: nowrap;}
-        .highlighter { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; cursor: pointer; display: inline-block; flex-shrink:0; }
-        .hl-yellow { background: #fef08a; } .hl-green { background: #bbf7d0; } 
+        .modal-header { display: flex; flex-direction: column; background: var(--card-bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
         
-        .reader-content-wrapper { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; transition: 0.3s; }
-        .toc-section { width: 0; opacity: 0; overflow-y: auto; background: var(--bg); border-right: 1px solid var(--border); transition: 0.3s; padding: 0; font-size: 0.85rem; }
-        .deep-mode .toc-section { width: 220px; padding: 15px; opacity: 1; }
-        .toc-item { padding: 4px 0; color: var(--meta); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .toc-item:hover { color: var(--primary); font-weight: bold; }
-        .toc-h1 { margin-left: 0; font-weight: bold; } .toc-h2 { margin-left: 10px; } .toc-h3 { margin-left: 20px; }
-
-        .article-section { flex: 2; overflow-y: auto; padding: 30px; border-right: 1px solid var(--border); display: flex; justify-content: center; background: var(--card-bg); transition: 0.3s;}
-        .article-view { font-size: 18px; line-height: 1.7; color: var(--text); max-width: 800px; width: 100%; outline: none; }
-        .article-view img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
-        .inline-note-box { display: block; margin: 10px 0; padding: 8px 12px; background: #fff7ed; border-left: 4px solid #f97316; color: #9a3412; font-size: 0.95rem; border-radius: 4px; }
-        .inline-note-box::before { content: '📝 筆記：'; font-weight: bold; margin-right: 5px; color: #ea580c; }
-        .mask-mode span[style*="background-color"] { color: transparent !important; background-color: #374151 !important; border-radius: 3px; cursor: help; transition: 0.2s; }
-        .mask-mode span[style*="background-color"]:hover { color: inherit !important; background-color: #f3f4f6 !important; }
-        .chunk-sep { color: #ef4444; font-weight: bold; margin: 0 2px; font-size: 1.1em; user-select: none; }
-        .shadowing-mode .article-view { cursor: pointer; } .shadowing-mode .article-view p:hover { background: rgba(37,99,235,0.05); }
-
-        .notes-section { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-width: 320px; max-width: 450px; transition: 0.3s; }
-        .notes-header { padding: 10px 15px; font-weight: bold; color: #b45309; background: #fffbeb; border-bottom: 1px solid #fcd34d; font-size: 0.9rem; display:flex; justify-content:space-between; align-items:center;}
-        .notes-input { flex: 1; width: 100%; padding: 15px; border: none; font-size: 16px; font-family: inherit; resize: none; outline: none; background: #fffbeb; color: #451a03; line-height: 1.6; }
-        .cornell-container { display: none; flex: 1; flex-direction: column; height: 100%; }
-        .deep-mode .cornell-container { display: flex; }
-        .cornell-box { display: flex; flex-direction: column; border-bottom: 1px solid #fcd34d; }
-        .cornell-label { font-size: 0.75rem; color: #b45309; background: #fff7ed; padding: 4px 10px; font-weight: bold; }
-        .cornell-text { flex: 1; border: none; background: #fffbeb; padding: 10px; font-size: 0.95rem; resize: none; outline: none; font-family: inherit; color: #451a03;}
-        .c-cues { height: 25%; } .c-notes { flex: 1; } .c-summary { height: 20%; background: #fff8e1; }
-
-        .english-container { display: none; flex: 1; flex-direction: column; height: 100%; overflow: hidden; background: #f9fafb; }
-        .ai-tools-bar { padding: 8px; display: flex; gap: 5px; background: #fff; border-bottom: 1px solid #e5e7eb; overflow-x: auto; flex-shrink: 0;}
-        .ai-btn { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 12px; padding: 4px 10px; font-size: 0.75rem; cursor: pointer; color: #374151; white-space: nowrap; display:flex; align-items:center; gap:4px;}
-        .ai-btn:hover { background: #e5e7eb; }
-        .cards-stream { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        .vocab-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s; }
-        .vc-header { display: flex; justify-content: space-between; align-items: center; }
-        .vc-term { font-weight: bold; color: #1f2937; font-size: 1rem; border: none; outline: none; width: 100%; background: transparent;}
-        .vc-del { color: #9ca3af; cursor: pointer; font-size: 1.2rem; line-height: 1; } .vc-del:hover { color: #ef4444; }
-        .vc-context { font-size: 0.85rem; color: #4b5563; border: 1px dashed #e5e7eb; padding: 6px; border-radius: 4px; background: #f9fafb; outline: none; resize: none; width: 100%; font-family: inherit;}
-        .vc-def { font-size: 0.9rem; border: none; outline: none; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px; width: 100%; background: transparent; }
+        .header-top-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; gap: 10px; }
+        .modal-title-input { font-weight: bold; font-size: 1.15rem; border: none; outline: none; flex: 1; background: transparent; color: var(--text); min-width: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .btn-close { font-size: 1rem; cursor: pointer; padding: 8px 14px; color: var(--meta); background: var(--bg); border-radius: 8px; font-weight: bold; }
         
-        .notes-footer { padding: 10px 15px; background: #fffbeb; border-top: 1px solid #fcd34d; display: grid; grid-template-columns: 1fr; gap: 5px; flex-shrink: 0;}
-        .btn-share-full { width: 100%; padding: 12px; background: #374151; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; justify-content: center; gap: 8px; align-items: center;}
+        /* 閱讀器內的標籤編輯區 */
+        .reader-tags-bar { padding: 0 15px 10px 15px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .reader-tag-edit-btn { background: none; border: 1px dashed var(--meta); color: var(--meta); font-size: 0.8rem; padding: 2px 8px; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .reader-tag-edit-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--tag-bg); }
 
-        .floating-menu { position: fixed; z-index: 3000; background: #333; border-radius: 8px; padding: 5px; display: none; gap: 5px; transform: translateX(-50%); box-shadow: 0 4px 15px rgba(0,0,0,0.2); white-space: nowrap; }
-        .floating-btn { background: none; border: none; cursor: pointer; width: auto; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.85rem; padding: 0 10px; gap: 4px;}
-        .float-hl-y { background: #fef08a; color: #333; width: 30px; padding: 0; border-radius: 50%; } 
-        .float-hl-g { background: #bbf7d0; color: #333; width: 30px; padding: 0; border-radius: 50%; }
+        .modal-toolbar { display: flex; gap: 8px; padding: 10px 15px; background: var(--bg); border-bottom: 1px solid var(--border); overflow-x: auto; white-space: nowrap; align-items: center; flex-shrink: 0; scrollbar-width: none; }
+        .modal-toolbar::-webkit-scrollbar { display: none; }
+        
+        .mode-switch-group { display: flex; background: #e5e7eb; border-radius: 12px; padding: 3px; }
+        .mode-btn { border: none; background: none; font-size: 0.9rem; padding: 6px 12px; cursor: pointer; border-radius: 10px; color: #666; transition: 0.2s; font-weight: 500; }
+        .mode-btn.active { background: white; color: var(--primary); font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .editor-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.9rem; color: var(--meta); cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 500; transition: 0.2s; }
+        .editor-btn:hover { border-color: var(--primary); color: var(--primary); }
 
-        .dict-panel { position: fixed; top: 60px; right: 20px; width: 350px; height: 500px; background: white; border: 1px solid #ccc; box-shadow: 0 5px 20px rgba(0,0,0,0.2); z-index: 4000; border-radius: 8px; display: none; flex-direction: column; overflow: hidden; }
-        .dict-header { background: #f3f4f6; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-        .dict-select { font-size: 0.8rem; padding: 2px 5px; border-radius: 4px; border: 1px solid #ccc; }
-        .dict-body { flex: 1; position: relative; background: #fff; }
-        .dict-iframe { width: 100%; height: 100%; border: none; }
-        .dict-fallback { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; color: #666; display:none;}
+        /* --- 核心佈局：純涵攝模式 (Subsumption) --- */
+        .reader-content-wrapper { flex: 1; display: flex; overflow: hidden; height: 100%; position: relative; background: var(--bg); }
+        
+        .subsumption-mode-container { display: flex; flex: 1; width: 100%; height: 100%; gap: 15px; padding: 15px; flex-direction: row; }
+        .sub-pane { flex: 1; background: var(--card-bg); border-radius: 12px; display: flex; flex-direction: column; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02); position: relative; }
+        .sub-header { padding: 12px 15px; font-weight: bold; border-bottom: 1px solid var(--border); background: #f8fafc; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; font-size: 0.95rem; color: #475569; }
+        .sub-header.ai-header { background: var(--ai-bg); color: #6d28d9; border-bottom-color: var(--ai-border); }
+        
+        .sub-textarea { flex: 1; width: 100%; border: none; resize: none; outline: none; padding: 15px; font-size: 1.05rem; line-height: 1.6; color: var(--text); background: transparent; font-family: inherit; }
+        
+        /* Markdown 渲染專區 */
+        .markdown-body { font-size: 1.05rem; line-height: 1.6; color: var(--text); padding: 15px; overflow-y: auto; flex: 1; word-wrap: break-word; }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 { margin-top: 1.2em; margin-bottom: 0.5em; color: var(--primary); font-weight: bold; }
+        .markdown-body h1 { font-size: 1.4em; } .markdown-body h2 { font-size: 1.2em; }
+        .markdown-body ul, .markdown-body ol { padding-left: 20px; margin-bottom: 1em; }
+        .markdown-body li { margin-bottom: 0.3em; }
+        .markdown-body strong { color: #b45309; }
+        .markdown-body blockquote { border-left: 4px solid #ddd6fe; background: #f5f3ff; padding: 8px 12px; color: #4c1d95; margin: 0 0 1em 0; border-radius: 0 4px 4px 0; }
+        .markdown-body code { background: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-size: 0.9em; color: #ef4444; }
+        .markdown-body pre { background: #1e293b; color: #f8fafc; padding: 12px; border-radius: 8px; overflow-x: auto; }
+        
+        .md-edit-btn { background: white; border: 1px solid var(--ai-border); border-radius: 4px; padding: 4px 8px; font-size: 0.8rem; cursor: pointer; color: #6d28d9; font-weight: bold; transition: 0.2s; }
+        .md-edit-btn:hover { background: #f5f3ff; }
 
+        .article-mode-container { display: none; flex: 1; overflow-y: auto; padding: 20px; justify-content: center; background: var(--card-bg); }
+        .article-view { font-size: 1.1rem; line-height: 1.75; color: var(--text); max-width: 800px; width: 100%; outline: none; padding-bottom: 50px; }
+
+        /* 雙螢幕 Iframe */
+        .iframe-pane { display: none; flex: 1.5; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; background: white; flex-direction: column; }
+        .iframe-header { padding: 8px 15px; background: #f1f5f9; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--meta); }
+        .web-iframe { width: 100%; height: 100%; border: none; }
+
+        /* 響應式佈局 */
         @media (max-width: 768px) {
-            .reader-content-wrapper { flex-direction: column; }
-            .article-section { border-right: none; flex: 1; width: 100%; border-bottom: 1px solid var(--border); padding: 15px; }
-            .notes-section { flex: none; height: 40vh; min-width: 100%; border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 50; }
-            .modal-overlay { top: 0; left: 0; right: 0; bottom: 0; background: var(--card-bg); }
-            .deep-mode .toc-section { position: absolute; left: 0; top: 0; bottom: 0; width: 75%; max-width: 300px; z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.2); transform: translateX(-100%); transition: 0.3s; opacity: 1; background: var(--bg); }
-            .deep-mode.toc-open .toc-section { transform: translateX(0); }
-            .dict-panel { width: 100%; left: 0; right: 0; bottom: 0; top: auto; height: 70vh; border-radius: 16px 16px 0 0; border: none; box-shadow: 0 -4px 20px rgba(0,0,0,0.3); }
-            .modal-toolbar { padding: 10px 5px; -webkit-overflow-scrolling: touch; }
-            .mode-switch-group { margin-right: 5px; flex-shrink: 0; }
-            .highlighter { display: none; }
+            .navbar { padding: 0 10px; }
+            .grid-container { grid-template-columns: 1fr; }
+            .header-top-row { padding: 8px 10px; }
+            .modal-title-input { font-size: 1.05rem; }
+            
+            .subsumption-mode-container { flex-direction: column; overflow-y: auto; padding: 10px; gap: 10px; -webkit-overflow-scrolling: touch; }
+            .sub-pane { flex: none; min-height: 40vh; height: auto; }
+            
+            .desktop-only { display: none !important; }
+            .mobile-only { display: flex !important; }
         }
-
-        .io-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; }
-        .io-box { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; border: 1px solid var(--border); color: var(--text); }
-        .io-textarea { width: 100%; height: 150px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 0.8rem; resize: none; background: var(--input-bg); color: var(--text); }
-        .io-buttons { display: flex; justify-content: flex-end; gap: 10px; }
-        .io-btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
-        .io-btn.primary { background: var(--primary); color: white; }
-        .io-btn.cancel { background: var(--bg); color: var(--text); }
-        .loading-mask { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 3000; display: none; align-items: center; justify-content: center; flex-direction: column; font-weight: bold; color: #555; }
+        @media (min-width: 769px) {
+            .mobile-only { display: none !important; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 🔥 登入畫面 -->
+    <!-- 啟動/登入畫面 -->
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="margin-top: 0; color: var(--primary);">📚 Lite-Pocket</h2>
-            <p style="color: var(--meta); font-size: 0.95rem;">跨裝置知識收集庫</p>
+            <h2 style="margin-top: 0; color: var(--primary); font-size: 1.8rem;">📚 Lite-Pocket</h2>
+            <p style="color: var(--meta); font-size: 0.95rem;">極簡涵攝，智慧標籤管理</p>
             <button class="login-btn" onclick="loginFirebase()">使用 Google 登入</button>
-            <button class="btn-text" style="width:100%; justify-content:center; margin-top:15px; font-size:0.9rem;" onclick="skipLogin()">先離線使用 (僅限本機)</button>
+            <div id="syncSpinner" class="sync-spinner">🔄 正在載入資料...</div>
         </div>
     </div>
 
-    <!-- 主應用程式介面 -->
+    <!-- 主頁面 -->
     <div id="app-content" style="display:none; height:100%;">
         <nav class="navbar">
             <div class="nav-left">
                 <div class="nav-brand">📚 Lite</div>
                 <button class="tool-btn" onclick="toggleToolMenu()">🔧 工具箱 ▼</button>
-                <button class="theme-btn" onclick="toggleTheme()">🌓</button>
             </div>
-            <!-- 🔥 擴展為四維度分頁 -->
             <div class="nav-menu">
-                <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">待讀</div>
-                <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">已讀</div>
+                <div class="nav-item active" onclick="switchTab('inbox')" id="tab-inbox">📥 待讀</div>
+                <div class="nav-item" onclick="switchTab('archive')" id="tab-archive">✅ 已讀</div>
                 <div class="nav-item" onclick="switchTab('starred')" id="tab-starred">⭐ 收藏</div>
-                <div class="nav-item" onclick="switchTab('notes')" id="tab-notes">📝 筆記</div>
             </div>
             
             <div class="tool-menu" id="toolMenu">
-                <!-- 🔥 雲端同步區塊整合進工具箱 -->
-                <div class="tool-item" style="background:var(--bg); font-size:0.8rem; color:var(--meta); cursor:default; justify-content:center; border-bottom:none;" id="cloud-status">☁️ 尚未同步</div>
-                <div class="tool-item" style="font-weight:bold; color:#10b981;" onclick="saveToCloudManual()">☁️ 備份至雲端</div>
-                <div class="tool-item" style="font-weight:bold; color:#f59e0b;" onclick="loadFromCloudManual()">📥 從雲端還原</div>
-                <div style="height:1px; background:var(--border); margin:5px 0;"></div>
+                <div class="tool-item" style="background:var(--bg); font-size:0.85rem; color:var(--meta); cursor:default; justify-content:center; border-bottom:none;" id="cloud-status">☁️ 尚未同步</div>
                 
-                <div class="tool-item" onclick="openExportModal()">📋 備份資料 (JSON)</div>
-                <div class="tool-item" onclick="openImportModal()">📥 匯入本機資料</div>
-                <div class="tool-item" onclick="exportListToHtml()">📄 匯出清單 (HTML)</div>
-                <div class="tool-item danger" onclick="clearReadItems()">🧹 清除已讀</div>
+                <div class="tool-item" style="font-weight:bold; color:#10b981;" id="btn-cloud-save" onclick="saveToCloud()">☁️ 備份至雲端</div>
+                <div class="tool-item" style="font-weight:bold; color:#f59e0b;" id="btn-cloud-load" onclick="loadFromCloud()">📥 從雲端還原</div>
                 
                 <div style="height:1px; background:var(--border); margin:5px 0;"></div>
+                <div class="tool-item danger" onclick="clearLocalData()">🧹 清除本機資料</div>
                 <div class="tool-item danger" onclick="logoutFirebase()" id="btn-logout" style="display:none;">🚪 登出帳號</div>
             </div>
         </nav>
 
         <div class="main-scroller">
             <div class="add-panel">
-                <div class="input-row"><button class="btn-paste" onclick="smartPaste()">📋 貼上</button><div style="flex:1"></div><button class="btn-paste" style="background:none;color:var(--meta);" onclick="clearInput()">✕ 清除</button></div>
-                <input type="text" id="newUrl" class="input-field" placeholder="網址 (或留空建立純筆記)..." oninput="checkUrlInput()">
-                <input type="text" id="newTitle" class="input-field" placeholder="標題 #標籤">
+                <div class="input-row">
+                    <button class="btn-paste" onclick="smartPaste()">📋 貼上網址</button>
+                    <button class="btn-paste" style="background:none;color:var(--meta);" onclick="clearInput()">✕ 清除</button>
+                </div>
+                <input type="text" id="newUrl" class="input-field" placeholder="🌐 網址 (必填，若為純筆記可留空)..." oninput="checkUrlInput()">
+                <input type="text" id="newTitle" class="input-field" placeholder="🏷️ 標題 #專案標籤 (選填)">
+                <textarea id="newAiSummary" class="ai-summary-input" placeholder="✨ 貼上 NotebookLM 結構化摘要 (Markdown 格式)..."></textarea>
                 <div id="titleStatus"><div id="titleBar"></div></div>
-                <button class="btn-confirm" onclick="confirmAdd()">＋ 加入</button>
+                <button class="btn-confirm" onclick="confirmAdd()">＋ 加入知識庫 (秒存本機)</button>
             </div>
+            
             <div class="search-row"><input type="text" class="search-input" id="searchInput" placeholder="🔍 搜尋標題..." oninput="render()"></div>
+            <!-- 🔥 智慧標籤列 -->
             <div class="filter-bar" id="filterBar"></div>
+            
             <div class="grid-container" id="container"></div>
-        </div>
-
-        <div class="bottom-bar" id="defaultBottomBar">
-            <button class="bottom-btn select-mode" onclick="toggleSelectMode()"><span>☑️</span> 選取模式</button>
-        </div>
-        <div class="bottom-bar" id="selectBottomBar" style="display:none; background:var(--bg);">
-            <button class="bottom-btn" onclick="toggleSelectMode()" style="color:var(--meta);"><span>✕</span> 取消</button>
-            <div style="font-weight:bold;color:var(--primary);">已選 <span id="selectCount">0</span> 篇</div>
-            <button class="bottom-btn export-urls" onclick="exportSelectedUrls()"><span>🔗</span> 匯出網址</button>
         </div>
     </div>
 
-    <!-- 閱讀器模態框與工具 (保留原樣) -->
+    <!-- 閱讀器模態框 (Modal) -->
     <div class="modal-overlay" id="readerModal">
         <div class="modal-header">
-            <div class="btn-close" onclick="closeReader()">✕ 關閉</div>
-            <div class="mode-switch-group">
-                <button class="mode-btn active" id="mode-lite" onclick="switchMode('lite')">📖 速讀</button>
-                <button class="mode-btn" id="mode-deep" onclick="switchMode('deep')">🎓 精讀</button>
-                <button class="mode-btn" id="mode-english" onclick="switchMode('english')" data-mode="english">🔤 英文</button>
+            <div class="header-top-row">
+                <div class="btn-close" onclick="closeReader()">✕ 關閉</div>
+                <input type="text" class="modal-title-input" id="readerTitleInput" placeholder="文章標題" onchange="markDirty()">
+                <button class="btn-save" onclick="closeReader()">儲存</button>
             </div>
-            <input type="text" class="modal-title-input" id="readerTitleInput" placeholder="文章標題">
-            <button class="btn-save" onclick="saveReader()">儲存</button>
+            <!-- 🔥 閱讀器內部的標籤管理區 -->
+            <div class="reader-tags-bar" id="readerTagsDisplay">
+                <!-- 標籤會渲染在這裡 -->
+            </div>
         </div>
         
         <div class="modal-toolbar">
-            <div class="toc-toggle-mobile" id="mobileTocBtn" onclick="toggleMobileToc()" style="display:none; cursor:pointer;">📑 目錄</div>
-            <div id="eng-tools" style="display:none; gap:5px; align-items:center;">
-                <button class="editor-btn" onclick="toggleMask()" id="btnMask">🙈 遮罩</button>
-                <button class="editor-btn" onclick="toggleShadowing()" id="btnShadow">🗣️ 跟讀</button>
-                <button class="editor-btn" onclick="toggleChunking()" id="btnChunk">✂️ 斷句</button>
-                <div class="tool-sep"></div>
+            <div class="mode-switch-group">
+                <button class="mode-btn active" id="mode-article" onclick="switchMode('article')">📖 原文</button>
+                <button class="mode-btn" id="mode-subsumption" onclick="switchMode('subsumption')">🧠 涵攝</button>
             </div>
-            <div class="audio-btn-group"><button class="audio-btn" onclick="ttsToggle()" id="ttsPlayBtn">▶ 朗讀</button><button class="audio-btn" onclick="ttsStop()">⏹ 停止</button></div>
-            <div class="tool-sep"></div>
-            <button class="editor-btn" onclick="autoExtract()" style="color:#059669;">🪄 智慧重整</button>
-            <button class="editor-btn" onmousedown="event.preventDefault(); keepSelectionOnly()" style="color:#ef4444;">✂️ 保留選取</button>
-            <button class="editor-btn" onclick="clearStyle()">📝 純文模式</button>
-            <div class="tool-sep"></div>
-            <button class="editor-btn" onclick="downloadCurrentHtml()" style="color:#2563eb;font-weight:bold;">📤 匯出講義</button>
-            <div class="highlighter hl-yellow" onmousedown="event.preventDefault(); highlight('yellow')"></div>
-            <div class="highlighter hl-green" onmousedown="event.preventDefault(); highlight('#bbf7d0')"></div>
-            <button class="editor-btn" onclick="captureReader()">📸 截圖</button>
+            <div class="tool-sep" style="margin: 0 10px;"></div>
+            <button class="editor-btn desktop-only" id="btnToggleSplit" onclick="toggleSplitView()" style="color:#6d28d9;">🌗 展開原文網頁</button>
+            <button class="editor-btn mobile-only" onclick="jumpToOriginal()" style="color:#2563eb; font-weight:bold;">🔗 躍遷原文</button>
+            <div class="tool-sep" style="margin: 0 10px;"></div>
+            <button class="editor-btn" onclick="shareDraft()" style="color:#059669;">📤 匯出涵攝筆記</button>
         </div>
 
-        <div class="reader-content-wrapper" id="readerWrapper">
-            <div class="toc-section" id="tocSection"></div>
-            <div class="article-section" onmouseup="checkSelection()" id="articleContainer">
-                <div class="article-view" id="articleView" contenteditable="true" placeholder="文章內容..."></div>
+        <div class="reader-content-wrapper">
+            <!-- 模式一：原文 -->
+            <div class="article-mode-container" id="articleModeContainer">
+                <div class="article-view" id="articleView" contenteditable="true" oninput="markDirty()"></div>
             </div>
-            <div class="notes-section">
-                <textarea id="userNotes" class="notes-input" placeholder="Lite模式：隨手筆記..."></textarea>
-                <div class="cornell-container">
-                    <div class="cornell-box c-cues"><div class="cornell-label">🔑 關鍵字</div><textarea id="noteCues" class="cornell-text"></textarea></div>
-                    <div class="cornell-box c-notes"><div class="cornell-label">📝 主要筆記</div><textarea id="noteMain" class="cornell-text"></textarea></div>
-                    <div class="cornell-box c-summary"><div class="cornell-label">💡 總結</div><textarea id="noteSummary" class="cornell-text"></textarea></div>
-                </div>
-                <div class="english-container">
-                    <div class="ai-tools-bar">
-                        <span style="font-size:0.7rem;color:#888;align-self:center;">🤖 AI:</span>
-                        <button class="ai-btn" onclick="copyAiPrompt('grammar')">文法</button>
-                        <button class="ai-btn" onclick="copyAiPrompt('rewrite')">改寫</button>
-                        <button class="ai-btn" onclick="copyAiPrompt('explain')">解釋</button>
+
+            <!-- 模式二：涵攝佈局 (Subsumption) -->
+            <div class="subsumption-mode-container" id="subsumptionModeContainer">
+                <!-- 左側：AI 摘要 (Markdown 雙態支援) -->
+                <div class="sub-pane" style="position: relative;">
+                    <div class="sub-header ai-header">
+                        <span>✨ NotebookLM 摘要 (Fact)</span>
+                        <button class="md-edit-btn" id="mdToggleBtn" onclick="toggleMarkdownEdit()">✏️ 編輯</button>
                     </div>
-                    <div class="cards-stream" id="vocabCardsList"></div>
-                    <textarea id="engQa" style="display:none;"></textarea>
+                    
+                    <textarea class="sub-textarea" id="aiSummaryArea" placeholder="貼上 Markdown 格式的 AI 摘要..." style="display: none; background:var(--ai-bg);" onblur="renderMarkdown()" oninput="markDirty()"></textarea>
+                    <div class="markdown-body" id="aiSummaryRender" ondblclick="toggleMarkdownEdit()"></div>
                 </div>
-                <div class="notes-footer" id="noteFooter">
-                    <button class="btn-share-full" onclick="shareDraft()">📤 分享草稿</button>
+                
+                <!-- 右側：洞察與行動 -->
+                <div class="sub-pane">
+                    <div class="sub-header">💡 洞察與涵攝 (Insight)</div>
+                    <textarea class="sub-textarea" id="insightArea" placeholder="這段知識如何對應到我的專案或痛點？" style="flex: 1; border-bottom: 1px solid var(--border);" oninput="markDirty()"></textarea>
+                    
+                    <div class="sub-header" style="border-top: none;">🚀 下一步行動 (Action)</div>
+                    <textarea class="sub-textarea" id="actionArea" placeholder="具體要執行的步驟或待辦清單..." style="flex: 1;" oninput="markDirty()"></textarea>
                 </div>
-                <div class="notes-footer" id="engFooter" style="display:none; background:#f0fdf4; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <button class="btn-share-full" onclick="shareDraft()" style="background:#374151;">📤 分享文字</button>
-                    <button class="btn-share-full" onclick="exportAnkiCsv()" style="background:#166534;">⚡ 匯出 CSV</button>
+
+                <!-- 隱藏的 Iframe -->
+                <div class="iframe-pane" id="iframePane">
+                    <div class="iframe-header">
+                        <span id="iframeDomain">🔗 原文預覽</span>
+                        <button onclick="toggleSplitView()" style="background:none;border:none;cursor:pointer;">✕</button>
+                    </div>
+                    <iframe class="web-iframe" id="webIframe" sandbox="allow-scripts allow-same-origin"></iframe>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- 浮動選單與彈出組件 (保留原樣) -->
-    <div class="floating-menu" id="floatingMenu">
-        <button class="floating-btn float-hl-y" onmousedown="applyHighlight('yellow')"></button>
-        <button class="floating-btn float-hl-g" onmousedown="applyHighlight('#bbf7d0')"></button>
-        <div style="width:1px;height:20px;background:#555;margin:0 5px;"></div>
-        <button class="floating-btn" onmousedown="lookupWord()">📖 查字典</button>
-        <button class="floating-btn" onmousedown="addVocabCard()">📝 做卡片</button>
-    </div>
-    <div class="dict-panel" id="dictPanel">
-        <div class="dict-header">
-            <strong>📖 字典</strong>
-            <select class="dict-select" id="dictSource" onchange="refreshDict()">
-                <option value="dictcom">Dictionary.com</option>
-                <option value="google">Google 翻譯</option>
-                <option value="cambridge">Cambridge</option>
-            </select>
-            <button onclick="document.getElementById('dictPanel').style.display='none'" style="border:none;background:none;cursor:pointer;">✕</button>
-        </div>
-        <div class="dict-body">
-            <iframe id="dictFrame" class="dict-iframe" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
-            <div id="dictFallback" class="dict-fallback"><p>⚠️ 此網站不允許嵌入</p><button class="btn-confirm" onclick="openDictPopup()">↗️ 彈出視窗開啟</button></div>
-        </div>
-    </div>
-
-    <div class="io-overlay" id="exportModal"><div class="io-box"><h3>📋 備份 (JSON)</h3><textarea id="exportArea" class="io-textarea" readonly></textarea><div class="io-buttons"><button class="io-btn cancel" onclick="closeIO()">關閉</button><button class="io-btn primary" onclick="copyExport()">複製</button></div></div></div>
-    <div class="io-overlay" id="importModal"><div class="io-box"><h3>📥 還原 (JSON)</h3><textarea id="importArea" class="io-textarea"></textarea><div class="io-buttons"><button class="io-btn cancel" onclick="closeIO()">取消</button><button class="io-btn primary" onclick="doImport()">還原</button></div></div></div>
-    <div class="loading-mask" id="loadingMask">📸 正在截圖...</div>
 
     <script>
-        /* 🔥 Firebase 初始化設定 (沿用白板設定) */
+        /* =========================================
+           1. Firebase 初始化與全域變數
+           ========================================= */
         const firebaseConfig = {
             apiKey: "AIzaSyAIY9PU-bDLktkTpLSmFKRe1uepvWCKEiU",
             authDomain: "maplestoryboss.firebaseapp.com",
@@ -366,11 +300,18 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
         const provider = new firebase.auth.GoogleAuthProvider();
+
         let currentUser = null;
+        let items = []; 
+        let currentTab = 'inbox'; 
+        let currentId = null; 
+        let isSplitView = false;
+        let isDirty = false;
+        let currentFilterTag = null; // 當前選擇的標籤
 
-        let items = []; let currentTab = 'inbox'; let currentId = null; let isSelectMode = false; let selectedIds = new Set(); let currentMode = 'lite'; let currentWord = ''; let isShadowing = false; let isChunking = false; let currentVocabCards = []; let currentFilterTag = null;
-
-        /* 🔥 認證狀態監聽與資料初始化 */
+        /* =========================================
+           2. 認證與同步機制 (Firebase 核心)
+           ========================================= */
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -388,220 +329,369 @@
         });
 
         function loginFirebase() { auth.signInWithPopup(provider).catch(e => alert("登入失敗：" + e.message)); }
-        function logoutFirebase() { if(confirm('確定登出？')) auth.signOut(); }
-        function skipLogin() { 
-            document.getElementById('login-screen').style.display = 'none'; 
-            document.getElementById('app-content').style.display = 'block';
-            initLocalData(); 
-        }
+        function logoutFirebase() { if(confirm('確定登出？\n未同步到雲端的資料將保留在本機。')) auth.signOut(); }
 
         function initLocalData() {
-            // 綁定儲存鍵值到使用者 ID，若是離線模式則使用通用鍵值
             const localKey = currentUser ? `lite_pocket__data_${currentUser.uid}` : 'lite_pocket__data';
             const saved = localStorage.getItem(localKey);
             
-            if (saved) {
-                items = JSON.parse(saved);
+            if (saved) { 
+                items = JSON.parse(saved); 
             } else if (currentUser) {
-                // 無痛轉移：偵測到舊版未登入資料，自動詢問是否接管
                 const oldOffline = localStorage.getItem('lite_pocket__data');
-                if (oldOffline && confirm('偵測到您過去的離線資料，是否將其無縫轉移至此帳號中？')) {
+                if (oldOffline && confirm('偵測到離線資料，是否無縫轉移至此帳號中？')) {
                     items = JSON.parse(oldOffline);
-                    save();
+                    saveLocal();
                 } else {
-                    if(confirm('本機目前無資料，是否從雲端下載最新進度？')) loadFromCloudManual();
+                    if(confirm('本機目前無資料，是否從雲端下載最新進度？')) loadFromCloud();
                 }
             }
             if (!Array.isArray(items)) items = [];
-            
-            if (localStorage.getItem('lite_pocket_theme') === 'dark') document.body.setAttribute('data-theme', 'dark');
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('add')) { document.getElementById('newUrl').value = params.get('add'); if (params.get('title')) { document.getElementById('newTitle').value = params.get('title'); updateTitleBar('success'); } else detectTitle(params.get('add')); window.history.replaceState({}, document.title, window.location.pathname); }
             render();
             
-            // 點擊外部關閉選單綁定
             document.addEventListener('mousedown', function(e) { 
-                if (!e.target.closest('.floating-menu')) document.getElementById('floatingMenu').style.display = 'none'; 
                 if (!e.target.closest('.tool-menu') && !e.target.closest('.tool-btn')) document.getElementById('toolMenu').style.display = 'none';
-                if (window.innerWidth < 768) { if (!e.target.closest('.toc-section') && !e.target.closest('#mobileTocBtn')) document.getElementById('readerWrapper').classList.remove('toc-open'); } 
             });
         }
 
-        /* 🔥 雲端雙軌操作函數 */
-        function saveToCloudManual() {
-            if(!currentUser) return alert('請先登入 Google 帳號才能使用雲端同步功能！');
-            const statusEl = document.getElementById('cloud-status');
-            statusEl.innerText = '上傳中...';
-            db.collection('LitePocket_Data').doc(currentUser.uid).set({
-                items: items,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            }, {merge:true}).then(() => {
-                alert('✅ 已成功備份至雲端！');
-                fetchCloudTime();
-            }).catch(e => alert("上傳失敗：" + e.message));
+        function saveLocal() {
+            const localKey = currentUser ? `lite_pocket__data_${currentUser.uid}` : 'lite_pocket__data';
+            localStorage.setItem(localKey, JSON.stringify(items));
         }
 
-        function loadFromCloudManual() {
-            if(!currentUser) return alert('請先登入 Google 帳號！');
-            if(!confirm('⚠️ 將覆蓋目前畫面上所有資料。確定繼續？')) return;
-            const statusEl = document.getElementById('cloud-status');
-            statusEl.innerText = '下載中...';
-            db.collection('LitePocket_Data').doc(currentUser.uid).get().then(doc => {
-                if(doc.exists && doc.data().items) {
+        // ☁️ Firebase: 整包存檔
+        function saveToCloud() {
+            if (!currentUser) return alert('請先登入！');
+            const btn = document.getElementById('btn-cloud-save');
+            const originalText = btn.innerText;
+            btn.innerText = '☁️ 上傳中...';
+
+            const payload = {
+                items: items, 
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            db.collection('LitePocket_Data').doc(currentUser.uid).set(payload)
+            .then(() => {
+                alert('✅ 已整包備份至雲端！');
+                fetchCloudTime();
+            })
+            .catch(e => alert("上傳失敗：" + e.message))
+            .finally(() => { btn.innerText = originalText; });
+        }
+
+        // 📥 Firebase: 整包還原
+        function loadFromCloud() {
+            if (!currentUser) return;
+            if (!confirm('⚠️ 警告：這將覆蓋本機目前所有資料。\n確定要從雲端還原嗎？')) return;
+            
+            const btn = document.getElementById('btn-cloud-load');
+            const originalText = btn.innerText;
+            btn.innerText = '📥 下載中...';
+
+            db.collection('LitePocket_Data').doc(currentUser.uid).get()
+            .then(doc => {
+                if (doc.exists && doc.data().items) {
                     items = doc.data().items;
-                    save(); render(); fetchCloudTime();
-                    alert('📥 雲端資料載入成功！');
-                } else {
-                    alert('雲端目前沒有備份資料喔！');
+                    saveLocal(); 
+                    render();
                     fetchCloudTime();
+                    alert('📥 雲端資料已成功還原！');
+                } else {
+                    alert('雲端目前沒有您的備份資料。');
                 }
-            }).catch(e => alert("下載失敗：" + e.message));
+            })
+            .catch(e => alert("下載失敗：" + e.message))
+            .finally(() => { btn.innerText = originalText; });
         }
 
         function fetchCloudTime() {
-            if(!currentUser) return;
+            if (!currentUser) return;
             db.collection('LitePocket_Data').doc(currentUser.uid).get().then(doc => {
                 const el = document.getElementById('cloud-status');
-                if(doc.exists && doc.data().updatedAt) {
+                if (doc.exists && doc.data().updatedAt) {
                     const d = doc.data().updatedAt.toDate();
-                    el.innerText = `☁️ 雲端紀錄: ${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                    el.innerText = `☁️ 上次雲端存檔: ${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
                 } else {
                     el.innerText = '☁️ 尚無雲端紀錄';
                 }
             });
         }
 
-        /* 儲存機制更新 (綁定 UID) */
-        function save() { 
-            const localKey = currentUser ? `lite_pocket__data_${currentUser.uid}` : 'lite_pocket__data';
-            localStorage.setItem(localKey, JSON.stringify(items)); 
+        function clearLocalData() {
+            if (!currentUser) return;
+            if (confirm('⚠️ 警告：這將徹底刪除「這台裝置」上的所有暫存資料！\n\n建議先執行【備份至雲端】。\n確定要清除嗎？')) {
+                const localKey = `lite_pocket__data_${currentUser.uid}`;
+                localStorage.removeItem(localKey);
+                items = [];
+                render();
+                alert('🧹 本機資料已清空！');
+            }
         }
 
-        /* --- UI 渲染邏輯 (加入星標與四分頁過濾) --- */
+        /* =========================================
+           3. 輕量化捕獲 (Add Panel) 
+           ========================================= */
+        function toggleToolMenu() { const menu = document.getElementById('toolMenu'); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; }
+        async function smartPaste() { try { const text = await navigator.clipboard.readText(); if (text) { document.getElementById('newUrl').value = text; checkUrlInput(); } } catch (err) { alert('⚠️ 無法自動貼上，請手動操作。'); } }
+        function clearInput(){ document.getElementById('newUrl').value=''; document.getElementById('newTitle').value=''; document.getElementById('newAiSummary').value=''; updateTitleBar('reset'); } 
+        function updateTitleBar(state) { const bar=document.getElementById('titleBar'); if(state==='loading'){bar.style.width='50%';bar.style.background='#f59e0b';} else if(state==='success'){bar.style.width='100%';bar.style.background='#10b981';} else if(state==='error'){bar.style.width='100%';bar.style.background='#ef4444';} else{bar.style.width='0%';} }
+
+        function extractTags(text) { 
+            const tags = text.match(/#[\w\u4e00-\u9fa5]+/g) || []; 
+            const cleanTitle = text.replace(/#[\w\u4e00-\u9fa5]+/g, '').trim(); 
+            return { title: cleanTitle, tags: tags.map(t => t.replace('#', '')) }; 
+        }
+
+        async function detectTitle(url) { 
+            const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return; 
+            updateTitleBar('loading'); titleInput.placeholder = '偵測中...'; 
+            try { 
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const match = data.contents.match(/<title>(.*?)<\/title>/i);
+                if (match && match[1]) { titleInput.value = new DOMParser().parseFromString(match[1], 'text/html').body.textContent; updateTitleBar('success'); } 
+                else { throw new Error(); }
+            } catch(e) { titleInput.placeholder = '請手動輸入標題'; updateTitleBar('error'); } 
+        }
+        function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
+
+        async function confirmAdd() { 
+            const urlInput = document.getElementById('newUrl').value.trim(); 
+            const titleInput = document.getElementById('newTitle').value.trim(); 
+            const aiSummaryInput = document.getElementById('newAiSummary').value.trim();
+            
+            if (!urlInput && !titleInput && !aiSummaryInput) return alert('請輸入資訊'); 
+            
+            const { title, tags } = extractTags(titleInput || urlInput || "未命名卡片"); 
+            const isUrl = urlInput.startsWith('http'); 
+            const domain = isUrl ? new URL(urlInput).hostname.replace('www.','') : '📝 Note';
+            
+            const newItem = { 
+                id: Date.now(), url: urlInput || ('#note-'+Date.now()), title: title, tags: tags, domain: domain, 
+                status: 'inbox', date: new Date().toLocaleDateString(), starred: false,
+                aiSummary: aiSummaryInput, insight: '', action: '', content: ''
+            };
+            
+            items.unshift(newItem); saveLocal(); render(); clearInput(); 
+            updateTitleBar('success'); setTimeout(() => { updateTitleBar('reset'); }, 1000);
+        }
+
+        /* =========================================
+           4. 智慧標籤列與首頁渲染
+           ========================================= */
+        function switchTab(t){currentTab=t;document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active'); currentFilterTag = null; render();}
+        
+        function renderTagsBar() { 
+            const allTags = new Set(); 
+            items.forEach(i => { if(i.tags) i.tags.forEach(t => allTags.add(t)); }); 
+            const bar = document.getElementById('filterBar'); 
+            if (allTags.size === 0) { bar.style.display = 'none'; return; } 
+            bar.style.display = 'flex'; bar.innerHTML = `<div class="filter-tag ${currentFilterTag === null ? 'active' : ''}" onclick="filterByTag(null)">全部</div>`; 
+            allTags.forEach(tag => { 
+                const active = currentFilterTag === tag ? 'active' : ''; 
+                bar.innerHTML += `<div class="filter-tag ${active}" onclick="filterByTag('${tag}')">#${tag}</div>`; 
+            }); 
+        }
+
+        function filterByTag(tag) { currentFilterTag = tag; render(); }
+
         function render() { 
-            renderTagsBar(); 
+            renderTagsBar();
             const container = document.getElementById('container'); container.innerHTML = ''; 
             const searchVal = document.getElementById('searchInput').value.toLowerCase();
-            
-            // 🔥 過濾邏輯升級，支援 4 種 Tab 切換
             const filtered = items.filter(i => { 
                 const matchSearch = !searchVal || i.title.toLowerCase().includes(searchVal);
-                const matchTag = !currentFilterTag || (i.tags && i.tags.includes(currentFilterTag)); 
-                
+                const matchTag = !currentFilterTag || (i.tags && i.tags.includes(currentFilterTag));
                 let matchTab = false;
                 if (currentTab === 'inbox') matchTab = i.status === 'inbox';
                 else if (currentTab === 'archive') matchTab = i.status === 'archive';
                 else if (currentTab === 'starred') matchTab = i.starred === true;
-                else if (currentTab === 'notes') matchTab = i.domain === '📝 Note';
-                
                 return matchTab && matchTag && matchSearch; 
             });
 
-            if(filtered.length===0) container.innerHTML='<div style="text-align:center;color:#999;margin-top:20px">無項目</div>'; 
+            if(filtered.length===0) container.innerHTML='<div style="text-align:center;color:#999;margin-top:20px;font-size:1.1rem;">無項目</div>'; 
             
             filtered.forEach(item => { 
-                let typeIcon = '📄'; 
-                if (item.tags && item.tags.includes('影音')) typeIcon = '🎬';
-                else if (item.tags && item.tags.includes('圖片')) typeIcon = '🖼️';
-                else if (item.domain === '📝 Note') typeIcon = '📝';
-
-                const noteClass = item.notes && item.notes.trim() !== '' ? 'card-note-badge' : 'card-note-badge style="display:none"'; 
-                let tagsHtml = ''; if(item.tags && item.tags.length > 0) tagsHtml = item.tags.map(t => `<span class="tag-badge">#${t}</span>`).join(' '); 
-                const isChecked = selectedIds.has(item.id) ? 'checked' : ''; const checkDisplay = isSelectMode ? 'block' : 'none'; const clickAction = isSelectMode ? `toggleCheck(${item.id})` : `openReader(${item.id})`; const activeCard = selectedIds.has(item.id) ? 'card selecting' : 'card'; 
-                
-                // 🔥 加入收藏 (Star) 按鈕
+                let typeIcon = '📄'; if (item.domain === '📝 Note') typeIcon = '📝';
+                const aiBadge = item.aiSummary && item.aiSummary.trim() !== '' ? `<span class="card-ai-badge">✨ AI 摘要</span>` : ''; 
                 const starBtnStyle = item.starred ? 'color:#f59e0b; font-weight:bold;' : 'color:var(--meta);';
                 const starBtnText = item.starred ? '★ 已收' : '⭐ 收藏';
+                const tagsHtml = item.tags && item.tags.length ? `<div class="card-tags">` + item.tags.map(t=>`<span class="tag-badge">#${t}</span>`).join('') + `</div>` : '';
                 
-                const div = document.createElement('div'); div.className = activeCard; 
-                div.innerHTML = `<div class="card-header" onclick="${clickAction}"><div style="display:${checkDisplay}; margin-right:10px;"><input type="checkbox" ${isChecked} style="pointer-events:none;"></div><div style="flex:1"><div class="card-meta"><span class="site-icon">${typeIcon}</span> ${item.domain} <span class="date-badge">${item.date}</span> ${tagsHtml}</div><div class="card-title">${item.title}</div><span ${noteClass}>📝 筆記</span></div></div><div class="card-actions"><button class="btn-text btn-rename" onclick="renameItem(${item.id})">✏️ 改名</button><button class="btn-text" style="${starBtnStyle}" onclick="toggleStar(${item.id})">${starBtnText}</button><button class="btn-text btn-read" onclick="openReader(${item.id})">📖 閱讀</button><button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}<button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️ 刪除</button></div>`; container.appendChild(div); 
+                const div = document.createElement('div'); div.className = 'card'; 
+                div.innerHTML = `
+                    <div class="card-header" onclick="openReader(${item.id})">
+                        <div style="flex:1">
+                            <div class="card-meta">
+                                <span class="site-icon">${typeIcon}</span> 
+                                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.domain}</span> 
+                                <span class="date-badge">${item.date}</span>
+                            </div>
+                            <div class="card-title">${item.title}</div>
+                            ${tagsHtml}
+                            ${aiBadge}
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-text" style="${starBtnStyle}" onclick="toggleStar(${item.id})">${starBtnText}</button>
+                        <button class="btn-text btn-read" onclick="openReader(${item.id})">🧠 涵攝</button>
+                        <button class="btn-text btn-link" onclick="window.open('${item.url}','_blank')">🔗 原文</button>
+                        ${currentTab==='inbox' ? `<button class="btn-text" onclick="moveItem(${item.id},'archive')">✅ 已讀</button>` : `<button class="btn-text" onclick="moveItem(${item.id},'inbox')">📥 放回</button>`}
+                        <button class="btn-text" style="color:#ef4444;" onclick="deleteItem(${item.id})">🗑️ 刪除</button>
+                    </div>`; 
+                container.appendChild(div); 
             }); 
         }
 
-        /* 🔥 新增收藏切換邏輯 */
-        function toggleStar(id) {
-            const idx = items.findIndex(i => i.id === id);
-            if (idx > -1) {
-                items[idx].starred = !items[idx].starred;
-                save(); render();
+        function toggleStar(id) { const idx = items.findIndex(i => i.id === id); if (idx > -1) { items[idx].starred = !items[idx].starred; saveLocal(); render(); } }
+        function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s; saveLocal();render();}}
+        function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id); saveLocal();render();}}
+
+        /* =========================================
+           5. 閱讀器內部的標籤管理
+           ========================================= */
+        function renderReaderTags() {
+            const item = items.find(i => i.id === currentId);
+            const el = document.getElementById('readerTagsDisplay');
+            let html = '';
+            if (item.tags && item.tags.length > 0) {
+                html = item.tags.map(t => `<span class="tag-badge">#${t}</span>`).join('');
+            }
+            html += `<button class="reader-tag-edit-btn" onclick="editReaderTags()">+ 編輯標籤</button>`;
+            el.innerHTML = html;
+        }
+
+        function editReaderTags() {
+            if(!currentId) return;
+            const item = items.find(i => i.id === currentId);
+            const currentStr = item.tags ? item.tags.join(' ') : '';
+            const newStr = prompt("編輯專案標籤 (請用空格分隔多個標籤，無須加 #)：", currentStr);
+            if(newStr !== null) {
+                item.tags = newStr.split(' ').map(t => t.trim().replace('#','')).filter(t => t !== '');
+                saveLocal();
+                renderReaderTags();
+                isDirty = true;
             }
         }
 
-        /* --- 原有工具與邏輯保持不變 --- */
-        async function smartPaste() { try { const text = await navigator.clipboard.readText(); if (text) { document.getElementById('newUrl').value = text; checkUrlInput(); } else { alert('剪貼簿是空的'); } } catch (err) { const input = document.getElementById('newUrl'); input.focus(); input.select(); alert('⚠️ 無法自動讀取 (需 HTTPS 或權限)。\n已聚焦輸入框，請手動貼上。'); } }
-        function autoExtract() { const root = document.getElementById('articleView'); const doc = document.implementation.createHTMLDocument('temp'); doc.body.innerHTML = root.innerHTML; const reader = new Readability(doc); const article = reader.parse(); if (article && article.content) { if(confirm('系統已偵測到文章主體，是否替換？')) { root.innerHTML = article.content; } } else { alert('⚠️ 無法自動識別主體，請使用「✂️ 保留選取」。'); } }
-        function keepSelectionOnly() { const sel = window.getSelection(); if(sel && sel.rangeCount > 0 && !sel.isCollapsed) { const range = sel.getRangeAt(0); const content = range.cloneContents(); const div = document.createElement('div'); div.appendChild(content); if(confirm('確定只保留選取的範圍，刪除其他內容嗎？')) { document.getElementById('articleView').innerHTML = div.innerHTML; } } else { alert('請先在文章中「滑鼠選取」範圍。'); } }
-        function clearStyle() { if(!confirm('這會移除所有圖片與排版，只保留純文字，確定嗎？')) return; let txt = document.getElementById('articleView').innerText; document.getElementById('articleView').innerHTML = txt.split('\n').filter(t=>t.trim()).map(t=>`<p>${t}</p>`).join(''); }
-        function toggleToolMenu() { const menu = document.getElementById('toolMenu'); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; }
-        
-        async function confirmAdd() { const urlInput = document.getElementById('newUrl').value.trim(); const titleInput = document.getElementById('newTitle').value.trim(); if (!urlInput && !titleInput) return alert('請輸入網址或標題'); const { title, tags } = extractTags(titleInput || urlInput || "未命名筆記"); if (urlInput.match(/youtube\.com|youtu\.be/i)) tags.push('影音'); else if (urlInput.match(/\.(jpg|jpeg|png|gif|webp)$/i)) tags.push('圖片'); const isUrl = urlInput.startsWith('http'); if (!isUrl) { createItem({ url: '#note-' + Date.now(), title: title || urlInput, tags: [...tags, '筆記'], domain: '📝 Note', content: `<div style="color:#666; padding:20px; border:2px dashed #eee; border-radius:10px; text-align:center;"><h3>📖 ${title || '新筆記'}</h3><p>這是您的自由編輯區。</p></div>`, date: new Date().toLocaleDateString() }); clearInput(); return; } const domain = new URL(urlInput).hostname.replace('www.',''); const newItem = createItem({ url: urlInput, title: title, tags: tags, domain: domain, content: null, date: new Date().toLocaleDateString() }); clearInput(); try { updateTitleBar('loading'); const html = await fetchWithFallbacks(urlInput); const idx = items.findIndex(i => i.id === newItem.id); if(idx > -1) { if(html) { updateTitleBar('success'); let doc = new DOMParser().parseFromString(html, 'text/html'); const dInfo = extractDateInfo(doc, html); let reader = new Readability(doc); let article = reader.parse(); if(article) { items[idx].date = dInfo.date; const header = `<h1>${items[idx].title}</h1><p style="color:#666;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:20px;">🔗 來源：${domain} | 📅 ${dInfo.date}</p>`; items[idx].content = header + DOMPurify.sanitize(article.content, {ADD_TAGS: ['style'], ADD_ATTR: ['style']}); items[idx].title = article.title || items[idx].title; } else { items[idx].content = `<div style="padding:20px;text-align:center;">⚠️ 無法解析本文，請點擊「原文連結」查看。</div>`; } } else { throw new Error("Proxy Empty"); } save(); render(); } } catch(e) { updateTitleBar('error'); const idx = items.findIndex(i => i.id === newItem.id); if (idx > -1) { items[idx].content = `<div style="padding:30px; text-align:center; color:#666;"><h3>⚠️ 自動抓取受阻</h3><p>目標網站可能阻擋了抓取。</p><hr style="margin:20px 0;border:0;border-top:1px solid #eee;"><p><b>解決方法：</b></p><p>1. 點擊「🔗 原文」複製內容<br>2. 回到這裡貼上</p></div>`; save(); render(); } } }
-        async function fetchWithFallbacks(url) { const ts = `&t=${Date.now()}`; const encodedUrl = encodeURIComponent(url); const proxies = [{ url: `https://api.allorigins.win/get?url=${encodedUrl}${ts}`, type: 'json' }, { url: `https://api.codetabs.com/v1/proxy?quest=${encodedUrl}`, type: 'text' }, { url: `https://corsproxy.io/?${encodedUrl}`, type: 'text' }]; for (let proxy of proxies) { try { const res = await fetch(proxy.url); if (!res.ok) throw new Error(); let htmlText = proxy.type === 'json' ? (await res.json()).contents : await res.text(); if (htmlText && htmlText.length > 100) return htmlText; } catch (e) {} } return null; }
-        
-        async function detectTitle(url) { const titleInput = document.getElementById('newTitle'); if(titleInput.value.trim() !== '') return; updateTitleBar('loading'); titleInput.placeholder = '偵測中...'; try { const html = await fetchWithFallbacks(url); if(html) { const m = html.match(/<title>(.*?)<\/title>/i); if(m && m[1]) { titleInput.value = new DOMParser().parseFromString(m[1], 'text/html').body.textContent; updateTitleBar('success'); } else { throw new Error(); } } } catch(e) { titleInput.placeholder = '請手動輸入'; updateTitleBar('error'); } }
-        function checkUrlInput() { const url = document.getElementById('newUrl').value.trim(); if (url.startsWith('http')) detectTitle(url); else updateTitleBar('reset'); }
-        function updateTitleBar(state) { const bar=document.getElementById('titleBar'); if(state==='loading'){bar.style.width='50%';bar.style.background='#f59e0b';}else if(state==='success'){bar.style.width='100%';bar.style.background='#10b981';}else if(state==='error'){bar.style.width='100%';bar.style.background='#ef4444';}else{bar.style.width='0%';} }
-        function clearInput(){document.getElementById('newUrl').value='';document.getElementById('newTitle').value='';updateTitleBar('reset');} 
-        function createItem(data) { const item = { id: Date.now(), url: data.url, title: data.title, tags: data.tags || [], domain: data.domain, status: 'inbox', content: data.content, notes: '', date: new Date().toLocaleDateString(), starred: false }; items.unshift(item); save(); render(); return item; }
-        
-        function addVocabCard() { event.preventDefault(); const sel = window.getSelection(); const text = sel.toString().trim(); if (text) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, 'yellow'); let context = ""; const node = sel.anchorNode; if(node && node.parentElement) { context = node.parentElement.innerText.trim(); if(context.length > 200) context = "..." + text + "..."; } currentVocabCards.push({ id: Date.now(), term: text, def: '', context: context }); renderVocabCards(); } document.getElementById('floatingMenu').style.display = 'none'; }
-        function renderVocabCards() { const list = document.getElementById('vocabCardsList'); if(currentVocabCards.length === 0) { list.innerHTML = `<div style="text-align:center;color:#9ca3af;margin-top:20px;font-size:0.9rem;">選取單字 -> 浮動選單 [📝]<br>自動建立卡片</div>`; return; } list.innerHTML = ''; currentVocabCards.forEach((card, index) => { const el = document.createElement('div'); el.className = 'vocab-card'; el.innerHTML = `<div class="vc-header"><input type="text" class="vc-term" value="${card.term}" oninput="updateCard(${index}, 'term', this.value)"><span class="vc-del" onclick="removeCard(${index})">×</span></div><input type="text" class="vc-def" placeholder="定義 / 筆記..." value="${card.def}" oninput="updateCard(${index}, 'def', this.value)"><textarea class="vc-context" rows="2" oninput="updateCard(${index}, 'context', this.value)">${card.context}</textarea>`; list.appendChild(el); }); }
-        function updateCard(index, field, value) { currentVocabCards[index][field] = value; }
-        function removeCard(index) { currentVocabCards.splice(index, 1); renderVocabCards(); }
-        function copyAiPrompt(type) { const sel = window.getSelection().toString().trim(); if(!sel) return alert('請先選取文字'); let prompt = ""; if(type === 'grammar') prompt = `Please analyze the grammatical structure:\n\n"${sel}"`; if(type === 'rewrite') prompt = `Please provide 3 academic rewrite options:\n\n"${sel}"`; if(type === 'explain') prompt = `Please explain the meaning (C1/C2 level):\n\n"${sel}"`; navigator.clipboard.writeText(prompt).then(() => { alert('已複製指令！請貼給 ChatGPT'); }); }
-        function exportAnkiCsv() { if(currentVocabCards.length === 0) return alert('沒有卡片'); let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; currentVocabCards.forEach(c => { csvContent += `${c.term} [${c.def.replace(/,/g, ' ')}],${c.context.replace(/,/g, ' ').replace(/\n/g, ' ')}\r\n`; }); const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `Anki_Export_${Date.now()}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); }
-        
-        function switchMode(mode) { currentMode = mode; document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); document.getElementById(`mode-${mode}`).classList.add('active'); const wrapper = document.getElementById('readerWrapper'); const userNotes = document.getElementById('userNotes'); const cornell = document.querySelector('.cornell-container'); const english = document.querySelector('.english-container'); const engTools = document.getElementById('eng-tools'); const toc = document.getElementById('tocSection'); const stdFooter = document.getElementById('noteFooter'); const engFooter = document.getElementById('engFooter'); const mobileTocBtn = document.getElementById('mobileTocBtn'); userNotes.style.display = 'none'; cornell.style.display = 'none'; english.style.display = 'none'; engTools.style.display = 'none'; wrapper.classList.remove('deep-mode'); toc.style.width = '0'; toc.style.opacity = '0'; stdFooter.style.display = 'block'; engFooter.style.display = 'none'; mobileTocBtn.style.display = 'none'; if (mode === 'lite') { userNotes.style.display = 'block'; } else if (mode === 'deep') { cornell.style.display = 'flex'; wrapper.classList.add('deep-mode'); generateTOC(); if(window.innerWidth < 768) mobileTocBtn.style.display = 'block'; } else if (mode === 'english') { english.style.display = 'flex'; engTools.style.display = 'flex'; stdFooter.style.display = 'none'; engFooter.style.display = 'grid'; renderVocabCards(); } }
-        function saveReader() { if (!currentId) return; const content = document.getElementById('articleView').innerHTML; const title = document.getElementById('readerTitleInput').value; const noteObj = { lite: document.getElementById('userNotes').value, deep: { cue: document.getElementById('noteCues').value, main: document.getElementById('noteMain').value, sum: document.getElementById('noteSummary').value }, eng: { cards: currentVocabCards, qa: document.getElementById('engQa').value }, lastMode: currentMode }; const idx = items.findIndex(i => i.id === currentId); if(idx > -1) { items[idx].content = content; items[idx].notes = JSON.stringify(noteObj); items[idx].title = title; save(); alert('已儲存！'); document.getElementById('readerModal').style.display = 'none'; render(); } }
-        function openReader(id, isError=false) { currentId = id; const item = items.find(i => i.id === id); document.getElementById('readerModal').style.display = 'flex'; document.getElementById('readerTitleInput').value = item.title; const view = document.getElementById('articleView'); view.innerHTML = item.content || (isError ? '⚠️ 內容抓取失敗' : '無內容'); try { const noteObj = JSON.parse(item.notes); document.getElementById('userNotes').value = noteObj.lite || ''; document.getElementById('noteCues').value = noteObj.deep?.cue || ''; document.getElementById('noteMain').value = noteObj.deep?.main || ''; document.getElementById('noteSummary').value = noteObj.deep?.sum || ''; currentVocabCards = noteObj.eng?.cards || []; document.getElementById('engQa').value = noteObj.eng?.qa || ''; switchMode(noteObj.lastMode || 'lite'); } catch (e) { document.getElementById('userNotes').value = item.notes || ''; currentVocabCards = []; switchMode('lite'); } }
-        
-        function shareDraft() { saveReader(); const item = items.find(i => i.id === currentId); let text = `【${item.title}】\n🔗 ${item.url}\n\n`; if (currentMode === 'english') { const qa = document.getElementById('engQa').value; if (qa) text += `[🤖 AI Notes]\n${qa}\n\n`; if (currentVocabCards.length > 0) { text += `[🔤 Vocabulary]\n`; currentVocabCards.forEach(c => { text += `● ${c.term}`; if (c.def) text += ` : ${c.def}`; if (c.context) text += `\n   > "${c.context}"`; text += `\n`; }); } else { text += `(無單字卡)\n`; } } else if (currentMode === 'deep') { const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value; if (main) text += `[📝 Notes]\n${main}\n\n`; if (sum) text += `[💡 Summary]\n${sum}\n`; } else { const notes = document.getElementById('userNotes').value; if (notes) text += `[📝 Notes]\n${notes}\n`; } if (navigator.share) { navigator.share({ title: item.title, text: text, url: item.url }).catch((err) => { if (err.name !== 'AbortError') copyToClipboardFallback(text); }); } else { copyToClipboardFallback(text); } }
-        function copyToClipboardFallback(text) { navigator.clipboard.writeText(text).then(() => { alert('📋 內容已複製！'); }).catch(() => { alert('❌ 複製失敗'); }); }
-        
-        function downloadCurrentHtml() { const item = items.find(i => i.id === currentId); const title = document.getElementById('readerTitleInput').value || '筆記'; const content = document.getElementById('articleView').innerHTML; let notesHtml = '', customStyle = ''; if (currentMode === 'english') { let cardsHtml = currentVocabCards.length > 0 ? currentVocabCards.map(c => `<div class="vocab-card"><div class="term">${c.term}</div><div class="def">${c.def || ''}</div><div class="context">"${c.context}"</div></div>`).join('') : '<div style="color:#999;">無單字卡</div>'; notesHtml = `<h3 style="border-bottom:2px solid #ddd;padding-bottom:5px;">🔤 單字積累</h3><div class="cards-grid">${cardsHtml}</div>`; customStyle = `.cards-grid{display:grid;grid-template-columns:1fr;gap:10px}.vocab-card{background:white;border:1px solid #eee;border-left:4px solid #2563eb;padding:10px;border-radius:4px}.term{font-weight:bold;font-size:1.1em}.def{color:#666;font-size:0.9em}.context{font-size:0.85em;color:#888;font-style:italic;background:#f9f9f9;padding:4px;}`; } else if (currentMode === 'deep') { const cue = document.getElementById('noteCues').value; const main = document.getElementById('noteMain').value; const sum = document.getElementById('noteSummary').value; notesHtml = `<div class="c-sec"><div class="c-lbl">🔑 Cues</div><pre>${cue}</pre></div><div class="c-sec"><div class="c-lbl">📝 Notes</div><pre>${main}</pre></div><div class="c-sec sum"><div class="c-lbl">💡 Summary</div><pre>${sum}</pre></div>`; customStyle = `.c-sec{margin-bottom:15px;border:1px solid #fcd34d;border-radius:6px}.c-lbl{background:#fffbeb;color:#b45309;padding:5px 10px;font-weight:bold;border-bottom:1px solid #fcd34d}pre{padding:10px;white-space:pre-wrap;margin:0;font-family:inherit}.sum{border-color:#f59e0b;box-shadow:0 2px 5px rgba(245,158,11,0.1)}`; } else { notesHtml = `<h3>📝 筆記</h3><pre style="white-space:pre-wrap;background:#fffbeb;padding:15px;border-radius:8px;">${document.getElementById('userNotes').value}</pre>`; } const exportTemplate = `<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${title}</title><style>body{font-family:system-ui,-apple-system,sans-serif;background:#f3f4f6;padding:20px;line-height:1.6}.container{max-width:1000px;margin:0 auto;background:white;border-radius:12px;display:flex;flex-wrap:wrap}.header{width:100%;background:#333;color:white;padding:20px}.article-col{flex:2;padding:30px;min-width:300px;border-right:1px solid #eee}.notes-col{flex:1;padding:20px;background:#f9fafb;min-width:280px}img{max-width:100%}${customStyle}@media(max-width:768px){.container{flex-direction:column}.article-col{border-right:none;border-bottom:1px solid #eee}}</style></head><body><div class="container"><div class="header"><h1>${title}</h1><p>來源：${item.domain}</p></div><div class="article-col">${content}</div><div class="notes-col">${notesHtml}</div></div></body></html>`; const blob = new Blob(['\uFEFF'+exportTemplate], { type: 'text/html;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `${title}_講義.html`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); }
-        
-        function renameItem(id) { const item = items.find(i => i.id === id); const newTitle = prompt("修改標題 (可加 #標籤)：", item.title + (item.tags ? ' #'+item.tags.join(' #') : '')); if (newTitle) { const {title, tags} = extractTags(newTitle); item.title = title; item.tags = tags; save(); render(); } }
-        function moveItem(id,s){const idx=items.findIndex(i=>i.id===id);if(idx>-1){items[idx].status=s;save();render();}}
-        function deleteItem(id){if(confirm('刪除?')){items=items.filter(i=>i.id!==id);save();render();}}
-        function switchTab(t){currentTab=t;document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));document.getElementById(`tab-${t}`).classList.add('active');render();}
-        function openExportModal(){document.getElementById('exportModal').style.display='flex';document.getElementById('exportArea').value=JSON.stringify(items);}
-        function copyExport(){navigator.clipboard.writeText(JSON.stringify(items));alert('已複製');}
-        function openImportModal(){document.getElementById('importModal').style.display='flex';}
-        function doImport(){try{items=JSON.parse(document.getElementById('importArea').value);save();render();alert('成功');closeIO();}catch(e){alert('錯誤');}}
-        function closeIO(){document.getElementById('exportModal').style.display='none';document.getElementById('importModal').style.display='none';}
-        function exportListToHtml() { const list = items.filter(i=>i.status===currentTab).map(i=>`<li><a href="${i.url}" target="_blank">${i.title}</a> (${i.domain})</li>`).join(''); const blob = new Blob([`\uFEFF<html><body><h1>閱讀清單</h1><ul>${list}</ul></body></html>`], {type:'text/html;charset=utf-8'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'list.html'; a.click(); }
-        function extractTags(text) { const tags = text.match(/#[\w\u4e00-\u9fa5]+/g) || []; const cleanTitle = text.replace(/#[\w\u4e00-\u9fa5]+/g, '').trim(); return { title: cleanTitle, tags: tags.map(t => t.replace('#', '')) }; }
-        function toggleSelectMode() { isSelectMode = !isSelectMode; if (!isSelectMode) selectedIds.clear(); document.getElementById('defaultBottomBar').style.display = isSelectMode ? 'none' : 'flex'; document.getElementById('selectBottomBar').style.display = isSelectMode ? 'flex' : 'none'; render(); }
-        function toggleCheck(id) { if (selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id); document.getElementById('selectCount').innerText = selectedIds.size; render(); }
-        function exportSelectedUrls() { if (selectedIds.size === 0) return alert('請先勾選'); const urls = items.filter(i => selectedIds.has(i.id) && i.url.startsWith('http')).map(i => i.url); if (urls.length === 0) return alert('無有效網址'); navigator.clipboard.writeText(urls.join('\n')).then(() => { alert(`✅ 已複製 ${urls.length} 個網址！`); toggleSelectMode(); }); }
-        function toggleTheme(){ if(document.body.getAttribute('data-theme')==='dark'){document.body.removeAttribute('data-theme');localStorage.setItem('lite_pocket_theme','light');}else{document.body.setAttribute('data-theme','dark');localStorage.setItem('lite_pocket_theme','dark');}} 
-        function clearReadItems() { if(confirm('清除所有「已讀」？')) { items = items.filter(i=>i.status==='inbox'); save(); render(); } }
-        function extractDateInfo(doc, html) { let metaDate = null; const selectors = ['meta[property="article:published_time"]', 'meta[property="article:modified_time"]', 'meta[property="og:updated_time"]', 'meta[name="pubdate"]', 'meta[name="date"]', 'meta[name="lastmod"]', 'time[datetime]']; for (let sel of selectors) { const el = doc.querySelector(sel); if (el) { const val = el.getAttribute('content') || el.getAttribute('datetime'); if (val) { try { const d = new Date(val); if(!isNaN(d.getTime())) metaDate = d; } catch(e){} } } if (metaDate) break; } if (metaDate) return { date: metaDate.toLocaleDateString(), type: 'single' }; return { date: new Date().toLocaleDateString(), type: 'single' }; }
-        function renderTagsBar() { const allTags = new Set(); items.forEach(i => { if(i.tags) i.tags.forEach(t => allTags.add(t)); }); const bar = document.getElementById('filterBar'); if (allTags.size === 0) { bar.style.display = 'none'; return; } bar.style.display = 'flex'; bar.innerHTML = ''; allTags.forEach(tag => { const active = currentFilterTag === tag ? 'active' : ''; bar.innerHTML += `<div class="filter-tag ${active}" onclick="filterByTag('${tag}')">#${tag}</div>`; }); }
-        function filterByTag(tag) { currentFilterTag = currentFilterTag === tag ? null : tag; render(); }
-        
-        function applyHighlight(color) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, color); document.getElementById('floatingMenu').style.display = 'none'; }
-        function highlight(color) { document.execCommand('styleWithCSS', false, true); document.execCommand('hiliteColor', false, color); }
-        function toggleMobileToc() { const wrapper = document.getElementById('readerWrapper'); wrapper.classList.toggle('toc-open'); }
-        function captureReader() { document.getElementById('loadingMask').style.display='flex'; html2canvas(document.querySelector("#readerWrapper")).then(canvas => { document.getElementById('loadingMask').style.display='none'; const link = document.createElement('a'); link.download = 'capture.png'; link.href = canvas.toDataURL(); link.click(); }); }
-        function openDictPopup() { const term = window.getSelection().toString(); if(term) window.open(`https://translate.google.com/?sl=en&tl=zh-TW&text=${encodeURIComponent(term)}&op=translate`, '_blank'); }
-        function lookupWord() { const term = window.getSelection().toString().trim(); if(!term) return; document.getElementById('dictPanel').style.display='flex'; document.getElementById('dictFrame').src = `https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${term}`; document.getElementById('floatingMenu').style.display='none'; }
-        function refreshDict() { const src = document.getElementById('dictSource').value; const term = window.getSelection().toString().trim() || 'hello'; let url = ''; if(src==='dictcom') url=`https://www.dictionary.com/browse/${term}`; else if(src==='google') url=`https://translate.google.com/?sl=auto&tl=zh-TW&text=${term}&op=translate`; else url=`https://dictionary.cambridge.org/dictionary/english-chinese-traditional/${term}`; document.getElementById('dictFrame').src = url; }
-        
-        let ttsUtterance = null;
-        function ttsToggle() { if(window.speechSynthesis.speaking){ window.speechSynthesis.cancel(); return;} const text = document.getElementById('articleView').innerText; speakText(text); }
-        function ttsStop() { window.speechSynthesis.cancel(); }
-        function speakText(text) { window.speechSynthesis.cancel(); ttsUtterance = new SpeechSynthesisUtterance(text); ttsUtterance.lang = 'en-US'; ttsUtterance.rate = 1.0; window.speechSynthesis.speak(ttsUtterance); }
-        function toggleShadowing() { isShadowing = !isShadowing; document.getElementById('readerWrapper').classList.toggle('shadowing-mode'); document.getElementById('btnShadow').classList.toggle('active'); alert(isShadowing ? '跟讀模式開啟：點擊段落朗讀' : '跟讀模式關閉'); }
-        function toggleChunking() { isChunking = !isChunking; document.getElementById('btnChunk').classList.toggle('active'); alert(isChunking ? '斷句模式開啟：點擊文字插入 | 分隔線' : '斷句模式關閉'); }
-        function toggleMask() { document.getElementById('readerWrapper').classList.toggle('mask-mode'); document.getElementById('btnMask').classList.toggle('active'); }
-        function generateTOC() { const view = document.getElementById('articleView'); const headers = view.querySelectorAll('h1, h2, h3'); const toc = document.getElementById('tocSection'); toc.innerHTML = ''; if(headers.length === 0) { toc.innerHTML = '<div style="padding:10px;color:#999;">無標題</div>'; return; } headers.forEach((h, i) => { const id = 'toc-'+i; h.id = id; const div = document.createElement('div'); div.className = `toc-item toc-${h.tagName.toLowerCase()}`; div.innerText = h.innerText; div.onclick = () => { document.getElementById(id).scrollIntoView({behavior:'smooth'}); if(window.innerWidth<768) toggleMobileToc(); }; toc.appendChild(div); }); }
+        /* =========================================
+           6. 涵攝模式 (Subsumption) 與 Markdown 渲染
+           ========================================= */
+        function markDirty() { isDirty = true; }
 
-        /* 點擊文字輔助閱讀事件 */
-        document.getElementById('articleView').addEventListener('click', function(e) {
-            if (currentMode !== 'english') return;
-            if (isChunking) { const sel = window.getSelection(); if (sel.isCollapsed && e.target.closest('p')) { const range = sel.getRangeAt(0); const span = document.createElement('span'); span.className = 'chunk-sep'; span.innerText = '|'; range.insertNode(span); range.collapse(false); } }
-            if (isShadowing) { let target = e.target; if (target.tagName !== 'P' && target.tagName !== 'DIV') target = target.closest('p') || target.closest('div'); if (target) { const text = target.innerText.replace(/\|/g, ''); speakText(text); } }
-        });
+        function switchMode(mode) { 
+            currentMode = mode; 
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active')); 
+            document.getElementById(`mode-${mode}`).classList.add('active'); 
+            
+            const articleCont = document.getElementById('articleModeContainer');
+            const subCont = document.getElementById('subsumptionModeContainer');
+            const btnToggleSplit = document.getElementById('btnToggleSplit');
+            
+            if (mode === 'article') { 
+                articleCont.style.display = 'flex'; subCont.style.display = 'none'; btnToggleSplit.style.display = 'none';
+            } else if (mode === 'subsumption') { 
+                articleCont.style.display = 'none'; subCont.style.display = 'flex'; 
+                if(window.innerWidth > 768) btnToggleSplit.style.display = 'flex';
+            } 
+        }
+
+        function toggleMarkdownEdit() {
+            const editArea = document.getElementById('aiSummaryArea');
+            const renderArea = document.getElementById('aiSummaryRender');
+            const btn = document.getElementById('mdToggleBtn');
+            
+            if (editArea.style.display === 'none') {
+                editArea.style.display = 'block'; renderArea.style.display = 'none'; btn.innerText = '👀 預覽'; editArea.focus();
+            } else { renderMarkdown(); }
+        }
+
+        function renderMarkdown() {
+            const editArea = document.getElementById('aiSummaryArea');
+            const renderArea = document.getElementById('aiSummaryRender');
+            const btn = document.getElementById('mdToggleBtn');
+            const rawText = editArea.value;
+            
+            if (rawText.trim() === '') { renderArea.innerHTML = '<div style="color:#a1a1aa; padding:10px;">雙擊此處或點擊編輯來貼上 Markdown 摘要...</div>'; } 
+            else { renderArea.innerHTML = DOMPurify.sanitize(marked.parse(rawText)); }
+            
+            editArea.style.display = 'none'; renderArea.style.display = 'block'; btn.innerText = '✏️ 編輯';
+            if(isDirty) saveReaderObj(); 
+        }
+
+        function openReader(id) { 
+            currentId = id; const item = items.find(i => i.id === id); isDirty = false;
+            document.getElementById('readerModal').style.display = 'flex'; 
+            document.getElementById('readerTitleInput').value = item.title; 
+            
+            // 渲染閱讀器標籤
+            renderReaderTags();
+            
+            // 載入涵攝資料
+            document.getElementById('articleView').innerHTML = item.content || '無內容';
+            document.getElementById('aiSummaryArea').value = item.aiSummary || '';
+            document.getElementById('insightArea').value = item.insight || '';
+            document.getElementById('actionArea').value = item.action || '';
+            renderMarkdown();
+            
+            isSplitView = false;
+            document.getElementById('iframePane').style.display = 'none';
+            document.getElementById('btnToggleSplit').innerText = '🌗 展開原文網頁';
+            document.getElementById('iframeDomain').innerText = `🔗 ${item.domain}`;
+            document.getElementById('webIframe').src = 'about:blank';
+
+            // 預設進入涵攝模式
+            switchMode('subsumption');
+        }
+
+        function saveReaderObj() {
+            if (!currentId) return; 
+            const idx = items.findIndex(i => i.id === currentId); 
+            if(idx > -1) { 
+                items[idx].title = document.getElementById('readerTitleInput').value; 
+                items[idx].content = document.getElementById('articleView').innerHTML; 
+                items[idx].aiSummary = document.getElementById('aiSummaryArea').value;
+                items[idx].insight = document.getElementById('insightArea').value;
+                items[idx].action = document.getElementById('actionArea').value;
+                saveLocal(); 
+                isDirty = false;
+            } 
+        }
+
+        function closeReader() { 
+            saveReaderObj(); 
+            document.getElementById('readerModal').style.display = 'none'; 
+            document.getElementById('webIframe').src = 'about:blank'; 
+            render(); 
+        }
+
+        function toggleSplitView() {
+            if(!currentId) return; const item = items.find(i => i.id === currentId);
+            const pane = document.getElementById('iframePane'); const btn = document.getElementById('btnToggleSplit');
+            isSplitView = !isSplitView;
+            if (isSplitView) { pane.style.display = 'flex'; btn.innerText = '✕ 關閉雙螢幕'; document.getElementById('webIframe').src = item.url; } 
+            else { pane.style.display = 'none'; btn.innerText = '🌗 展開原文網頁'; document.getElementById('webIframe').src = 'about:blank'; }
+        }
+
+        function jumpToOriginal() {
+            if(!currentId) return; const item = items.find(i => i.id === currentId);
+            if(isDirty) saveReaderObj(); window.open(item.url, '_blank');
+        }
+
+        function shareDraft() { 
+            saveReaderObj(); const item = items.find(i => i.id === currentId); 
+            let text = `【${item.title}】\n🔗 來源: ${item.url}\n\n`; 
+            if (item.tags && item.tags.length) text += `🏷️ 標籤: ${item.tags.map(t=>'#'+t).join(' ')}\n\n`;
+            if (item.aiSummary) text += `[✨ AI 摘要 (Fact)]\n${item.aiSummary}\n\n`; 
+            if (item.insight) text += `[💡 洞察 (Insight)]\n${item.insight}\n\n`; 
+            if (item.action) text += `[🚀 行動 (Action)]\n${item.action}\n`; 
+            if (navigator.share) { navigator.share({ title: item.title, text: text }).catch(() => { copyToClipboardFallback(text); }); } 
+            else { copyToClipboardFallback(text); } 
+        }
+        function copyToClipboardFallback(text) { navigator.clipboard.writeText(text).then(() => { alert('📋 筆記已複製到剪貼簿！'); }).catch(() => { alert('❌ 複製失敗'); }); }
+        
     </script>
 </body>
 </html>
